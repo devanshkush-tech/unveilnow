@@ -1,7 +1,52 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { BadgeCheck, Edit3, Mic } from "lucide-react";
+import { BadgeCheck, Edit3, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+type Prof = {
+  first_name: string | null;
+  age: number | null;
+  city: string | null;
+  profession: string | null;
+  intent: string | null;
+};
+
+const intentLabel = (i: string | null) => {
+  switch (i) {
+    case "serious": return "Serious relationship";
+    case "marriage": return "Marriage minded";
+    case "exploring": return "Exploring intentionally";
+    default: return "Open to connection";
+  }
+};
 
 const Profile = () => {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Prof | null>(null);
+  const [prompts, setPrompts] = useState<{ question: string; answer: string }[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: p }, { data: pr }, { data: ints }] = await Promise.all([
+        supabase.from("profiles").select("first_name, age, city, profession, intent").eq("id", user.id).maybeSingle(),
+        supabase.from("profile_prompts").select("question, answer, position").eq("user_id", user.id).order("position"),
+        supabase.from("profile_interests").select("interest").eq("user_id", user.id),
+      ]);
+      setProfile(p ?? null);
+      setPrompts(pr ?? []);
+      setInterests((ints ?? []).map((x) => x.interest));
+      setLoading(false);
+    })();
+  }, [user]);
+
+  if (loading) {
+    return <div className="container max-w-3xl py-20 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
+
   return (
     <div className="container max-w-3xl py-6 md:py-10">
       <div className="mb-8 flex items-end justify-between">
@@ -16,38 +61,36 @@ const Profile = () => {
         <div className="relative h-40 bg-gradient-romance flex items-end p-6">
           <div aria-hidden className="absolute inset-0 bg-gradient-veil opacity-50" />
           <div className="relative text-primary-foreground flex items-center gap-3">
-            <h2 className="font-display text-4xl">You, 28</h2>
+            <h2 className="font-display text-4xl">{profile?.first_name ?? "You"}{profile?.age ? `, ${profile.age}` : ""}</h2>
             <BadgeCheck className="h-6 w-6" />
           </div>
         </div>
         <div className="p-6 md:p-8 space-y-6">
-          <div className="text-sm text-muted-foreground">Bengaluru · Product designer · Serious relationship</div>
-
-          <button className="flex items-center gap-3 w-full p-4 rounded-2xl bg-secondary/70">
-            <div className="h-10 w-10 rounded-full bg-gradient-romance flex items-center justify-center shrink-0">
-              <Mic className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <div className="text-left">
-              <div className="text-sm font-medium">Your voice intro</div>
-              <div className="text-xs text-muted-foreground">28 seconds · Tap to re-record</div>
-            </div>
-          </button>
+          <div className="text-sm text-muted-foreground">
+            {[profile?.city, profile?.profession, intentLabel(profile?.intent ?? null)].filter(Boolean).join(" · ")}
+          </div>
 
           <div className="space-y-5">
-            <PromptRow q="My ideal Sunday looks like…" a="A long walk in Cubbon, dosa at a hole-in-the-wall, and a film I've been putting off." />
-            <PromptRow q="I value…" a="People who follow through. And listen with their phone face down." />
+            {prompts.map((p, i) => (
+              <div key={i} className="border-l-2 border-accent/60 pl-4">
+                <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1.5">{p.question}</p>
+                <p className="font-display text-lg leading-snug">{p.answer}</p>
+              </div>
+            ))}
           </div>
+
+          {interests.length > 0 && (
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Interests</p>
+              <div className="flex flex-wrap gap-2">
+                {interests.map((i) => <span key={i} className="px-3 py-1.5 rounded-full bg-secondary text-sm">{i}</span>)}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
-
-const PromptRow = ({ q, a }: { q: string; a: string }) => (
-  <div className="border-l-2 border-accent/60 pl-4">
-    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1.5">{q}</p>
-    <p className="font-display text-lg leading-snug">{a}</p>
-  </div>
-);
 
 export default Profile;
