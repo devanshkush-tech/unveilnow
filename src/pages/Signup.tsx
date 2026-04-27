@@ -6,21 +6,50 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Mail, Phone } from "lucide-react";
+import { Mail } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [method, setMethod] = useState<"email" | "phone">("email");
   const [accepted, setAccepted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accepted) {
       toast.error("Please accept the community guidelines.");
       return;
     }
-    toast.success("Welcome to Unveil. Let's set up your profile.");
-    navigate("/onboarding");
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/onboarding`,
+          data: { first_name: firstName },
+        },
+      });
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success("Welcome to Unveil. Let's set up your profile.");
+      navigate("/onboarding");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onGoogle = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/onboarding`,
+    });
+    if (result.error) toast.error("Could not sign in with Google.");
   };
 
   return (
@@ -34,43 +63,22 @@ const Signup = () => {
         </>
       }
     >
-      <div className="flex p-1 rounded-full bg-secondary mb-6 text-sm">
-        {(["email", "phone"] as const).map((m) => (
-          <button
-            key={m}
-            onClick={() => setMethod(m)}
-            className={`flex-1 py-2 rounded-full transition-all ${
-              method === m ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"
-            }`}
-          >
-            {m === "email" ? "Email" : "Phone"}
-          </button>
-        ))}
-      </div>
-
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">First name</Label>
-          <Input id="name" placeholder="What should we call you?" required className="h-11 rounded-xl" />
+          <Input id="name" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="What should we call you?" required className="h-11 rounded-xl" />
         </div>
-        {method === "email" ? (
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="email" type="email" placeholder="you@email.com" required className="h-11 rounded-xl pl-10" />
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required className="h-11 rounded-xl pl-10" />
           </div>
-        ) : (
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input id="phone" type="tel" placeholder="+91 98765 43210" required className="h-11 rounded-xl pl-10" />
-            </div>
-            <p className="text-xs text-muted-foreground">We'll send a 6-digit code to verify.</p>
-          </div>
-        )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required minLength={8} className="h-11 rounded-xl" />
+        </div>
 
         <div className="flex items-start gap-3 pt-2">
           <Checkbox id="terms" checked={accepted} onCheckedChange={(v) => setAccepted(!!v)} className="mt-0.5" />
@@ -81,8 +89,8 @@ const Signup = () => {
           </label>
         </div>
 
-        <Button type="submit" variant="hero" className="w-full h-12 rounded-full" size="lg">
-          Continue
+        <Button type="submit" variant="hero" className="w-full h-12 rounded-full" size="lg" disabled={loading}>
+          {loading ? "Creating account…" : "Continue"}
         </Button>
 
         <div className="relative py-2">
@@ -90,7 +98,7 @@ const Signup = () => {
           <div className="relative flex justify-center"><span className="bg-background px-3 text-xs text-muted-foreground uppercase tracking-widest">or</span></div>
         </div>
 
-        <Button type="button" variant="soft" className="w-full h-12 rounded-full" size="lg">
+        <Button type="button" onClick={onGoogle} variant="soft" className="w-full h-12 rounded-full" size="lg">
           Continue with Google
         </Button>
       </form>
