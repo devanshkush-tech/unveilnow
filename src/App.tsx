@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/useAuth";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Signup from "./pages/Signup.tsx";
@@ -26,24 +28,40 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/trust" element={<Trust />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Discover />} />
-            <Route path="matches" element={<Matches />} />
-            <Route path="chats" element={<Chats />} />
-            <Route path="profile" element={<Profile />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/onboarding"
+              element={
+                <RequireAuth requireOnboarded={false}>
+                  <Onboarding />
+                </RequireAuth>
+              }
+            />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/trust" element={<Trust />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/dashboard"
+              element={
+                <RequireAuth>
+                  <DashboardLayout />
+                </RequireAuth>
+              }
+            >
+              <Route index element={<Discover />} />
+              <Route path="matches" element={<Matches />} />
+              <Route path="chats" element={<Chats />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

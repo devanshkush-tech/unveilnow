@@ -1,8 +1,19 @@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 
 const Settings = () => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   return (
     <div className="container max-w-2xl py-6 md:py-10 space-y-8">
       <div>
@@ -29,6 +40,9 @@ const Settings = () => {
 
       <Section title="Account">
         <Button variant="ghost" className="justify-start">Blocked users</Button>
+        <Button variant="ghost" className="justify-start" onClick={handleSignOut}>
+          <LogOut className="h-4 w-4" /> Sign out
+        </Button>
         <Button variant="ghost" className="justify-start text-destructive hover:text-destructive">Delete my account</Button>
       </Section>
     </div>
