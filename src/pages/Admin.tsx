@@ -161,6 +161,44 @@ const Admin = () => {
     load();
   };
 
+  const promoteUser = async (uid: string, name: string | null) => {
+    const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAdminIds((s) => new Set(s).add(uid));
+    toast.success(`${name ?? "User"} is now an admin.`);
+  };
+
+  const revokeAdmin = async (uid: string, name: string | null) => {
+    if (uid === user?.id) {
+      toast.error("You can't remove your own admin role from here.");
+      return;
+    }
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "admin");
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAdminIds((s) => {
+      const next = new Set(s);
+      next.delete(uid);
+      return next;
+    });
+    toast.success(`Removed admin from ${name ?? "user"}.`);
+  };
+
+  const resolveReport = async (id: string) => {
+    const { error } = await supabase.from("reports").update({ status: "resolved" }).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status: "resolved" } : r)));
+    toast.success("Report marked resolved.");
+  };
+
   const filteredUsers = users.filter((u) =>
     !search.trim() || (u.first_name ?? "").toLowerCase().includes(search.toLowerCase()) || u.id.includes(search),
   );
@@ -201,7 +239,15 @@ const Admin = () => {
               </div>
             </div>
           </div>
-          <div className="text-sm text-muted-foreground">Admin</div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-xs text-muted-foreground leading-none">Signed in as</span>
+              <span className="text-sm font-medium leading-tight truncate max-w-[200px]">{user?.email}</span>
+            </div>
+            <Button variant="outline" size="sm" className="rounded-full" onClick={() => signOut()}>
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </div>
         </div>
       </header>
 
