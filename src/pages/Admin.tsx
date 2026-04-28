@@ -19,6 +19,8 @@ import {
   Loader2,
   Megaphone,
   ArrowLeft,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,11 +43,12 @@ type FunnelData = {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
   const [users, setUsers] = useState<{ id: string; first_name: string | null; city: string | null; created_at: string; onboarded: boolean }[]>([]);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [prompts, setPrompts] = useState<{ id: string; text: string; category: string; active: boolean; position: number }[]>([]);
   const [newPrompt, setNewPrompt] = useState("");
@@ -71,6 +74,7 @@ const Admin = () => {
       { data: promptsData },
       { data: annData },
       { data: reportsData },
+      { data: rolesData },
     ] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", todayIso),
@@ -82,6 +86,7 @@ const Admin = () => {
       supabase.from("prompts_library").select("*").order("position"),
       supabase.from("announcements").select("*").order("created_at", { ascending: false }),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("user_roles").select("user_id").eq("role", "admin"),
     ]);
 
     setStats({
@@ -109,6 +114,7 @@ const Admin = () => {
     setPrompts(promptsData ?? []);
     setAnnouncements(annData ?? []);
     setReports(reportsData ?? []);
+    setAdminIds(new Set((rolesData ?? []).map((r: { user_id: string }) => r.user_id)));
     setLoading(false);
   };
 
@@ -155,6 +161,44 @@ const Admin = () => {
     load();
   };
 
+  const promoteUser = async (uid: string, name: string | null) => {
+    const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAdminIds((s) => new Set(s).add(uid));
+    toast.success(`${name ?? "User"} is now an admin.`);
+  };
+
+  const revokeAdmin = async (uid: string, name: string | null) => {
+    if (uid === user?.id) {
+      toast.error("You can't remove your own admin role from here.");
+      return;
+    }
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", uid).eq("role", "admin");
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAdminIds((s) => {
+      const next = new Set(s);
+      next.delete(uid);
+      return next;
+    });
+    toast.success(`Removed admin from ${name ?? "user"}.`);
+  };
+
+  const resolveReport = async (id: string) => {
+    const { error } = await supabase.from("reports").update({ status: "resolved" }).eq("id", id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status: "resolved" } : r)));
+    toast.success("Report marked resolved.");
+  };
+
   const filteredUsers = users.filter((u) =>
     !search.trim() || (u.first_name ?? "").toLowerCase().includes(search.toLowerCase()) || u.id.includes(search),
   );
@@ -195,7 +239,15 @@ const Admin = () => {
               </div>
             </div>
           </div>
-          <div className="text-sm text-muted-foreground">Admin</div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-xs text-muted-foreground leading-none">Signed in as</span>
+              <span className="text-sm font-medium leading-tight truncate max-w-[200px]">{user?.email}</span>
+            </div>
+            <Button variant="outline" size="sm" className="rounded-full" onClick={() => signOut()}>
+              <LogOut className="h-4 w-4" /> Sign out
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -259,30 +311,67 @@ const Admin = () => {
                 <h2 className="font-display text-2xl">Members</h2>
                 <Input placeholder="Search by name or id…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 max-w-xs rounded-full" />
               </div>
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="text-left px-5 py-3">Name</th>
-                    <th className="text-left px-5 py-3">City</th>
-                    <th className="text-left px-5 py-3">Joined</th>
-                    <th className="text-left px-5 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="border-t border-border/60">
-                      <td className="px-5 py-3">{u.first_name ?? "—"}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{u.city ?? "—"}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td className="px-5 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs ${u.onboarded ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-                          {u.onboarded ? "Active" : "Onboarding"}
-                        </span>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[640px]">
+                  <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="text-left px-5 py-3">Name</th>
+                      <th className="text-left px-5 py-3">City</th>
+                      <th className="text-left px-5 py-3">Joined</th>
+                      <th className="text-left px-5 py-3">Status</th>
+                      <th className="text-right px-5 py-3">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u) => {
+                      const isAdminUser = adminIds.has(u.id);
+                      return (
+                        <tr key={u.id} className="border-t border-border/60 hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <span>{u.first_name ?? "—"}</span>
+                              {isAdminUser && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-romance text-primary-foreground text-[10px] uppercase tracking-wider">
+                                  <ShieldCheck className="h-3 w-3" /> Admin
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 text-muted-foreground">{u.city ?? "—"}</td>
+                          <td className="px-5 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
+                          <td className="px-5 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs ${u.onboarded ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                              {u.onboarded ? "Active" : "Onboarding"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            {isAdminUser ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-full text-xs"
+                                disabled={u.id === user?.id}
+                                onClick={() => revokeAdmin(u.id, u.first_name)}
+                              >
+                                Revoke admin
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="soft"
+                                size="sm"
+                                className="rounded-full text-xs"
+                                onClick={() => promoteUser(u.id, u.first_name)}
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5" /> Make admin
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </TabsContent>
 
@@ -361,28 +450,40 @@ const Admin = () => {
               {reports.length === 0 ? (
                 <div className="p-10 text-center text-sm text-muted-foreground">No open reports. The community is healthy.</div>
               ) : (
-                <table className="w-full text-sm">
-                  <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-                    <tr>
-                      <th className="text-left px-5 py-3">Report</th>
-                      <th className="text-left px-5 py-3">Reason</th>
-                      <th className="text-left px-5 py-3">Status</th>
-                      <th className="text-left px-5 py-3">When</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.map((r) => (
-                      <tr key={r.id} className="border-t border-border/60">
-                        <td className="px-5 py-3 font-mono text-xs">{r.id.slice(0, 8)}</td>
-                        <td className="px-5 py-3">{r.reason}</td>
-                        <td className="px-5 py-3">
-                          <span className="px-2.5 py-1 rounded-full bg-secondary text-xs capitalize">{r.status}</span>
-                        </td>
-                        <td className="px-5 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[640px]">
+                    <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
+                      <tr>
+                        <th className="text-left px-5 py-3">Report</th>
+                        <th className="text-left px-5 py-3">Reason</th>
+                        <th className="text-left px-5 py-3">Status</th>
+                        <th className="text-left px-5 py-3">When</th>
+                        <th className="text-right px-5 py-3">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {reports.map((r) => (
+                        <tr key={r.id} className="border-t border-border/60 hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-3 font-mono text-xs">{r.id.slice(0, 8)}</td>
+                          <td className="px-5 py-3">{r.reason}</td>
+                          <td className="px-5 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs capitalize ${
+                              r.status === "resolved" ? "bg-primary text-primary-foreground" : "bg-accent/30 text-accent-foreground"
+                            }`}>{r.status}</span>
+                          </td>
+                          <td className="px-5 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                          <td className="px-5 py-3 text-right">
+                            {r.status !== "resolved" && (
+                              <Button variant="soft" size="sm" className="rounded-full text-xs" onClick={() => resolveReport(r.id)}>
+                                <CheckCircle className="h-3.5 w-3.5" /> Resolve
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </TabsContent>
