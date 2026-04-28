@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          active: boolean
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      interest_requests: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          receiver_id: string
+          sender_id: string
+          status: Database["public"]["Enums"]["interest_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_id: string
+          sender_id: string
+          status?: Database["public"]["Enums"]["interest_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          receiver_id?: string
+          sender_id?: string
+          status?: Database["public"]["Enums"]["interest_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -224,42 +281,138 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          age_max: number | null
+          age_min: number | null
           city: string | null
           created_at: string
+          distance_km: number | null
           first_name: string | null
           gender: string | null
           id: string
           intent: string | null
+          looking_for: string | null
           onboarded: boolean
+          onboarding_step: number
           profession: string | null
+          story: string | null
           updated_at: string
           voice_intro_path: string | null
         }
         Insert: {
           age?: number | null
+          age_max?: number | null
+          age_min?: number | null
           city?: string | null
           created_at?: string
+          distance_km?: number | null
           first_name?: string | null
           gender?: string | null
           id: string
           intent?: string | null
+          looking_for?: string | null
           onboarded?: boolean
+          onboarding_step?: number
           profession?: string | null
+          story?: string | null
           updated_at?: string
           voice_intro_path?: string | null
         }
         Update: {
           age?: number | null
+          age_max?: number | null
+          age_min?: number | null
           city?: string | null
           created_at?: string
+          distance_km?: number | null
           first_name?: string | null
           gender?: string | null
           id?: string
           intent?: string | null
+          looking_for?: string | null
           onboarded?: boolean
+          onboarding_step?: number
           profession?: string | null
+          story?: string | null
           updated_at?: string
           voice_intro_path?: string | null
+        }
+        Relationships: []
+      }
+      prompts_library: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          id: string
+          position: number
+          text: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          position?: number
+          text: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          id?: string
+          position?: number
+          text?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -268,10 +421,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      interest_status: "pending" | "accepted" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -398,6 +558,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      interest_status: ["pending", "accepted", "declined"],
+    },
   },
 } as const
