@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,8 @@ type PromptAnswer = { prompt_id: string; question: string; answer: string };
 const Onboarding = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const editMode = searchParams.get("edit") === "1";
   const [step, setStep] = useState(0);
   const [hydrating, setHydrating] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,7 +103,7 @@ const Onboarding = () => {
         // Resume on saved step (cap at last index)
         const savedStep = Math.min(Math.max(prof.onboarding_step ?? 0, 0), TOTAL_STEPS - 1);
         setStep(savedStep);
-        if (prof.onboarded) {
+        if (prof.onboarded && !editMode) {
           navigate("/dashboard");
           return;
         }
@@ -281,8 +283,8 @@ const Onboarding = () => {
         .eq("id", user.id);
       if (pErr) throw pErr;
 
-      toast.success("Welcome to a better way to date.");
-      navigate("/dashboard");
+      toast.success(editMode ? "Profile updated." : "Welcome to a better way to date.");
+      navigate(editMode ? "/dashboard/profile" : "/dashboard");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Could not save profile.");
