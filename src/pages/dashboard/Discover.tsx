@@ -108,7 +108,16 @@ const Discover = () => {
     })();
   }, [user]);
 
-  const visible = useMemo(() => candidates, [candidates]);
+  const visible = useMemo(
+    () => candidates.filter((c) => !skippedIds.has(c.id) && !sentIds.has(c.id)),
+    [candidates, skippedIds, sentIds],
+  );
+  const current = visible[cursor] ?? null;
+  const next = () => setCursor((i) => i + 1);
+  const skipCurrent = () => {
+    if (!current) return;
+    setSkippedIds((s) => new Set(s).add(current.id));
+  };
 
   if (loading) {
     return (
