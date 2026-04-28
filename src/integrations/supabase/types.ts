@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_accounts: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          last_login_at: string | null
+          password_hash: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_name?: string | null
+          email: string
+          id?: string
+          last_login_at?: string | null
+          password_hash: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_name?: string | null
+          email?: string
+          id?: string
+          last_login_at?: string | null
+          password_hash?: string
+        }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: {
+          admin_id: string
+          created_at: string
+          expires_at: string
+          ip: string | null
+          token: string
+          user_agent: string | null
+        }
+        Insert: {
+          admin_id: string
+          created_at?: string
+          expires_at: string
+          ip?: string | null
+          token: string
+          user_agent?: string | null
+        }
+        Update: {
+          admin_id?: string
+          created_at?: string
+          expires_at?: string
+          ip?: string | null
+          token?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_sessions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           active: boolean
@@ -38,6 +103,27 @@ export type Database = {
           created_by?: string | null
           id?: string
           title?: string
+        }
+        Relationships: []
+      }
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
         }
         Relationships: []
       }
@@ -148,6 +234,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_reads: {
+        Row: {
+          last_read_at: string
+          match_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          match_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          match_id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -283,57 +387,87 @@ export type Database = {
           age: number | null
           age_max: number | null
           age_min: number | null
+          banned: boolean
           city: string | null
           created_at: string
+          device: string | null
           distance_km: number | null
           first_name: string | null
           gender: string | null
           id: string
           intent: string | null
+          interested_in: string | null
+          last_active_at: string | null
           looking_for: string | null
           onboarded: boolean
           onboarding_step: number
+          plan: string
           profession: string | null
           story: string | null
+          suspended: boolean
           updated_at: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          verified: boolean
           voice_intro_path: string | null
         }
         Insert: {
           age?: number | null
           age_max?: number | null
           age_min?: number | null
+          banned?: boolean
           city?: string | null
           created_at?: string
+          device?: string | null
           distance_km?: number | null
           first_name?: string | null
           gender?: string | null
           id: string
           intent?: string | null
+          interested_in?: string | null
+          last_active_at?: string | null
           looking_for?: string | null
           onboarded?: boolean
           onboarding_step?: number
+          plan?: string
           profession?: string | null
           story?: string | null
+          suspended?: boolean
           updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          verified?: boolean
           voice_intro_path?: string | null
         }
         Update: {
           age?: number | null
           age_max?: number | null
           age_min?: number | null
+          banned?: boolean
           city?: string | null
           created_at?: string
+          device?: string | null
           distance_km?: number | null
           first_name?: string | null
           gender?: string | null
           id?: string
           intent?: string | null
+          interested_in?: string | null
+          last_active_at?: string | null
           looking_for?: string | null
           onboarded?: boolean
           onboarding_step?: number
+          plan?: string
           profession?: string | null
           story?: string | null
+          suspended?: boolean
           updated_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          verified?: boolean
           voice_intro_path?: string | null
         }
         Relationships: []
