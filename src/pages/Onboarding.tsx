@@ -283,8 +283,8 @@ const Onboarding = () => {
         .eq("id", user.id);
       if (pErr) throw pErr;
 
-      toast.success("Welcome to a better way to date.");
-      navigate("/dashboard");
+      toast.success(editMode ? "Profile updated." : "Welcome to a better way to date.");
+      navigate(editMode ? "/dashboard/profile" : "/dashboard");
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Could not save profile.");

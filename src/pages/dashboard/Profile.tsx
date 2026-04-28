@@ -63,7 +63,7 @@ const Profile = () => {
           <p className="text-muted-foreground mt-1">This is how others meet you. Read me before you judge me.</p>
         </div>
         <Button variant="soft" className="rounded-full" asChild>
-          <Link to="/onboarding"><Edit3 className="h-4 w-4" /> Edit</Link>
+          <Link to="/onboarding?edit=1"><Edit3 className="h-4 w-4" /> Edit profile</Link>
         </Button>
       </div>
 
