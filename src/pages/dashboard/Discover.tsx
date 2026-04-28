@@ -7,6 +7,7 @@ import { InterestDialog } from "@/components/dating/InterestDialog";
 import { VoicePlayer } from "@/components/dating/VoicePlayer";
 import { EmptyState } from "@/components/dating/EmptyState";
 import { ProfileCardSkeleton } from "@/components/dating/CardSkeleton";
+import coupleCafe from "@/assets/couple-cafe.jpg";
 import {
   Sheet,
   SheetContent,
@@ -140,7 +141,8 @@ const Discover = () => {
     return (
       <div className="container max-w-2xl py-16">
         <EmptyState
-          icon={Compass}
+          image={coupleCafe}
+          imageAlt="A young Indian couple sharing coffee"
           tone="warm"
           title="You're all caught up."
           subtitle="New people are joining Unveil every day. Quality takes a moment — check back soon."

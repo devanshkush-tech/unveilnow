@@ -22,6 +22,7 @@ import Matches from "./pages/dashboard/Matches.tsx";
 import Chats from "./pages/dashboard/Chats.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
+import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <PaymentTestModeBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
