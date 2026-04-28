@@ -159,7 +159,7 @@ const Discover = () => {
           <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
           <p className="text-muted-foreground mt-1 text-sm">One person at a time. Read, then decide.</p>
         </div>
-        <span className="text-xs text-muted-foreground shrink-0">{cursor + 1} of {visible.length + cursor}</span>
+        <span className="text-xs text-muted-foreground shrink-0">{visible.length} to read</span>
       </div>
 
       <article
