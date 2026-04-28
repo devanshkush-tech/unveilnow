@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { EyeOff, MessageCircle, Loader2, Heart, Inbox, Sparkles } from "lucide-react";
+import { EyeOff, MessageCircle, Heart, Inbox, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/dating/EmptyState";
 
 type MatchRow = {
   id: string;
@@ -106,8 +107,15 @@ const Matches = () => {
 
   if (loading) {
     return (
-      <div className="container max-w-3xl py-20 flex justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="container max-w-3xl py-6 md:py-10 space-y-6">
+        <div className="space-y-2">
+          <div className="h-9 w-56 skeleton-shimmer" />
+          <div className="h-3 w-64 skeleton-shimmer" />
+        </div>
+        <div className="h-12 w-80 skeleton-shimmer rounded-full" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="h-28 skeleton-shimmer rounded-3xl" />
+        ))}
       </div>
     );
   }
@@ -141,14 +149,18 @@ const Matches = () => {
           {received.length === 0 ? (
             <Empty title="No interest yet — that's okay." subtitle="Real connections take a beat." />
           ) : (
-            received.map((r) => (
-              <div key={r.id} className="p-5 rounded-3xl bg-card border border-border/60 shadow-card animate-fade-up">
+            received.map((r, idx) => (
+              <div
+                key={r.id}
+                style={{ animationDelay: `${idx * 60}ms` }}
+                className="p-5 rounded-3xl bg-card border border-border/60 shadow-card animate-fade-up card-hover"
+              >
                 <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-full bg-gradient-romance flex items-center justify-center shrink-0">
+                  <div className="h-12 w-12 rounded-full bg-gradient-romance flex items-center justify-center shrink-0 animate-pulse-glow">
                     <EyeOff className="h-4 w-4 text-primary-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
+                    <div className="flex items-baseline gap-2 flex-wrap">
                       <p className="font-display text-lg">{r.other.first_name}</p>
                       <span className="text-xs text-muted-foreground">{formatDistanceToNow(new Date(r.created_at), { addSuffix: true })}</span>
                     </div>
@@ -224,10 +236,7 @@ const Matches = () => {
 };
 
 const Empty = ({ title, subtitle }: { title: string; subtitle: string }) => (
-  <div className="rounded-3xl border border-dashed border-border p-10 text-center">
-    <p className="font-display text-2xl mb-2">{title}</p>
-    <p className="text-muted-foreground text-sm">{subtitle}</p>
-  </div>
+  <EmptyState icon={Heart} tone="warm" title={title} subtitle={subtitle} />
 );
 
 export default Matches;
