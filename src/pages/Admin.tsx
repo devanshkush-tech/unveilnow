@@ -311,30 +311,67 @@ const Admin = () => {
                 <h2 className="font-display text-2xl">Members</h2>
                 <Input placeholder="Search by name or id…" value={search} onChange={(e) => setSearch(e.target.value)} className="h-10 max-w-xs rounded-full" />
               </div>
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="text-left px-5 py-3">Name</th>
-                    <th className="text-left px-5 py-3">City</th>
-                    <th className="text-left px-5 py-3">Joined</th>
-                    <th className="text-left px-5 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="border-t border-border/60">
-                      <td className="px-5 py-3">{u.first_name ?? "—"}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{u.city ?? "—"}</td>
-                      <td className="px-5 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td className="px-5 py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs ${u.onboarded ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-                          {u.onboarded ? "Active" : "Onboarding"}
-                        </span>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm min-w-[640px]">
+                  <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="text-left px-5 py-3">Name</th>
+                      <th className="text-left px-5 py-3">City</th>
+                      <th className="text-left px-5 py-3">Joined</th>
+                      <th className="text-left px-5 py-3">Status</th>
+                      <th className="text-right px-5 py-3">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredUsers.map((u) => {
+                      const isAdminUser = adminIds.has(u.id);
+                      return (
+                        <tr key={u.id} className="border-t border-border/60 hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-3">
+                            <div className="flex items-center gap-2">
+                              <span>{u.first_name ?? "—"}</span>
+                              {isAdminUser && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-romance text-primary-foreground text-[10px] uppercase tracking-wider">
+                                  <ShieldCheck className="h-3 w-3" /> Admin
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-5 py-3 text-muted-foreground">{u.city ?? "—"}</td>
+                          <td className="px-5 py-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</td>
+                          <td className="px-5 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs ${u.onboarded ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                              {u.onboarded ? "Active" : "Onboarding"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            {isAdminUser ? (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-full text-xs"
+                                disabled={u.id === user?.id}
+                                onClick={() => revokeAdmin(u.id, u.first_name)}
+                              >
+                                Revoke admin
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="soft"
+                                size="sm"
+                                className="rounded-full text-xs"
+                                onClick={() => promoteUser(u.id, u.first_name)}
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5" /> Make admin
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </TabsContent>
 
