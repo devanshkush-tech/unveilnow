@@ -132,8 +132,12 @@ const Onboarding = () => {
 
   const persistStep = async (nextStep: number) => {
     if (!user) return;
-    // Persist whatever is meaningful for the current step before advancing.
-    const updates: Record<string, unknown> = { onboarding_step: nextStep };
+    const updates: Partial<{
+      onboarding_step: number;
+      first_name: string; age: number | null; gender: string; city: string; profession: string;
+      looking_for: string; age_min: number; age_max: number; distance_km: number; intent: string;
+      story: string;
+    }> = { onboarding_step: nextStep };
 
     if (step === 0) {
       Object.assign(updates, {
