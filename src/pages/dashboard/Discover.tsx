@@ -66,13 +66,15 @@ const Discover = () => {
         .limit(50);
       if (wantedGender) profilesQuery = profilesQuery.eq("gender", wantedGender);
 
-      const [{ data: sentRows }, { data: profiles }] = await Promise.all([
+      const [{ data: sentRows }, { data: blockedRows }, { data: profiles }] = await Promise.all([
         supabase.from("interest_requests").select("receiver_id").eq("sender_id", user.id),
+        supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id),
         profilesQuery,
       ]);
       const sent = new Set((sentRows ?? []).map((r) => r.receiver_id));
+      const blocked = new Set((blockedRows ?? []).map((r) => r.blocked_id));
       setSentIds(sent);
-      const filtered = profiles ?? [];
+      const filtered = (profiles ?? []).filter((p) => !blocked.has(p.id) && !sent.has(p.id));
       if (filtered.length === 0) {
         setCandidates([]);
         setLoading(false);
