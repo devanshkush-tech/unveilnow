@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Mail } from "lucide-react";
+import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
@@ -14,9 +14,11 @@ const Signup = () => {
   const navigate = useNavigate();
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ const Signup = () => {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -38,8 +40,13 @@ const Signup = () => {
         toast.error(error.message);
         return;
       }
-      toast.success("Welcome to Unveil. Let's set up your profile.");
-      navigate("/onboarding");
+      // If session is returned, email confirmation is disabled — go straight to onboarding
+      if (data.session) {
+        toast.success("Welcome to Unveil. Let's set up your profile.");
+        navigate("/onboarding");
+        return;
+      }
+      setSentTo(email);
     } finally {
       setLoading(false);
     }
@@ -51,6 +58,85 @@ const Signup = () => {
     });
     if (result.error) toast.error("Could not sign in with Google.");
   };
+
+  const onResend = async () => {
+    if (!sentTo) return;
+    setResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: sentTo,
+        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      });
+      if (error) toast.error(error.message);
+      else toast.success("Verification email re-sent.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  // ----- Verification success state -----
+  if (sentTo) {
+    const domain = sentTo.split("@")[1] ?? "";
+    const gmailUrl = domain.toLowerCase().includes("gmail")
+      ? "https://mail.google.com"
+      : `https://${domain}`;
+
+    return (
+      <AuthShell
+        title="Almost there."
+        subtitle="One quick step to keep Unveil real and safe."
+      >
+        <div className="animate-fade-up">
+          <div className="rounded-3xl border border-border/60 bg-card shadow-card p-8 text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-gradient-romance flex items-center justify-center mb-5 animate-float">
+              <MailCheck className="h-7 w-7 text-primary-foreground" />
+            </div>
+            <h2 className="font-display text-2xl mb-2">Account created 💌</h2>
+            <p className="text-sm text-muted-foreground mb-1">
+              We sent a verification link to
+            </p>
+            <p className="font-medium mb-5 break-all">{sentTo}</p>
+            <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
+              Please verify your email to continue. <br />
+              <span className="italic">Read me before you judge me.</span>
+            </p>
+
+            <div className="space-y-2.5">
+              <Button asChild variant="hero" className="w-full h-12 rounded-full" size="lg">
+                <a href={gmailUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink className="h-4 w-4" /> Open inbox
+                </a>
+              </Button>
+              <Button
+                onClick={onResend}
+                disabled={resending}
+                variant="soft"
+                className="w-full h-11 rounded-full"
+              >
+                <RefreshCw className={`h-4 w-4 ${resending ? "animate-spin" : ""}`} />
+                {resending ? "Resending…" : "Resend verification email"}
+              </Button>
+              <Button
+                onClick={() => setSentTo(null)}
+                variant="ghost"
+                className="w-full h-11 rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4" /> Change email
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            Already verified?{" "}
+            <Link to="/login" className="text-foreground underline underline-offset-2">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell

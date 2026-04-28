@@ -13,6 +13,7 @@ import Onboarding from "./pages/Onboarding.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import Trust from "./pages/Trust.tsx";
 import Admin from "./pages/Admin.tsx";
+import { RequireAdmin } from "./components/auth/RequireAdmin";
 import DashboardLayout from "./pages/dashboard/DashboardLayout.tsx";
 import Discover from "./pages/dashboard/Discover.tsx";
 import Matches from "./pages/dashboard/Matches.tsx";
@@ -43,7 +44,7 @@ const App = () => (
             />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/trust" element={<Trust />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<RequireAdmin><Admin /></RequireAdmin>} />
             <Route
               path="/dashboard"
               element={
