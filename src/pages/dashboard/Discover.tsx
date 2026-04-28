@@ -7,6 +7,7 @@ import { InterestDialog } from "@/components/dating/InterestDialog";
 import { VoicePlayer } from "@/components/dating/VoicePlayer";
 import { EmptyState } from "@/components/dating/EmptyState";
 import { ProfileCardSkeleton } from "@/components/dating/CardSkeleton";
+import coupleCafe from "@/assets/couple-cafe.jpg";
 import {
   Sheet,
   SheetContent,
