@@ -135,7 +135,7 @@ const Discover = () => {
     );
   }
 
-  if (visible.length === 0) {
+  if (visible.length === 0 || !current) {
     return (
       <div className="container max-w-2xl py-16">
         <EmptyState
@@ -148,93 +148,101 @@ const Discover = () => {
     );
   }
 
+  const c = current;
+  const sent = sentIds.has(c.id);
+
   return (
-    <div className="container max-w-5xl py-6 md:py-10">
-      <div className="mb-8 animate-fade-up">
-        <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
-        <p className="text-muted-foreground mt-1">Read first. Decide with your gut. Connection before attraction.</p>
+    <div className="container max-w-2xl py-6 md:py-10">
+      <div className="mb-6 animate-fade-up flex items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
+          <p className="text-muted-foreground mt-1 text-sm">One person at a time. Read, then decide.</p>
+        </div>
+        <span className="text-xs text-muted-foreground shrink-0">{cursor + 1} of {visible.length + cursor}</span>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5">
-        {visible.map((c, idx) => {
-          const sent = sentIds.has(c.id);
-          return (
-            <article
-              key={c.id}
-              style={{ animationDelay: `${Math.min(idx * 60, 360)}ms` }}
-              className="bg-card border border-border/60 rounded-3xl shadow-card overflow-hidden animate-fade-up card-hover flex flex-col"
-            >
-              <div className="relative h-32 bg-gradient-romance flex items-end p-5 overflow-hidden">
-                <div aria-hidden className="absolute inset-0 bg-gradient-veil opacity-50" />
-                <div className="relative text-primary-foreground">
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/20 backdrop-blur text-[10px] uppercase tracking-wider mb-2">
-                    <EyeOff className="h-3 w-3" /> Photos hidden
-                  </div>
-                  <h2 className="font-display text-2xl">
-                    {c.first_name}
-                    {c.age ? <>, <span className="font-light">{c.age}</span></> : null}
-                  </h2>
-                </div>
-              </div>
+      <article
+        key={c.id}
+        className="bg-card border border-border/60 rounded-3xl shadow-card overflow-hidden animate-fade-up flex flex-col"
+      >
+        <div className="relative h-36 bg-gradient-romance flex items-end p-5 overflow-hidden">
+          <div aria-hidden className="absolute inset-0 bg-gradient-veil opacity-50" />
+          <div className="relative text-primary-foreground">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/20 backdrop-blur text-[10px] uppercase tracking-wider mb-2">
+              <EyeOff className="h-3 w-3" /> Photos hidden
+            </div>
+            <h2 className="font-display text-3xl">
+              {c.first_name}
+              {c.age ? <>, <span className="font-light">{c.age}</span></> : null}
+            </h2>
+          </div>
+        </div>
 
-              <div className="p-5 space-y-4 flex-1 flex flex-col">
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
-                  {c.city && <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3" /> {c.city}</span>}
-                  {c.profession && <span className="flex items-center gap-1.5"><Briefcase className="h-3 w-3" /> {c.profession}</span>}
-                  <span className="flex items-center gap-1.5"><Heart className="h-3 w-3" /> {intentLabel(c.intent)}</span>
-                </div>
+        <div className="p-5 md:p-6 space-y-5 flex-1 flex flex-col">
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+            {c.city && <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3" /> {c.city}</span>}
+            {c.profession && <span className="flex items-center gap-1.5"><Briefcase className="h-3 w-3" /> {c.profession}</span>}
+            <span className="flex items-center gap-1.5"><Heart className="h-3 w-3" /> {intentLabel(c.intent)}</span>
+          </div>
 
-                {c.voice_intro_path && (
-                  <div><VoicePlayer path={c.voice_intro_path} /></div>
-                )}
+          {c.voice_intro_path && (
+            <div><VoicePlayer path={c.voice_intro_path} /></div>
+          )}
 
-                {c.prompts.slice(0, 2).map((p, i) => (
-                  <div key={i} className="border-l-2 border-accent/60 pl-3">
-                    <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{p.question}</p>
-                    <p className="font-display text-base leading-snug line-clamp-3">{p.answer}</p>
-                  </div>
-                ))}
+          {c.prompts.slice(0, 2).map((p, i) => (
+            <div key={i} className="border-l-2 border-accent/60 pl-3">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">{p.question}</p>
+              <p className="font-display text-base leading-snug">{p.answer}</p>
+            </div>
+          ))}
 
-                {c.story && (
-                  <p className="text-sm text-muted-foreground line-clamp-3 italic">"{c.story.slice(0, 160)}{c.story.length > 160 ? "…" : ""}"</p>
-                )}
+          {c.story && (
+            <p className="text-sm text-muted-foreground italic line-clamp-4">"{c.story.slice(0, 220)}{c.story.length > 220 ? "…" : ""}"</p>
+          )}
 
-                {c.interests.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {c.interests.slice(0, 5).map((i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-full bg-secondary text-xs">{i}</span>
-                    ))}
-                  </div>
-                )}
+          {c.interests.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {c.interests.slice(0, 6).map((i) => (
+                <span key={i} className="px-2.5 py-1 rounded-full bg-secondary text-xs">{i}</span>
+              ))}
+            </div>
+          )}
 
-                <div className="mt-auto pt-2 grid grid-cols-2 gap-2">
-                  <Button variant="soft" className="rounded-full" onClick={() => setActive(c)}>
-                    <BookOpen className="h-4 w-4" /> Read full
-                  </Button>
-                  <TooltipProvider delayDuration={150}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="contents">
-                          <Button
-                            variant="hero"
-                            className="rounded-full w-full"
-                            onClick={() => setInterestFor(c)}
-                            disabled={sent}
-                          >
-                            <Heart className="h-4 w-4" /> {sent ? "Sent" : "Send interest"}
-                          </Button>
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed bg-card border border-border/60 text-foreground shadow-card animate-fade-in">
-                        They won't know you sent interest unless they also send interest from their side. Once both are interested, you can connect and view each other.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+          <Button variant="soft" className="rounded-full w-full" onClick={() => setActive(c)}>
+            <BookOpen className="h-4 w-4" /> Read full profile
+          </Button>
+        </div>
+      </article>
+
+      <div className="mt-5 grid grid-cols-[auto_1fr_auto] gap-3 items-center">
+        <Button variant="soft" size="lg" className="rounded-full h-14 w-14 p-0" onClick={skipCurrent} aria-label="Skip">
+          <X className="h-5 w-5" />
+        </Button>
+
+        <TooltipProvider delayDuration={150}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="contents">
+                <Button
+                  variant="hero"
+                  size="lg"
+                  className="rounded-full h-14 w-full"
+                  onClick={() => setInterestFor(c)}
+                  disabled={sent}
+                >
+                  <Heart className="h-5 w-5" /> {sent ? "Interest sent" : `Send interest to ${c.first_name}`}
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed bg-card border border-border/60 text-foreground shadow-card animate-fade-in">
+              They won't know you sent interest unless they also send interest from their side. Once both are interested, you can connect and view each other.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <Button variant="ghost" size="lg" className="rounded-full h-14 px-5" onClick={next} aria-label="Next">
+          <ChevronRight className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* Full-profile sheet */}
