@@ -87,10 +87,25 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "shimmer": {
+          "0%": { backgroundPosition: "-400px 0" },
+          "100%": { backgroundPosition: "400px 0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(var(--primary) / 0.35)" },
+          "50%": { boxShadow: "0 0 0 14px hsl(var(--primary) / 0)" },
+        },
+        "scale-in": {
+          "0%": { transform: "scale(0.96)", opacity: "0" },
+          "100%": { transform: "scale(1)", opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "shimmer": "shimmer 1.6s linear infinite",
+        "pulse-glow": "pulse-glow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "scale-in": "scale-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) both",
       },
     },
   },
