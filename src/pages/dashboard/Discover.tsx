@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, MapPin, Briefcase, Sparkles, Loader2, BookOpen, EyeOff } from "lucide-react";
+import { Heart, MapPin, Briefcase, BookOpen, EyeOff, Compass } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { InterestDialog } from "@/components/dating/InterestDialog";
 import { VoicePlayer } from "@/components/dating/VoicePlayer";
+import { EmptyState } from "@/components/dating/EmptyState";
+import { ProfileCardSkeleton } from "@/components/dating/CardSkeleton";
 import {
   Sheet,
   SheetContent,
@@ -95,35 +97,48 @@ const Discover = () => {
 
   if (loading) {
     return (
-      <div className="container max-w-4xl py-20 flex justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="container max-w-5xl py-6 md:py-10">
+        <div className="mb-8 space-y-2">
+          <div className="h-9 w-48 skeleton-shimmer" />
+          <div className="h-3 w-72 skeleton-shimmer" />
+        </div>
+        <div className="grid md:grid-cols-2 gap-5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ProfileCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (visible.length === 0) {
     return (
-      <div className="container max-w-2xl py-16 text-center">
-        <h1 className="font-display text-3xl md:text-4xl mb-3">You're all caught up.</h1>
-        <p className="text-muted-foreground">New people are joining Unveil every day. Check back soon — quality takes a moment.</p>
+      <div className="container max-w-2xl py-16">
+        <EmptyState
+          icon={Compass}
+          tone="warm"
+          title="You're all caught up."
+          subtitle="New people are joining Unveil every day. Quality takes a moment — check back soon."
+        />
       </div>
     );
   }
 
   return (
     <div className="container max-w-5xl py-6 md:py-10">
-      <div className="mb-8">
+      <div className="mb-8 animate-fade-up">
         <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
         <p className="text-muted-foreground mt-1">Read first. Decide with your gut. Connection before attraction.</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
-        {visible.map((c) => {
+        {visible.map((c, idx) => {
           const sent = sentIds.has(c.id);
           return (
             <article
               key={c.id}
-              className="bg-card border border-border/60 rounded-3xl shadow-card overflow-hidden animate-fade-up flex flex-col"
+              style={{ animationDelay: `${Math.min(idx * 60, 360)}ms` }}
+              className="bg-card border border-border/60 rounded-3xl shadow-card overflow-hidden animate-fade-up card-hover flex flex-col"
             >
               <div className="relative h-32 bg-gradient-romance flex items-end p-5 overflow-hidden">
                 <div aria-hidden className="absolute inset-0 bg-gradient-veil opacity-50" />
