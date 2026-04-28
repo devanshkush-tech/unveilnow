@@ -112,8 +112,9 @@ const Discover = () => {
     () => candidates.filter((c) => !skippedIds.has(c.id) && !sentIds.has(c.id)),
     [candidates, skippedIds, sentIds],
   );
-  const current = visible[cursor] ?? null;
-  const next = () => setCursor((i) => i + 1);
+  const safeCursor = Math.min(cursor, Math.max(0, visible.length - 1));
+  const current = visible[safeCursor] ?? null;
+  const next = () => setCursor((i) => Math.min(i + 1, Math.max(0, visible.length - 1)));
   const skipCurrent = () => {
     if (!current) return;
     setSkippedIds((s) => new Set(s).add(current.id));
