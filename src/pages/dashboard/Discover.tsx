@@ -44,6 +44,8 @@ const Discover = () => {
   const [active, setActive] = useState<Candidate | null>(null);
   const [interestFor, setInterestFor] = useState<Candidate | null>(null);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+  const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set());
+  const [cursor, setCursor] = useState(0);
 
   useEffect(() => {
     if (!user) return;
