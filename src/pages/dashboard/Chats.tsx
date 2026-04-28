@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EyeOff, Send, Eye, Loader2 } from "lucide-react";
+import { EyeOff, Send, Eye, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { computeChemistry, chemistryLabel, type Msg } from "@/lib/chemistry";
 
 type Conv = {
   id: string;
@@ -17,8 +18,6 @@ type Conv = {
   user_b: string;
 };
 
-type Msg = { id: string; sender_id: string; body: string; created_at: string };
-
 const Chats = () => {
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
@@ -29,6 +28,7 @@ const Chats = () => {
   const [input, setInput] = useState("");
   const [loadingList, setLoadingList] = useState(true);
   const [loadingThread, setLoadingThread] = useState(false);
+  const [showReveal, setShowReveal] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Load conversations
@@ -90,12 +90,20 @@ const Chats = () => {
     return () => { supabase.removeChannel(channel); };
   }, [active?.id]);
 
-  // Auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
-  // Fetch revealed photos when both sides have consented
+  // Reveal cinematic
+  useEffect(() => {
+    if (active?.reveal_a && active?.reveal_b) {
+      setShowReveal(true);
+      const t = setTimeout(() => setShowReveal(false), 2400);
+      return () => clearTimeout(t);
+    }
+  }, [active?.reveal_a, active?.reveal_b]);
+
+  // Fetch revealed photos
   useEffect(() => {
     if (!active || !user) { setRevealedPhotos([]); return; }
     if (!(active.reveal_a && active.reveal_b)) { setRevealedPhotos([]); return; }
@@ -134,6 +142,13 @@ const Chats = () => {
   const fullyRevealed = !!active?.reveal_a && !!active?.reveal_b;
   const myConsent = active && user ? (user.id === active.user_a ? active.reveal_a : active.reveal_b) : false;
 
+  const chemistry = useMemo(() => {
+    if (!active) return 0;
+    return computeChemistry(messages, active.user_a, active.user_b);
+  }, [messages, active]);
+
+  const canRequestReveal = chemistry >= 60;
+
   return (
     <div className="h-[calc(100vh-3.5rem)] md:h-screen grid md:grid-cols-[320px_1fr]">
       <aside className="border-r border-border/60 bg-gradient-soft overflow-y-auto">
@@ -168,29 +183,69 @@ const Chats = () => {
         )}
       </aside>
 
-      <section className="hidden md:flex flex-col bg-background">
+      <section className="hidden md:flex flex-col bg-background relative">
+        {/* Cinematic reveal overlay */}
+        {showReveal && (
+          <div className="absolute inset-0 z-40 bg-gradient-romance flex items-center justify-center animate-fade-in">
+            <div className="text-center text-primary-foreground animate-fade-up">
+              <Sparkles className="h-10 w-10 mx-auto mb-4" />
+              <p className="font-display text-4xl">Unveiled.</p>
+              <p className="text-sm opacity-80 mt-2">You both chose to share.</p>
+            </div>
+          </div>
+        )}
+
         {!active ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">Select a conversation</div>
         ) : (
           <>
-            <header className="flex items-center justify-between p-4 border-b border-border/60">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-romance flex items-center justify-center overflow-hidden">
-                  {fullyRevealed && revealedPhotos[0]
-                    ? <img src={revealedPhotos[0].url} alt={active.name ?? ""} className="w-full h-full object-cover" />
-                    : <EyeOff className="h-4 w-4 text-primary-foreground" />}
-                </div>
-                <div>
-                  <div className="font-medium">{active.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {fullyRevealed ? "Photos revealed" : myConsent ? "Waiting on them to reveal" : "Photos hidden"}
+            <header className="p-4 border-b border-border/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-romance flex items-center justify-center overflow-hidden">
+                    {fullyRevealed && revealedPhotos[0]
+                      ? <img src={revealedPhotos[0].url} alt={active.name ?? ""} className="w-full h-full object-cover" />
+                      : <EyeOff className="h-4 w-4 text-primary-foreground" />}
+                  </div>
+                  <div>
+                    <div className="font-medium">{active.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {fullyRevealed ? "Photos revealed" : myConsent ? "Waiting on them to reveal" : "Photos hidden"}
+                    </div>
                   </div>
                 </div>
+                {!fullyRevealed && (
+                  <Button
+                    variant={canRequestReveal ? "hero" : "soft"}
+                    size="sm"
+                    className="rounded-full"
+                    onClick={requestReveal}
+                    disabled={myConsent || !canRequestReveal}
+                  >
+                    <Eye className="h-4 w-4" /> {myConsent ? "Reveal requested" : canRequestReveal ? "Request reveal" : "Reveal locked"}
+                  </Button>
+                )}
               </div>
+
+              {/* Chemistry meter */}
               {!fullyRevealed && (
-                <Button variant="soft" size="sm" className="rounded-full" onClick={requestReveal} disabled={myConsent}>
-                  <Eye className="h-4 w-4" /> {myConsent ? "Reveal requested" : "Request reveal"}
-                </Button>
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-muted-foreground uppercase tracking-widest">Chemistry meter</span>
+                    <span className="font-medium text-foreground">{chemistry}% · {chemistryLabel(chemistry)}</span>
+                  </div>
+                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-romance transition-all duration-700"
+                      style={{ width: `${chemistry}%` }}
+                    />
+                  </div>
+                  {!canRequestReveal && (
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      Reveal unlocks at 60%. Keep the conversation real and consistent.
+                    </p>
+                  )}
+                </div>
               )}
             </header>
 
@@ -208,7 +263,7 @@ const Chats = () => {
               ) : messages.length === 0 ? (
                 <div className="text-center text-sm text-muted-foreground pt-10">Say hi. The first message sets the tone.</div>
               ) : messages.map((m) => (
-                <div key={m.id} className={`flex ${m.sender_id === user?.id ? "justify-end" : "justify-start"}`}>
+                <div key={m.id} className={`flex ${m.sender_id === user?.id ? "justify-end" : "justify-start"} animate-fade-up`}>
                   <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     m.sender_id === user?.id
                       ? "bg-gradient-romance text-primary-foreground rounded-br-md"
