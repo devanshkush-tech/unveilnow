@@ -13,6 +13,8 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import Trust from "./pages/Trust.tsx";
+import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import { RequireAdmin } from "./components/auth/RequireAdmin";
@@ -49,6 +51,8 @@ const App = () => (
             />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/trust" element={<Trust />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/admin" element={<Navigate to="/admindashboard" replace />} />
             <Route path="/admindashboard/login" element={<AdminLogin />} />
             <Route path="/admindashboard" element={<RequireAdmin><Admin /></RequireAdmin>} />
