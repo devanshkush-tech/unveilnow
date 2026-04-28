@@ -2,11 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EyeOff, Send, Eye, Loader2, Sparkles } from "lucide-react";
+import { EyeOff, Send, Eye, Loader2, Sparkles, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { computeChemistry, chemistryLabel, type Msg } from "@/lib/chemistry";
+import { ChatRowSkeleton } from "@/components/dating/CardSkeleton";
 
 type Conv = {
   id: string;
@@ -156,19 +157,26 @@ const Chats = () => {
           <h1 className="font-display text-2xl">Chats</h1>
         </div>
         {loadingList ? (
-          <div className="p-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          <div>
+            {Array.from({ length: 4 }).map((_, i) => <ChatRowSkeleton key={i} />)}
+          </div>
         ) : conversations.length === 0 ? (
-          <div className="p-6 text-sm text-muted-foreground">No conversations yet. Match with someone to start chatting.</div>
+          <div className="p-6 text-sm text-muted-foreground leading-relaxed">
+            No conversations yet. <span className="text-foreground">Match with someone</span> to start a real exchange.
+          </div>
         ) : (
           <ul>
-            {conversations.map((c) => (
-              <li key={c.id}>
+            {conversations.map((c, idx) => (
+              <li key={c.id} style={{ animationDelay: `${idx * 40}ms` }} className="animate-fade-in">
                 <button
                   onClick={() => { setActive(c); setParams({ match: c.id }, { replace: true }); }}
-                  className={`w-full flex items-center gap-3 p-4 border-b border-border/40 text-left transition-colors ${
-                    active?.id === c.id ? "bg-card" : "hover:bg-card/50"
+                  className={`w-full flex items-center gap-3 p-4 border-b border-border/40 text-left transition-all duration-300 relative ${
+                    active?.id === c.id ? "bg-card" : "hover:bg-card/60"
                   }`}
                 >
+                  {active?.id === c.id && (
+                    <span aria-hidden className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-romance" />
+                  )}
                   <div className="h-11 w-11 rounded-full bg-gradient-romance flex items-center justify-center shrink-0">
                     <EyeOff className="h-4 w-4 text-primary-foreground" />
                   </div>
@@ -196,7 +204,13 @@ const Chats = () => {
         )}
 
         {!active ? (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground">Select a conversation</div>
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-10">
+            <div className="h-14 w-14 rounded-2xl bg-gradient-romance flex items-center justify-center mb-5 shadow-soft">
+              <MessageCircle className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <p className="font-display text-2xl mb-1">Pick a conversation</p>
+            <p className="text-sm text-muted-foreground max-w-xs">Real connection starts with a thoughtful first line.</p>
+          </div>
         ) : (
           <>
             <header className="p-4 border-b border-border/60 space-y-3">
