@@ -450,28 +450,40 @@ const Admin = () => {
               {reports.length === 0 ? (
                 <div className="p-10 text-center text-sm text-muted-foreground">No open reports. The community is healthy.</div>
               ) : (
-                <table className="w-full text-sm">
-                  <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
-                    <tr>
-                      <th className="text-left px-5 py-3">Report</th>
-                      <th className="text-left px-5 py-3">Reason</th>
-                      <th className="text-left px-5 py-3">Status</th>
-                      <th className="text-left px-5 py-3">When</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.map((r) => (
-                      <tr key={r.id} className="border-t border-border/60">
-                        <td className="px-5 py-3 font-mono text-xs">{r.id.slice(0, 8)}</td>
-                        <td className="px-5 py-3">{r.reason}</td>
-                        <td className="px-5 py-3">
-                          <span className="px-2.5 py-1 rounded-full bg-secondary text-xs capitalize">{r.status}</span>
-                        </td>
-                        <td className="px-5 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[640px]">
+                    <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
+                      <tr>
+                        <th className="text-left px-5 py-3">Report</th>
+                        <th className="text-left px-5 py-3">Reason</th>
+                        <th className="text-left px-5 py-3">Status</th>
+                        <th className="text-left px-5 py-3">When</th>
+                        <th className="text-right px-5 py-3">Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {reports.map((r) => (
+                        <tr key={r.id} className="border-t border-border/60 hover:bg-secondary/30 transition-colors">
+                          <td className="px-5 py-3 font-mono text-xs">{r.id.slice(0, 8)}</td>
+                          <td className="px-5 py-3">{r.reason}</td>
+                          <td className="px-5 py-3">
+                            <span className={`px-2.5 py-1 rounded-full text-xs capitalize ${
+                              r.status === "resolved" ? "bg-primary text-primary-foreground" : "bg-accent/30 text-accent-foreground"
+                            }`}>{r.status}</span>
+                          </td>
+                          <td className="px-5 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
+                          <td className="px-5 py-3 text-right">
+                            {r.status !== "resolved" && (
+                              <Button variant="soft" size="sm" className="rounded-full text-xs" onClick={() => resolveReport(r.id)}>
+                                <CheckCircle className="h-3.5 w-3.5" /> Resolve
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </TabsContent>
