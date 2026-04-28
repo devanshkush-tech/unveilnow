@@ -141,7 +141,8 @@ const Discover = () => {
     return (
       <div className="container max-w-2xl py-16">
         <EmptyState
-          icon={Compass}
+          image={coupleCafe}
+          imageAlt="A young Indian couple sharing coffee"
           tone="warm"
           title="You're all caught up."
           subtitle="New people are joining Unveil every day. Quality takes a moment — check back soon."
