@@ -19,6 +19,8 @@ import {
   Loader2,
   Megaphone,
   ArrowLeft,
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,11 +43,12 @@ type FunnelData = {
 };
 
 const Admin = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [funnel, setFunnel] = useState<FunnelData | null>(null);
   const [users, setUsers] = useState<{ id: string; first_name: string | null; city: string | null; created_at: string; onboarded: boolean }[]>([]);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [prompts, setPrompts] = useState<{ id: string; text: string; category: string; active: boolean; position: number }[]>([]);
   const [newPrompt, setNewPrompt] = useState("");
@@ -71,6 +74,7 @@ const Admin = () => {
       { data: promptsData },
       { data: annData },
       { data: reportsData },
+      { data: rolesData },
     ] = await Promise.all([
       supabase.from("profiles").select("*", { count: "exact", head: true }),
       supabase.from("profiles").select("*", { count: "exact", head: true }).gte("created_at", todayIso),
@@ -82,6 +86,7 @@ const Admin = () => {
       supabase.from("prompts_library").select("*").order("position"),
       supabase.from("announcements").select("*").order("created_at", { ascending: false }),
       supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("user_roles").select("user_id").eq("role", "admin"),
     ]);
 
     setStats({
@@ -109,6 +114,7 @@ const Admin = () => {
     setPrompts(promptsData ?? []);
     setAnnouncements(annData ?? []);
     setReports(reportsData ?? []);
+    setAdminIds(new Set((rolesData ?? []).map((r: { user_id: string }) => r.user_id)));
     setLoading(false);
   };
 
