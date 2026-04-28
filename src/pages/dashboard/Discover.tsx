@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, MapPin, Briefcase, BookOpen, EyeOff, Compass } from "lucide-react";
+import { Heart, MapPin, Briefcase, BookOpen, EyeOff, Compass, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { InterestDialog } from "@/components/dating/InterestDialog";
