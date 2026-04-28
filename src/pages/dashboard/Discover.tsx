@@ -13,6 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Candidate = {
   id: string;
@@ -48,14 +49,24 @@ const Discover = () => {
     if (!user) return;
     (async () => {
       setLoading(true);
+      // Load my own preference so we only show profiles matching gender preference
+      const { data: me } = await supabase.from("profiles").select("looking_for").eq("id", user.id).maybeSingle();
+      const lookingFor = me?.looking_for ?? "Everyone";
+      const wantedGender =
+        lookingFor === "Women" ? "Woman" :
+        lookingFor === "Men" ? "Man" : null;
+
+      let profilesQuery = supabase
+        .from("profiles")
+        .select("id, first_name, age, city, profession, intent, story, voice_intro_path, gender")
+        .eq("onboarded", true)
+        .neq("id", user.id)
+        .limit(50);
+      if (wantedGender) profilesQuery = profilesQuery.eq("gender", wantedGender);
+
       const [{ data: sentRows }, { data: profiles }] = await Promise.all([
         supabase.from("interest_requests").select("receiver_id").eq("sender_id", user.id),
-        supabase
-          .from("profiles")
-          .select("id, first_name, age, city, profession, intent, story, voice_intro_path")
-          .eq("onboarded", true)
-          .neq("id", user.id)
-          .limit(50),
+        profilesQuery,
       ]);
       const sent = new Set((sentRows ?? []).map((r) => r.receiver_id));
       setSentIds(sent);
@@ -187,14 +198,25 @@ const Discover = () => {
                   <Button variant="soft" className="rounded-full" onClick={() => setActive(c)}>
                     <BookOpen className="h-4 w-4" /> Read full
                   </Button>
-                  <Button
-                    variant="hero"
-                    className="rounded-full"
-                    onClick={() => setInterestFor(c)}
-                    disabled={sent}
-                  >
-                    <Heart className="h-4 w-4" /> {sent ? "Sent" : "Send interest"}
-                  </Button>
+                  <TooltipProvider delayDuration={150}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="contents">
+                          <Button
+                            variant="hero"
+                            className="rounded-full w-full"
+                            onClick={() => setInterestFor(c)}
+                            disabled={sent}
+                          >
+                            <Heart className="h-4 w-4" /> {sent ? "Sent" : "Send interest"}
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed bg-card border border-border/60 text-foreground shadow-card animate-fade-in">
+                        They won't know you sent interest unless they also send interest from their side. Once both are interested, you can connect and view each other.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
             </article>
