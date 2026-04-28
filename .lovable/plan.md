@@ -1,42 +1,49 @@
+# Add Legal Pages: Terms & Privacy
+
 ## Goal
+Replace the current 3-item Legal section in the footer with exactly 2 links — **Terms & Conditions** and **Privacy Policy** — wired to two new full-content pages using the copy you provided.
 
-Move the admin console to `https://unveilnow.in/admindashboard`, locked to the verified account `Devanshkush@gmail.com` via a server-enforced admin role. No passwords are ever stored in code.
+## Changes
 
-## Security note (please read)
+### 1. New page: `src/pages/Terms.tsx`
+- Route: `/terms`
+- Layout: `<Navbar />` + main + `<Footer />` (matches `Trust.tsx` pattern)
+- Hero: "Terms and Conditions" title, effective date "27 April 2026", website link
+- Body: All 18 sections from your provided text, rendered as styled headings (`font-display`) + paragraphs + bullet lists, wrapped in a `prose`-like container (`max-w-3xl mx-auto`)
 
-You shared a real password in chat. That message is now in conversation history.
+### 2. New page: `src/pages/Privacy.tsx`
+- Route: `/privacy`
+- Same layout pattern as Terms
+- Hero: "Privacy Policy" title, effective date, website link
+- Body: All 16 sections from your provided text, including subsections A/B/C in section 1
 
-- Treat that password as compromised. Change it from the login page after we wire this up.
-- The admin gate uses your Supabase `user_roles` table + `has_role()` RLS function. Anyone trying to access `/admindashboard` who is not signed in (or who is signed in without the `admin` role) will be bounced to login or back to the dashboard. The check happens both client-side (route guard) and server-side (RLS on every admin query).
+### 3. Register routes in `src/App.tsx`
+Add two new `<Route>` entries:
+- `<Route path="/terms" element={<Terms />} />`
+- `<Route path="/privacy" element={<Privacy />} />`
 
-## What I'll change
+### 4. Update `src/components/layout/Footer.tsx` — Legal section
+Replace the current 3 items:
+```
+Privacy / Terms / Community guidelines
+```
+With exactly 2 items as `<Link>` (react-router) entries:
+```
+Terms & Conditions  → /terms
+Privacy Policy      → /privacy
+```
+The other footer columns (Product, Company) remain untouched.
 
-### 1. New route at `/admindashboard`
-- Add `<Route path="/admindashboard">` in `src/App.tsx`, wrapped in the existing `RequireAdmin` guard.
-- Old `/admin` becomes a redirect to `/admindashboard` so any old links keep working.
+## Styling Notes
+- Use existing design tokens (`text-muted-foreground`, `font-display`, `text-gradient`) so the legal pages match the rest of the site
+- Numbered section headings as `h2` with `font-display text-2xl mt-10`
+- Lists use `list-disc pl-6 space-y-2 text-muted-foreground`
+- Smooth scroll to top on route change is already handled by the app shell
 
-### 2. Promote your account to admin (one-time DB action)
-Run a single SQL statement that finds the user id for `devanshkush@gmail.com` in `auth.users` (case-insensitive) and inserts a row into `public.user_roles` with role `admin`, idempotent via `ON CONFLICT DO NOTHING`. If the email is not found, the migration raises a clear notice and does nothing — meaning the account hasn't been signed up / the email is spelled differently.
+## Files Touched
+- **Create:** `src/pages/Terms.tsx`
+- **Create:** `src/pages/Privacy.tsx`
+- **Edit:** `src/App.tsx` (add 2 routes)
+- **Edit:** `src/components/layout/Footer.tsx` (Legal column → 2 links)
 
-### 3. Polish the existing admin console
-The console already has Overview / Funnel / Users / Prompts / Announcements / Moderation. Small refinements while we're in there:
-- Show the signed-in admin's email in the header (instead of just the word "Admin"), with a Sign out button.
-- Add a "Promote to admin" action on the Users tab so you can grant admin to other accounts later without touching the database.
-- Add a "Mark resolved" action on the Moderation tab (updates `reports.status`).
-- Apply the same skeleton/empty-state polish used elsewhere.
-
-### 4. What I will NOT do
-- I will not store `Devanshkush@gmail.com` or the password in any file, env var, or secret. Auth happens through the normal login form.
-- I will not bypass email verification or RLS. If the account isn't email-verified yet, the login will be blocked by Supabase as designed.
-
-## How you'll use it
-
-1. After I deploy, go to `https://unveilnow.in/login` and sign in with your existing email + password.
-2. Navigate to `https://unveilnow.in/admindashboard`. The admin role check will pass and you'll see the console.
-3. Change your password from inside the app for safety, since the old one was shared in chat.
-
-## Files touched
-
-- `src/App.tsx` — add `/admindashboard` route, redirect `/admin`.
-- `src/pages/Admin.tsx` — header polish, sign-out button, promote-user action, resolve-report action.
-- New migration — grant `admin` role to the user with email `devanshkush@gmail.com`.
+No backend, schema, or auth changes needed.
