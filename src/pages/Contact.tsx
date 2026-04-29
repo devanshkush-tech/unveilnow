@@ -78,12 +78,14 @@ const Contact = () => {
     setForm({ full_name: "", email: user.email ?? "", contact_number: "", subject: "", message: "" });
   };
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = "Contact Unveil | Get in Touch";
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      {(() => {
-        if (typeof document !== "undefined") document.title = "Contact Unveil | Get in Touch";
-        return null;
-      })()}
       <Navbar />
       <main className="pt-28 md:pt-32 pb-20">
         <section className="container max-w-3xl text-center animate-fade-up">
