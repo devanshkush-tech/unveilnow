@@ -208,11 +208,11 @@ const Chats = () => {
   };
 
   return (
-    // Lock to viewport so the chat owns its own scroll, not the page.
-    // Account for mobile bottom nav (h-[60px] approx with grid py-3 + label).
+    // Lock to available viewport so the chat owns its own scroll, not the page.
+    // Mobile: subtract top bar (3.5rem) + bottom nav (~4.25rem). Desktop: full dvh.
     <div
-      className="grid md:grid-cols-[320px_1fr] bg-background"
-      style={{ height: "100dvh" }}
+      className="grid md:grid-cols-[320px_1fr] bg-background -mb-20 md:mb-0"
+      style={{ height: "calc(100dvh - 3.5rem - 4.25rem)" }}
     >
       {/* Conversations list — hidden on mobile when a chat is open */}
       <aside
