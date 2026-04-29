@@ -55,6 +55,8 @@ const App = () => (
             <Route path="/trust" element={<Trust />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/admin" element={<Navigate to="/admindashboard" replace />} />
             <Route path="/admindashboard/login" element={<AdminLogin />} />
             <Route path="/admindashboard" element={<RequireAdmin><Admin /></RequireAdmin>} />
