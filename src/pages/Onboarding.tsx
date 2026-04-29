@@ -299,15 +299,16 @@ const Onboarding = () => {
 
   const next = async () => {
     if (!validateStep()) return;
+    const isLast = step === TOTAL_STEPS - 1;
+    if (isLast) {
+      // finish() handles its own loading + errors + redirect.
+      await finish();
+      return;
+    }
     setSaving(true);
     try {
-      const isLast = step === TOTAL_STEPS - 1;
-      await persistStep(isLast ? step : step + 1);
-      if (isLast) {
-        await finish();
-      } else {
-        setStep((s) => s + 1);
-      }
+      await persistStep(step + 1);
+      setStep((s) => s + 1);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't save progress.");
     } finally {
