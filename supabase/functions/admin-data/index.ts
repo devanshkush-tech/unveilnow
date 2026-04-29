@@ -235,6 +235,33 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === 'list_tickets') {
+      const { search: q, status, type, sort } = await req.json().catch(() => ({}));
+      let query = admin.from('support_tickets').select('*');
+      if (status) query = query.eq('status', status);
+      if (type) query = query.eq('ticket_type', type);
+      if (q && q.trim()) {
+        const term = `%${q.trim()}%`;
+        query = query.or(`full_name.ilike.${term},email.ilike.${term},subject.ilike.${term},message.ilike.${term},transaction_id.ilike.${term}`);
+      }
+      query = query.order('created_at', { ascending: sort === 'oldest' });
+      const { data, error } = await query.limit(500);
+      if (error) return json({ error: error.message }, 500);
+      return json({ tickets: data ?? [] });
+    }
+
+    if (action === 'update_ticket') {
+      const { id, status, priority, admin_notes } = await req.json();
+      if (!id) return json({ error: 'id required' }, 400);
+      const patch: Record<string, unknown> = {};
+      if (status) patch.status = status;
+      if (priority) patch.priority = priority;
+      if (typeof admin_notes === 'string') patch.admin_notes = admin_notes;
+      const { error } = await admin.from('support_tickets').update(patch).eq('id', id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);
