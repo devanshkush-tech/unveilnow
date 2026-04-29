@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAuth, type AdminUser } from "@/lib/adminAuth";
+import AdminTickets from "@/components/admin/AdminTickets";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
@@ -224,6 +225,7 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="rounded-full p-1 h-12 bg-secondary">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
+            <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
           </TabsList>
 
@@ -320,6 +322,10 @@ const Admin = () => {
                 </table>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="tickets">
+            <AdminTickets />
           </TabsContent>
 
           <TabsContent value="moderation">
