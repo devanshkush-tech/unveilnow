@@ -59,11 +59,16 @@ const Contact = () => {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("support_tickets").insert({
+    const payload = {
       user_id: user.id,
       ticket_type: "contact",
-      ...parsed.data,
-    });
+      full_name: parsed.data.full_name,
+      email: parsed.data.email,
+      contact_number: parsed.data.contact_number,
+      subject: parsed.data.subject,
+      message: parsed.data.message,
+    };
+    const { error } = await supabase.from("support_tickets").insert(payload);
     setSubmitting(false);
     if (error) {
       toast.error(error.message);
