@@ -324,6 +324,10 @@ const Admin = () => {
             </div>
           </TabsContent>
 
+          <TabsContent value="tickets">
+            <AdminTickets />
+          </TabsContent>
+
           <TabsContent value="moderation">
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft p-6 text-sm text-muted-foreground">
               Open the user drawer to see reports filed against a member, and use the action buttons there to suspend, ban, or delete.
