@@ -15,6 +15,8 @@ import PricingPage from "./pages/PricingPage.tsx";
 import Trust from "./pages/Trust.tsx";
 import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
+import Contact from "./pages/Contact.tsx";
+import RefundPolicy from "./pages/RefundPolicy.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import { RequireAdmin } from "./components/auth/RequireAdmin";
