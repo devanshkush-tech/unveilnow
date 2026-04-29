@@ -6,7 +6,7 @@ import { EyeOff, Send, Eye, Loader2, Sparkles, MessageCircle, ArrowLeft } from "
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { computeChemistry, chemistryLabel, type Msg } from "@/lib/chemistry";
+import { computeChemistry, chemistryLabel, DEFAULT_CHEMISTRY_WEIGHTS, type ChemistryWeights, type Msg } from "@/lib/chemistry";
 import { ChatRowSkeleton } from "@/components/dating/CardSkeleton";
 
 type Conv = {
@@ -32,7 +32,23 @@ const Chats = () => {
   const [showReveal, setShowReveal] = useState(false);
   const [sending, setSending] = useState(false);
   const [animatedChem, setAnimatedChem] = useState(0);
+  const [chemWeights, setChemWeights] = useState<ChemistryWeights>(DEFAULT_CHEMISTRY_WEIGHTS);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load tunable chemistry weights (admin-managed)
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("app_settings" as any)
+        .select("value")
+        .eq("key", "chemistry_weights")
+        .maybeSingle();
+      const v = (data as any)?.value;
+      if (v && typeof v === "object") {
+        setChemWeights({ ...DEFAULT_CHEMISTRY_WEIGHTS, ...v });
+      }
+    })();
+  }, []);
 
   // Load conversations
   useEffect(() => {
@@ -173,8 +189,8 @@ const Chats = () => {
 
   const chemistry = useMemo(() => {
     if (!active) return 0;
-    return computeChemistry(messages, active.user_a, active.user_b);
-  }, [messages, active]);
+    return computeChemistry(messages, active.user_a, active.user_b, chemWeights);
+  }, [messages, active, chemWeights]);
 
   // Animated chemistry bar
   useEffect(() => {
