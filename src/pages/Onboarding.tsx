@@ -259,22 +259,25 @@ const Onboarding = () => {
     if (!user) return;
     setSaving(true);
     try {
-      // Upload new photos
-      const uploaded: { storage_path: string; position: number }[] = [];
+      // Upload new photos in parallel
       const baseIdx = existingPhotos.length;
-      for (let i = 0; i < photos.length; i++) {
-        const file = photos[i].file;
-        const ext = file.name.split(".").pop() ?? "jpg";
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("photos").upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-        if (upErr) throw upErr;
-        uploaded.push({ storage_path: path, position: baseIdx + i });
-      }
+      const uploaded = await Promise.all(
+        photos.map(async ({ file }, i) => {
+          const ext = file.name.split(".").pop() ?? "jpg";
+          const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+          const { error: upErr } = await supabase.storage.from("photos").upload(path, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+          if (upErr) throw upErr;
+          return { storage_path: path, position: baseIdx + i };
+        }),
+      );
       if (uploaded.length) {
-        await supabase.from("profile_photos").insert(uploaded.map((u) => ({ user_id: user.id, ...u })));
+        const { error: insErr } = await supabase
+          .from("profile_photos")
+          .insert(uploaded.map((u) => ({ user_id: user.id, ...u })));
+        if (insErr) throw insErr;
       }
 
       const { error: pErr } = await supabase
@@ -284,7 +287,8 @@ const Onboarding = () => {
       if (pErr) throw pErr;
 
       toast.success(editMode ? "Profile updated." : "Welcome to a better way to date.");
-      navigate(editMode ? "/dashboard/profile" : "/dashboard");
+      // Use replace so the Back button doesn't return to onboarding mid-flow.
+      navigate(editMode ? "/dashboard/profile" : "/dashboard", { replace: true });
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Could not save profile.");
