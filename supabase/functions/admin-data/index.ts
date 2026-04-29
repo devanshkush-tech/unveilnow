@@ -262,6 +262,23 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (action === 'get_setting') {
+      const { key } = await req.json();
+      if (!key) return json({ error: 'key required' }, 400);
+      const { data, error } = await admin.from('app_settings').select('value, updated_at').eq('key', key).maybeSingle();
+      if (error) return json({ error: error.message }, 500);
+      return json({ value: data?.value ?? null, updated_at: data?.updated_at ?? null });
+    }
+
+    if (action === 'set_setting') {
+      const { key, value } = await req.json();
+      if (!key || typeof value === 'undefined') return json({ error: 'key and value required' }, 400);
+      const { error } = await admin.from('app_settings')
+        .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);

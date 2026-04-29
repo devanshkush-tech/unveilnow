@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 import { adminAuth, type AdminUser } from "@/lib/adminAuth";
 import AdminTickets from "@/components/admin/AdminTickets";
+import AdminChemistry from "@/components/admin/AdminChemistry";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
@@ -223,9 +224,10 @@ const Admin = () => {
         </section>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="rounded-full p-1 h-12 bg-secondary">
+          <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
+            <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
           </TabsList>
 
@@ -326,6 +328,10 @@ const Admin = () => {
 
           <TabsContent value="tickets">
             <AdminTickets />
+          </TabsContent>
+
+          <TabsContent value="chemistry">
+            <AdminChemistry />
           </TabsContent>
 
           <TabsContent value="moderation">
