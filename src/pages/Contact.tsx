@@ -75,11 +75,10 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Helmet>
-        <title>Contact Unveil | Get in Touch</title>
-        <meta name="description" content="Contact Unveil for support, feedback, partnerships, and inquiries." />
-        <link rel="canonical" href="https://unveilnow.in/contact" />
-      </Helmet>
+      {(() => {
+        if (typeof document !== "undefined") document.title = "Contact Unveil | Get in Touch";
+        return null;
+      })()}
       <Navbar />
       <main className="pt-28 md:pt-32 pb-20">
         <section className="container max-w-3xl text-center animate-fade-up">
