@@ -577,6 +577,60 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          admin_notes: string | null
+          contact_number: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string
+          priority: string
+          purchase_date: string | null
+          status: string
+          subject: string | null
+          ticket_type: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          contact_number?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message: string
+          priority?: string
+          purchase_date?: string | null
+          status?: string
+          subject?: string | null
+          ticket_type?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          contact_number?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string
+          priority?: string
+          purchase_date?: string | null
+          status?: string
+          subject?: string | null
+          ticket_type?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
