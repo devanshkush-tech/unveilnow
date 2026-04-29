@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAuth, type AdminUser } from "@/lib/adminAuth";
+import AdminTickets from "@/components/admin/AdminTickets";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
