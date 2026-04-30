@@ -7,6 +7,7 @@ import { InterestDialog } from "@/components/dating/InterestDialog";
 import { VoicePlayer } from "@/components/dating/VoicePlayer";
 import { EmptyState } from "@/components/dating/EmptyState";
 import { ProfileCardSkeleton } from "@/components/dating/CardSkeleton";
+import { MatchUsageBanner } from "@/components/dating/MatchUsageBanner";
 import coupleCafe from "@/assets/couple-cafe.jpg";
 import {
   Sheet,
@@ -156,13 +157,15 @@ const Discover = () => {
 
   return (
     <div className="container max-w-2xl py-6 md:py-10">
-      <div className="mb-6 animate-fade-up flex items-end justify-between gap-3">
+      <div className="mb-5 animate-fade-up flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
-          <p className="text-muted-foreground mt-1 text-sm">One person at a time. Read, then decide.</p>
+          <p className="text-muted-foreground mt-1 text-sm">Likes are unlimited — matches happen when it's mutual.</p>
         </div>
         <span className="text-xs text-muted-foreground shrink-0">{visible.length} to read</span>
       </div>
+
+      <div className="mb-6"><MatchUsageBanner /></div>
 
       <article
         key={c.id}
@@ -238,7 +241,7 @@ const Discover = () => {
               </span>
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed bg-card border border-border/60 text-foreground shadow-card animate-fade-in">
-              They won't know you sent interest unless they also send interest from their side. Once both are interested, you can connect and view each other.
+              Likes are unlimited. A match only forms when interest is mutual — and counts toward your monthly match limit.
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
