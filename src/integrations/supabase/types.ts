@@ -468,6 +468,8 @@ export type Database = {
           is_admin_created: boolean
           last_active_at: string | null
           looking_for: string | null
+          match_period_start: string
+          matches_used_this_period: number
           onboarded: boolean
           onboarding_step: number
           payment_status: string
@@ -503,6 +505,8 @@ export type Database = {
           is_admin_created?: boolean
           last_active_at?: string | null
           looking_for?: string | null
+          match_period_start?: string
+          matches_used_this_period?: number
           onboarded?: boolean
           onboarding_step?: number
           payment_status?: string
@@ -538,6 +542,8 @@ export type Database = {
           is_admin_created?: boolean
           last_active_at?: string | null
           looking_for?: string | null
+          match_period_start?: string
+          matches_used_this_period?: number
           onboarded?: boolean
           onboarding_step?: number
           payment_status?: string
@@ -741,6 +747,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_match_usage: {
+        Args: never
+        Returns: {
+          limit: number
+          period_start: string
+          plan: string
+          used: number
+        }[]
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -753,6 +768,8 @@ export type Database = {
         Returns: boolean
       }
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
+      match_limit_for_plan: { Args: { _plan: string }; Returns: number }
+      refresh_match_period: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
