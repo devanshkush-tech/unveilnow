@@ -340,6 +340,10 @@ const Admin = () => {
             <AdminPayments />
           </TabsContent>
 
+          <TabsContent value="payment-history">
+            <AdminPaymentHistory />
+          </TabsContent>
+
           <TabsContent value="tickets">
             <AdminTickets />
           </TabsContent>
