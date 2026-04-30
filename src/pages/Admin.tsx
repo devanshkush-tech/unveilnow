@@ -465,6 +465,9 @@ const Admin = () => {
                   <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-2">
+                  <Button variant="soft" size="sm" className="rounded-full col-span-2" onClick={() => setImpersonateId(detail.profile.id)}>
+                    <EyeOff className="h-4 w-4" /> Login as user (read-only)
+                  </Button>
                   <Button variant="outline" size="sm" className="rounded-full" onClick={() => resetPassword(detail.profile.id)}>
                     <KeyRound className="h-4 w-4" /> Reset password
                   </Button>
