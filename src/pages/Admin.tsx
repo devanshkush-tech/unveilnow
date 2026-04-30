@@ -247,6 +247,7 @@ const Admin = () => {
                 </div>
                 <Button variant="hero" className="rounded-full" onClick={loadUsers}><Filter className="h-4 w-4" /> Apply</Button>
                 <Button variant="soft" className="rounded-full" onClick={exportUsers}><Download className="h-4 w-4" /> Export CSV</Button>
+                <AdminCreateProfile onCreated={loadUsers} />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
                 <select value={gender} onChange={(e) => setGender(e.target.value)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
@@ -331,6 +332,10 @@ const Admin = () => {
                 </table>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <AdminPayments />
           </TabsContent>
 
           <TabsContent value="tickets">
