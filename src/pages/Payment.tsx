@@ -133,7 +133,7 @@ const Payment = () => {
         <section className="text-center max-w-2xl mx-auto animate-fade-up">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">One last step</p>
           <h1 className="font-display text-3xl md:text-5xl leading-tight">Activate your Unveil membership.</h1>
-          <p className="text-muted-foreground mt-3">Choose a plan, pay via UPI, and share the screenshot. We verify each member personally to keep the community real.</p>
+          <p className="text-muted-foreground mt-3">Likes are always unlimited. Pick a plan that matches how many <em>matches</em> you want each month.</p>
         </section>
 
         {/* Plan picker */}
