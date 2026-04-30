@@ -310,6 +310,54 @@ export type Database = {
           },
         ]
       }
+      payment_submissions: {
+        Row: {
+          admin_notes: string | null
+          amount_label: string | null
+          created_at: string
+          id: string
+          phone: string | null
+          plan: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          upi_reference: string | null
+          user_id: string
+          whatsapp_sent_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_label?: string | null
+          created_at?: string
+          id?: string
+          phone?: string | null
+          plan: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          upi_reference?: string | null
+          user_id: string
+          whatsapp_sent_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_label?: string | null
+          created_at?: string
+          id?: string
+          phone?: string | null
+          plan?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          upi_reference?: string | null
+          user_id?: string
+          whatsapp_sent_at?: string | null
+        }
+        Relationships: []
+      }
       profile_interests: {
         Row: {
           interest: string
@@ -402,6 +450,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           age: number | null
           age_max: number | null
           age_min: number | null
@@ -412,15 +461,20 @@ export type Database = {
           distance_km: number | null
           first_name: string | null
           gender: string | null
+          grandfathered: boolean
           id: string
           intent: string | null
           interested_in: string | null
+          is_admin_created: boolean
           last_active_at: string | null
           looking_for: string | null
           onboarded: boolean
           onboarding_step: number
+          payment_status: string
+          phone: string | null
           plan: string
           profession: string | null
+          selected_plan: string | null
           story: string | null
           suspended: boolean
           updated_at: string
@@ -431,6 +485,7 @@ export type Database = {
           voice_intro_path: string | null
         }
         Insert: {
+          account_status?: string
           age?: number | null
           age_max?: number | null
           age_min?: number | null
@@ -441,15 +496,20 @@ export type Database = {
           distance_km?: number | null
           first_name?: string | null
           gender?: string | null
+          grandfathered?: boolean
           id: string
           intent?: string | null
           interested_in?: string | null
+          is_admin_created?: boolean
           last_active_at?: string | null
           looking_for?: string | null
           onboarded?: boolean
           onboarding_step?: number
+          payment_status?: string
+          phone?: string | null
           plan?: string
           profession?: string | null
+          selected_plan?: string | null
           story?: string | null
           suspended?: boolean
           updated_at?: string
@@ -460,6 +520,7 @@ export type Database = {
           voice_intro_path?: string | null
         }
         Update: {
+          account_status?: string
           age?: number | null
           age_max?: number | null
           age_min?: number | null
@@ -470,15 +531,20 @@ export type Database = {
           distance_km?: number | null
           first_name?: string | null
           gender?: string | null
+          grandfathered?: boolean
           id?: string
           intent?: string | null
           interested_in?: string | null
+          is_admin_created?: boolean
           last_active_at?: string | null
           looking_for?: string | null
           onboarded?: boolean
           onboarding_step?: number
+          payment_status?: string
+          phone?: string | null
           plan?: string
           profession?: string | null
+          selected_plan?: string | null
           story?: string | null
           suspended?: boolean
           updated_at?: string
@@ -686,6 +752,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_active: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

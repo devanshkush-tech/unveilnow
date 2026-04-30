@@ -279,6 +279,165 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ---------- PAYMENTS ----------
+    if (action === 'list_payments') {
+      const { status, search: q } = await req.json().catch(() => ({}));
+      let query = admin.from('payment_submissions').select('*').order('created_at', { ascending: false }).limit(500);
+      if (status) query = query.eq('status', status);
+      const { data: subs, error } = await query;
+      if (error) return json({ error: error.message }, 500);
+
+      // Enrich with profile + email
+      const ids = Array.from(new Set((subs ?? []).map((s: any) => s.user_id)));
+      const profilesMap = new Map<string, any>();
+      if (ids.length) {
+        const { data: profs } = await admin.from('profiles')
+          .select('id, first_name, account_status, payment_status, selected_plan, phone, is_admin_created, plan')
+          .in('id', ids);
+        for (const p of profs ?? []) profilesMap.set(p.id, p);
+      }
+      const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const emails = new Map<string, string>();
+      for (const u of authPage?.users ?? []) emails.set(u.id, u.email ?? '');
+
+      let rows = (subs ?? []).map((s: any) => ({
+        ...s,
+        name: profilesMap.get(s.user_id)?.first_name ?? '',
+        email: emails.get(s.user_id) ?? '',
+        account_status: profilesMap.get(s.user_id)?.account_status ?? 'locked',
+        is_admin_created: !!profilesMap.get(s.user_id)?.is_admin_created,
+      }));
+
+      if (q && q.trim()) {
+        const term = q.trim().toLowerCase();
+        rows = rows.filter((r: any) =>
+          (r.name ?? '').toLowerCase().includes(term)
+          || (r.email ?? '').toLowerCase().includes(term)
+          || (r.phone ?? '').toLowerCase().includes(term)
+          || (r.upi_reference ?? '').toLowerCase().includes(term)
+        );
+      }
+      return json({ payments: rows });
+    }
+
+    if (action === 'update_payment_status') {
+      const { id, status, admin_notes } = await req.json();
+      if (!id || !['approved', 'rejected', 'pending'].includes(status)) return json({ error: 'Invalid input' }, 400);
+
+      const { data: sub, error: subErr } = await admin.from('payment_submissions').select('*').eq('id', id).maybeSingle();
+      if (subErr || !sub) return json({ error: 'Payment not found' }, 404);
+
+      const patch: any = { status, reviewed_at: new Date().toISOString(), reviewed_by: auth.adminId };
+      if (typeof admin_notes === 'string') patch.admin_notes = admin_notes;
+      const { error: upErr } = await admin.from('payment_submissions').update(patch).eq('id', id);
+      if (upErr) return json({ error: upErr.message }, 500);
+
+      // Mirror to profile
+      const profPatch: any = { payment_status: status };
+      if (status === 'approved') {
+        profPatch.account_status = 'active';
+        profPatch.plan = sub.plan;
+        profPatch.selected_plan = sub.plan;
+      } else if (status === 'rejected') {
+        profPatch.account_status = 'locked';
+      }
+      await admin.from('profiles').update(profPatch).eq('id', sub.user_id);
+      return json({ ok: true });
+    }
+
+    if (action === 'assign_plan') {
+      const { user_id, plan } = await req.json();
+      if (!user_id || !plan) return json({ error: 'user_id and plan required' }, 400);
+      const { error } = await admin.from('profiles').update({ plan, selected_plan: plan }).eq('id', user_id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'set_account_status') {
+      const { user_id, account_status } = await req.json();
+      if (!user_id || !['locked', 'active'].includes(account_status)) return json({ error: 'Invalid' }, 400);
+      const { error } = await admin.from('profiles').update({ account_status }).eq('id', user_id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    // ---------- CREATE PROFILE (admin) ----------
+    if (action === 'create_admin_profile') {
+      const { email, password, first_name, age, gender, city, looking_for, story, plan } = await req.json();
+      if (!email || !password || !first_name) return json({ error: 'email, password, first_name required' }, 400);
+
+      // Create auth user (auto-confirmed)
+      const { data: created, error: cErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { first_name },
+      });
+      if (cErr || !created?.user) return json({ error: cErr?.message ?? 'Could not create user' }, 500);
+
+      const newId = created.user.id;
+      // Profile row is auto-inserted by handle_new_user trigger; update it.
+      await admin.from('profiles').update({
+        first_name,
+        age: age ?? null,
+        gender: gender ?? null,
+        city: city ?? null,
+        looking_for: looking_for ?? null,
+        story: story ?? null,
+        is_admin_created: true,
+        onboarded: true,
+        account_status: 'active',
+        payment_status: 'approved',
+        plan: plan ?? 'starter',
+        selected_plan: plan ?? 'starter',
+      }).eq('id', newId);
+
+      return json({ ok: true, user_id: newId });
+    }
+
+    // ---------- IMPERSONATE (read-only) ----------
+    // Returns a short-lived signed read token + lightweight snapshot of the user's view.
+    if (action === 'impersonate_view') {
+      const { user_id } = await req.json();
+      if (!user_id) return json({ error: 'user_id required' }, 400);
+
+      const [{ data: profile }, { data: matchesRows }, { data: photos }] = await Promise.all([
+        admin.from('profiles').select('*').eq('id', user_id).maybeSingle(),
+        admin.from('matches').select('*').or(`user_a.eq.${user_id},user_b.eq.${user_id}`).order('created_at', { ascending: false }),
+        admin.from('profile_photos').select('storage_path, position').eq('user_id', user_id).order('position'),
+      ]);
+
+      // Pull other-side profile snippets + last messages per match
+      const otherIds = (matchesRows ?? []).map((m: any) => m.user_a === user_id ? m.user_b : m.user_a);
+      const profMap = new Map<string, any>();
+      if (otherIds.length) {
+        const { data: profs } = await admin.from('profiles').select('id, first_name, age, city').in('id', otherIds);
+        for (const p of profs ?? []) profMap.set(p.id, p);
+      }
+
+      const matches: any[] = [];
+      for (const m of matchesRows ?? []) {
+        const otherId = m.user_a === user_id ? m.user_b : m.user_a;
+        const { data: msgs } = await admin
+          .from('messages').select('id, body, sender_id, created_at')
+          .eq('match_id', m.id).order('created_at', { ascending: true }).limit(50);
+        matches.push({
+          id: m.id,
+          other: profMap.get(otherId) ?? { id: otherId },
+          messages: msgs ?? [],
+          created_at: m.created_at,
+        });
+      }
+
+      let photo_urls: string[] = [];
+      for (const p of photos ?? []) {
+        const { data } = await admin.storage.from('photos').createSignedUrl(p.storage_path, 600);
+        if (data?.signedUrl) photo_urls.push(data.signedUrl);
+      }
+
+      return json({ profile, matches, photo_urls });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);

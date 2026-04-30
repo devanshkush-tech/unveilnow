@@ -3,11 +3,25 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-export const RequireAuth = ({ children, requireOnboarded = true }: { children: ReactNode; requireOnboarded?: boolean }) => {
+type Gate = {
+  onboarded: boolean;
+  account_status: string;
+  payment_status: string;
+};
+
+export const RequireAuth = ({
+  children,
+  requireOnboarded = true,
+  requireActive = true,
+}: {
+  children: ReactNode;
+  requireOnboarded?: boolean;
+  requireActive?: boolean;
+}) => {
   const { session, loading } = useAuth();
   const location = useLocation();
   const [checking, setChecking] = useState(true);
-  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+  const [gate, setGate] = useState<Gate | null>(null);
 
   useEffect(() => {
     if (!session?.user) { setChecking(false); return; }
@@ -15,11 +29,15 @@ export const RequireAuth = ({ children, requireOnboarded = true }: { children: R
     (async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("onboarded")
+        .select("onboarded, account_status, payment_status")
         .eq("id", session.user.id)
         .maybeSingle();
       if (!cancelled) {
-        setOnboarded(!!data?.onboarded);
+        setGate({
+          onboarded: !!data?.onboarded,
+          account_status: data?.account_status ?? "locked",
+          payment_status: data?.payment_status ?? "none",
+        });
         setChecking(false);
       }
     })();
@@ -35,7 +53,13 @@ export const RequireAuth = ({ children, requireOnboarded = true }: { children: R
   }
 
   if (!session) return <Navigate to="/login" state={{ from: location }} replace />;
-  if (requireOnboarded && onboarded === false) return <Navigate to="/onboarding" replace />;
+  if (requireOnboarded && gate && !gate.onboarded) return <Navigate to="/onboarding" replace />;
+
+  if (requireActive && gate && gate.account_status !== "active") {
+    // Locked: route them to the right place
+    if (gate.payment_status === "pending") return <Navigate to="/payment/review" replace />;
+    return <Navigate to="/payment" replace />;
+  }
 
   return <>{children}</>;
 };

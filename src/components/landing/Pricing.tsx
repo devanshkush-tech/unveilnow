@@ -1,11 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuth } from "@/hooks/useAuth";
-import { isPaymentsConfigured } from "@/lib/stripe";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "sonner";
 
 type Plan = {
   name: string;
@@ -57,26 +53,25 @@ export const plans: Plan[] = [
   },
 ];
 
+// Map landing-page priceIds to manual payment plan ids
+const planIdMap: Record<string, string> = {
+  starter_monthly: "starter",
+  premium_monthly: "premium",
+  elite_monthly: "elite",
+};
+
 export const Pricing = ({ compact = false }: { compact?: boolean }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
 
   const handleChoose = (plan: Plan) => {
+    const planId = planIdMap[plan.priceId] ?? "premium";
     if (!user) {
-      navigate(`/signup?plan=${plan.priceId}`);
+      navigate(`/signup?plan=${planId}`);
       return;
     }
-    if (!isPaymentsConfigured()) {
-      toast.info("Payments coming online shortly. We'll notify you when this plan goes live.");
-      return;
-    }
-    openCheckout({
-      priceId: plan.priceId,
-      customerEmail: user.email ?? undefined,
-      userId: user.id,
-      returnUrl: `${window.location.origin}/dashboard/profile?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    });
+    // Signed-in users go straight to the manual payment flow.
+    navigate(`/payment?plan=${planId}`);
   };
 
   return (
@@ -132,15 +127,6 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
           ))}
         </div>
       </div>
-
-      <Dialog open={isOpen} onOpenChange={(v) => !v && closeCheckout()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="font-display text-2xl">Complete your subscription</DialogTitle>
-          </DialogHeader>
-          <div className="px-2 pb-4">{checkoutElement}</div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 };

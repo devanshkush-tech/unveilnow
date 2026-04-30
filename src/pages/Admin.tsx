@@ -24,12 +24,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users, Heart, Eye, Activity, CheckCircle, Sparkles, Loader2, ArrowLeft,
   LogOut, ShieldCheck, Download, Search, Filter, BadgeCheck, Ban, Trash2,
-  KeyRound, MessageCircle, IndianRupee,
+  KeyRound, MessageCircle, IndianRupee, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAuth, type AdminUser } from "@/lib/adminAuth";
 import AdminTickets from "@/components/admin/AdminTickets";
 import AdminChemistry from "@/components/admin/AdminChemistry";
+import AdminPayments from "@/components/admin/AdminPayments";
+import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
+import AdminImpersonate from "@/components/admin/AdminImpersonate";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
@@ -77,6 +80,9 @@ const Admin = () => {
 
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState<UserRow | null>(null);
+
+  // Impersonate
+  const [impersonateId, setImpersonateId] = useState<string | null>(null);
 
   useEffect(() => {
     setAdmin(adminAuth.getAdmin());
@@ -226,6 +232,7 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
+            <TabsTrigger value="payments" className="rounded-full px-5">Payments</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
@@ -240,6 +247,7 @@ const Admin = () => {
                 </div>
                 <Button variant="hero" className="rounded-full" onClick={loadUsers}><Filter className="h-4 w-4" /> Apply</Button>
                 <Button variant="soft" className="rounded-full" onClick={exportUsers}><Download className="h-4 w-4" /> Export CSV</Button>
+                <AdminCreateProfile onCreated={loadUsers} />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">
                 <select value={gender} onChange={(e) => setGender(e.target.value)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
@@ -324,6 +332,10 @@ const Admin = () => {
                 </table>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <AdminPayments />
           </TabsContent>
 
           <TabsContent value="tickets">
@@ -453,6 +465,9 @@ const Admin = () => {
                   <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 pt-2">
+                  <Button variant="soft" size="sm" className="rounded-full col-span-2" onClick={() => setImpersonateId(detail.profile.id)}>
+                    <EyeOff className="h-4 w-4" /> Login as user (read-only)
+                  </Button>
                   <Button variant="outline" size="sm" className="rounded-full" onClick={() => resetPassword(detail.profile.id)}>
                     <KeyRound className="h-4 w-4" /> Reset password
                   </Button>
@@ -491,6 +506,12 @@ const Admin = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AdminImpersonate
+        userId={impersonateId}
+        open={!!impersonateId}
+        onOpenChange={(v) => !v && setImpersonateId(null)}
+      />
     </div>
   );
 };

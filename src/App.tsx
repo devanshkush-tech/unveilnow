@@ -17,6 +17,8 @@ import Terms from "./pages/Terms.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import Contact from "./pages/Contact.tsx";
 import RefundPolicy from "./pages/RefundPolicy.tsx";
+import Payment from "./pages/Payment.tsx";
+import PaymentReview from "./pages/PaymentReview.tsx";
 import Admin from "./pages/Admin.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import { RequireAdmin } from "./components/auth/RequireAdmin";
@@ -57,6 +59,22 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route
+              path="/payment"
+              element={
+                <RequireAuth requireOnboarded={true} requireActive={false}>
+                  <Payment />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/payment/review"
+              element={
+                <RequireAuth requireOnboarded={true} requireActive={false}>
+                  <PaymentReview />
+                </RequireAuth>
+              }
+            />
             <Route path="/admin" element={<Navigate to="/admindashboard" replace />} />
             <Route path="/admindashboard/login" element={<AdminLogin />} />
             <Route path="/admindashboard" element={<RequireAdmin><Admin /></RequireAdmin>} />
