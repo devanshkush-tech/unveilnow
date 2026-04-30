@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_PLANS, PaymentPlanId, UPI_ID, WHATSAPP_URL } from "@/lib/payment";
+import { trackMetaEvent } from "@/lib/metaCapi";
 import upiQr from "@/assets/upi-qr.jpeg";
 
 type Profile = {

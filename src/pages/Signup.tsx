@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { trackMetaEvent } from "@/lib/metaCapi";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -40,6 +41,12 @@ const Signup = () => {
         toast.error(error.message);
         return;
       }
+      // Fire CompleteRegistration on successful signup (server hashes the email)
+      trackMetaEvent("CompleteRegistration", {
+        event_id: `signup_${data.user?.id ?? email}`,
+        email,
+        custom_data: { content_name: "Signup", status: "submitted" },
+      });
       // If session is returned, email confirmation is disabled — go straight to onboarding
       if (data.session) {
         toast.success("Welcome to Unveil. Let's set up your profile.");

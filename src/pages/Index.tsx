@@ -8,6 +8,7 @@ import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { useEffect } from "react";
+import { trackMetaEvent } from "@/lib/metaCapi";
 
 const Index = () => {
   useEffect(() => {
@@ -21,6 +22,10 @@ const Index = () => {
       m.content = content;
       document.head.appendChild(m);
     }
+    trackMetaEvent("ViewContent", {
+      event_id: `view_landing_${Date.now()}`,
+      custom_data: { content_name: "Landing", content_category: "marketing" },
+    });
   }, []);
 
   return (
