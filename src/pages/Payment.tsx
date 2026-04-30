@@ -66,6 +66,7 @@ const Payment = () => {
           content_type: "subscription",
         },
       });
+    })();
     return () => { cancelled = true; };
   }, [user, loading, navigate]);
 
