@@ -31,6 +31,7 @@ import { adminAuth, type AdminUser } from "@/lib/adminAuth";
 import AdminTickets from "@/components/admin/AdminTickets";
 import AdminChemistry from "@/components/admin/AdminChemistry";
 import AdminPayments from "@/components/admin/AdminPayments";
+import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
 
@@ -233,6 +234,7 @@ const Admin = () => {
           <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
             <TabsTrigger value="payments" className="rounded-full px-5">Payments</TabsTrigger>
+            <TabsTrigger value="payment-history" className="rounded-full px-5">Payment history</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
@@ -336,6 +338,10 @@ const Admin = () => {
 
           <TabsContent value="payments">
             <AdminPayments />
+          </TabsContent>
+
+          <TabsContent value="payment-history">
+            <AdminPaymentHistory />
           </TabsContent>
 
           <TabsContent value="tickets">

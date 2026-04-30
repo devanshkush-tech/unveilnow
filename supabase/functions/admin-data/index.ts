@@ -363,10 +363,9 @@ Deno.serve(async (req) => {
 
     // ---------- CREATE PROFILE (admin) ----------
     if (action === 'create_admin_profile') {
-      const { email, password, first_name, age, gender, city, looking_for, story, plan } = await req.json();
+      const { email, password, first_name, age, gender, city, looking_for, story, plan, prompts, interests } = await req.json();
       if (!email || !password || !first_name) return json({ error: 'email, password, first_name required' }, 400);
 
-      // Create auth user (auto-confirmed)
       const { data: created, error: cErr } = await admin.auth.admin.createUser({
         email,
         password,
@@ -376,7 +375,6 @@ Deno.serve(async (req) => {
       if (cErr || !created?.user) return json({ error: cErr?.message ?? 'Could not create user' }, 500);
 
       const newId = created.user.id;
-      // Profile row is auto-inserted by handle_new_user trigger; update it.
       await admin.from('profiles').update({
         first_name,
         age: age ?? null,
@@ -392,7 +390,66 @@ Deno.serve(async (req) => {
         selected_plan: plan ?? 'starter',
       }).eq('id', newId);
 
+      const promptRows = (prompts ?? [])
+        .filter((p: any) => p && p.question && p.answer)
+        .map((p: any, i: number) => ({ user_id: newId, question: String(p.question), answer: String(p.answer), position: i }));
+      if (promptRows.length) await admin.from('profile_prompts').insert(promptRows);
+
+      const interestRows = (interests ?? [])
+        .filter((i: any) => typeof i === 'string' && i.trim())
+        .map((i: string) => ({ user_id: newId, interest: i.trim() }));
+      if (interestRows.length) await admin.from('profile_interests').insert(interestRows);
+
       return json({ ok: true, user_id: newId });
+    }
+
+    // ---------- PAYMENT HISTORY ----------
+    if (action === 'payment_history') {
+      const { search: q, status, plan, dateFrom, dateTo } = await req.json().catch(() => ({}));
+      let query = admin.from('payment_submissions').select('*').order('created_at', { ascending: false }).limit(1000);
+      if (status) query = query.eq('status', status);
+      if (plan) query = query.eq('plan', plan);
+      if (dateFrom) query = query.gte('created_at', dateFrom);
+      if (dateTo) query = query.lte('created_at', dateTo);
+      const { data: subs, error } = await query;
+      if (error) return json({ error: error.message }, 500);
+
+      const ids = Array.from(new Set((subs ?? []).map((s: any) => s.user_id)));
+      const profilesMap = new Map<string, any>();
+      if (ids.length) {
+        const { data: profs } = await admin.from('profiles')
+          .select('id, first_name, account_status, payment_status, phone, is_admin_created')
+          .in('id', ids);
+        for (const p of profs ?? []) profilesMap.set(p.id, p);
+      }
+      const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const emails = new Map<string, string>();
+      for (const u of authPage?.users ?? []) emails.set(u.id, u.email ?? '');
+
+      let rows = (subs ?? []).map((s: any) => ({
+        ...s,
+        name: profilesMap.get(s.user_id)?.first_name ?? '',
+        email: emails.get(s.user_id) ?? '',
+        account_status: profilesMap.get(s.user_id)?.account_status ?? 'locked',
+      }));
+
+      if (q && q.trim()) {
+        const term = q.trim().toLowerCase();
+        rows = rows.filter((r: any) =>
+          (r.name ?? '').toLowerCase().includes(term)
+          || (r.email ?? '').toLowerCase().includes(term)
+          || (r.phone ?? '').toLowerCase().includes(term)
+          || (r.upi_reference ?? '').toLowerCase().includes(term)
+        );
+      }
+
+      const totals = {
+        total: rows.length,
+        approved: rows.filter((r: any) => r.status === 'approved').length,
+        rejected: rows.filter((r: any) => r.status === 'rejected').length,
+        pending: rows.filter((r: any) => r.status === 'pending').length,
+      };
+      return json({ payments: rows, totals });
     }
 
     // ---------- IMPERSONATE (read-only) ----------
