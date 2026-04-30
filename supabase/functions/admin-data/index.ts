@@ -1,6 +1,13 @@
 // Admin data API: list users with filters, get user detail, suspend/ban/delete/verify/reset, xlsx export.
 // All requests must include x-admin-token (validated against admin_sessions). Service role only on the server.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { sendMetaEvent } from '../_shared/meta-capi.ts';
+
+const PLAN_PRICE_INR: Record<string, number> = {
+  starter: 299,
+  premium: 499,
+  elite: 999,
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -342,6 +349,29 @@ Deno.serve(async (req) => {
         profPatch.account_status = 'locked';
       }
       await admin.from('profiles').update(profPatch).eq('id', sub.user_id);
+
+      // Fire Meta CAPI Purchase event ONCE per approval (only when transitioning to approved).
+      if (status === 'approved' && sub.status !== 'approved') {
+        try {
+          const value = PLAN_PRICE_INR[sub.plan] ?? 0;
+          const { data: userResp } = await admin.auth.admin.getUserById(sub.user_id);
+          const email = userResp?.user?.email ?? null;
+          await sendMetaEvent({
+            event_name: 'Purchase',
+            event_id: `purchase_${sub.id}`,
+            action_source: 'system_generated',
+            user: { email, phone: sub.phone, external_id: sub.user_id },
+            custom_data: {
+              currency: 'INR',
+              value,
+              content_name: sub.plan,
+              content_type: 'subscription',
+            },
+          });
+        } catch (e) {
+          console.error('[admin-data] Meta Purchase send failed', e);
+        }
+      }
       return json({ ok: true });
     }
 
