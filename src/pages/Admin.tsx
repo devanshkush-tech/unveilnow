@@ -24,12 +24,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users, Heart, Eye, Activity, CheckCircle, Sparkles, Loader2, ArrowLeft,
   LogOut, ShieldCheck, Download, Search, Filter, BadgeCheck, Ban, Trash2,
-  KeyRound, MessageCircle, IndianRupee,
+  KeyRound, MessageCircle, IndianRupee, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import { adminAuth, type AdminUser } from "@/lib/adminAuth";
 import AdminTickets from "@/components/admin/AdminTickets";
 import AdminChemistry from "@/components/admin/AdminChemistry";
+import AdminPayments from "@/components/admin/AdminPayments";
+import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
+import AdminImpersonate from "@/components/admin/AdminImpersonate";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
@@ -77,6 +80,9 @@ const Admin = () => {
 
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState<UserRow | null>(null);
+
+  // Impersonate
+  const [impersonateId, setImpersonateId] = useState<string | null>(null);
 
   useEffect(() => {
     setAdmin(adminAuth.getAdmin());
@@ -226,6 +232,7 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
+            <TabsTrigger value="payments" className="rounded-full px-5">Payments</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
