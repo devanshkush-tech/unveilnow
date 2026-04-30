@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/dating/EmptyState";
+import { MatchUsageBanner } from "@/components/dating/MatchUsageBanner";
 
 type MatchRow = {
   id: string;
@@ -122,10 +123,12 @@ const Matches = () => {
 
   return (
     <div className="container max-w-3xl py-6 md:py-10">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="font-display text-3xl md:text-4xl">Connections</h1>
         <p className="text-muted-foreground mt-1">Meaningful interest. The good part.</p>
       </div>
+
+      <div className="mb-6"><MatchUsageBanner /></div>
 
       <Tabs defaultValue="incoming" className="space-y-6">
         <TabsList className="rounded-full p-1 h-12 bg-secondary">

@@ -50,8 +50,8 @@ const DashboardLayout = () => {
           ))}
         </nav>
         <div className="mt-auto p-4 rounded-2xl bg-gradient-romance text-primary-foreground">
-          <p className="font-display text-lg leading-snug">Upgrade to Premium</p>
-          <p className="text-xs opacity-80 mt-1 mb-3">Unlimited likes & better filters.</p>
+          <p className="font-display text-lg leading-snug">More matches?</p>
+          <p className="text-xs opacity-80 mt-1 mb-3">Likes are unlimited. Upgrade for more monthly matches.</p>
           <Link to="/pricing" className="inline-block text-xs font-medium px-3 py-1.5 rounded-full bg-background text-foreground">
             See plans
           </Link>

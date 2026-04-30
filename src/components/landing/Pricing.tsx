@@ -20,7 +20,12 @@ export const plans: Plan[] = [
     period: "/month",
     tag: "Get going",
     priceId: "starter_monthly",
-    features: ["5 thoughtful matches a day", "Unlimited prompts", "Voice intros", "Basic filters"],
+    features: [
+      "Up to 5 matches / month",
+      "Unlimited likes & requests",
+      "Standard profile visibility",
+      "Voice intros & prompts",
+    ],
   },
   {
     name: "Premium",
@@ -30,10 +35,10 @@ export const plans: Plan[] = [
     highlighted: true,
     priceId: "premium_monthly",
     features: [
-      "Unlimited likes",
-      "Better filters",
+      "Up to 10 matches / month",
+      "Unlimited likes & requests",
+      "2× profile visibility",
       "Priority matching",
-      "Read receipts",
       "See who liked you",
     ],
   },
@@ -44,11 +49,11 @@ export const plans: Plan[] = [
     tag: "Hand-picked",
     priceId: "elite_monthly",
     features: [
-      "Everything in Premium",
+      "Unlimited matches",
+      "Unlimited likes & requests",
+      "4× profile visibility",
       "Verified Elite badge",
       "Concierge support",
-      "Exclusive events",
-      "Profile review",
     ],
   },
 ];
