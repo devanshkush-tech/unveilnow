@@ -48,10 +48,24 @@ const Payment = () => {
       if (data.account_status === "active") { navigate("/dashboard", { replace: true }); return; }
       if (data.payment_status === "pending") { navigate("/payment/review", { replace: true }); return; }
       setProfile(data as any);
+      const initialPlan = (data.selected_plan as PaymentPlanId) || "premium";
       if (data.selected_plan) setPlan(data.selected_plan as PaymentPlanId);
       if (data.phone) setPhone(data.phone);
       setHydrating(false);
-    })();
+      // Fire InitiateCheckout once user lands on the payment screen
+      const planMeta = PAYMENT_PLANS.find((p) => p.id === initialPlan);
+      const value = parseInt((planMeta?.price ?? "0").replace(/\D/g, ""), 10) || 0;
+      trackMetaEvent("InitiateCheckout", {
+        event_id: `checkout_${user.id}`,
+        phone: data.phone,
+        custom_data: {
+          currency: "INR",
+          value,
+          content_name: planMeta?.name ?? initialPlan,
+          content_ids: [initialPlan],
+          content_type: "subscription",
+        },
+      });
     return () => { cancelled = true; };
   }, [user, loading, navigate]);
 
