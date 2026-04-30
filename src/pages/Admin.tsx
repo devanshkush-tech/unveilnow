@@ -506,6 +506,12 @@ const Admin = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AdminImpersonate
+        userId={impersonateId}
+        open={!!impersonateId}
+        onOpenChange={(v) => !v && setImpersonateId(null)}
+      />
     </div>
   );
 };
