@@ -10,21 +10,33 @@ export const PAYMENT_PLANS: { id: PaymentPlanId; name: string; price: string; ta
     name: "Starter",
     price: "₹299",
     tag: "Get going",
-    perks: ["5 thoughtful matches a day", "Unlimited prompts", "Voice intros"],
+    perks: [
+      "Up to 5 matches / month",
+      "Unlimited likes & requests",
+      "Standard profile visibility",
+    ],
   },
   {
     id: "premium",
     name: "Premium",
     price: "₹499",
     tag: "Most loved",
-    perks: ["Unlimited likes", "Priority matching", "See who liked you"],
+    perks: [
+      "Up to 10 matches / month",
+      "Unlimited likes & requests",
+      "2× profile visibility",
+    ],
   },
   {
     id: "elite",
     name: "Elite Verified",
     price: "₹999",
     tag: "Hand-picked",
-    perks: ["Verified Elite badge", "Concierge support", "Exclusive events"],
+    perks: [
+      "Unlimited matches",
+      "Unlimited likes & requests",
+      "4× profile visibility · Verified badge",
+    ],
   },
 ];
 
