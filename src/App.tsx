@@ -48,7 +48,7 @@ const App = () => (
             <Route
               path="/onboarding"
               element={
-                <RequireAuth requireOnboarded={false}>
+                <RequireAuth requireOnboarded={false} requireActive={false}>
                   <Onboarding />
                 </RequireAuth>
               }
