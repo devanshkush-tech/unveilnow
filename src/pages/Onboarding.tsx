@@ -286,9 +286,10 @@ const Onboarding = () => {
         .eq("id", user.id);
       if (pErr) throw pErr;
 
-      toast.success(editMode ? "Profile updated." : "Welcome to a better way to date.");
-      // Use replace so the Back button doesn't return to onboarding mid-flow.
-      navigate(editMode ? "/dashboard/profile" : "/dashboard", { replace: true });
+      toast.success(editMode ? "Profile updated." : "Almost there — one last step.");
+      // After onboarding, send new users to the payment flow.
+      // Existing/grandfathered users editing their profile go back to profile.
+      navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Could not save profile.");
