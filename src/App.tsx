@@ -29,6 +29,7 @@ import Chats from "./pages/dashboard/Chats.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -38,9 +39,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <PaymentTestModeBanner />
-          <Routes>
+        <ErrorBoundary>
+          <AuthProvider>
+            <PaymentTestModeBanner />
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
@@ -94,8 +96,9 @@ const App = () => (
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
+            </Routes>
+          </AuthProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
