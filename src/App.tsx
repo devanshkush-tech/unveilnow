@@ -29,6 +29,7 @@ import Chats from "./pages/dashboard/Chats.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -38,9 +39,10 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <PaymentTestModeBanner />
-          <Routes>
+        <ErrorBoundary>
+          <AuthProvider>
+            <PaymentTestModeBanner />
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
