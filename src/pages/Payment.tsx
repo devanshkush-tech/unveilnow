@@ -37,35 +37,53 @@ const Payment = () => {
     if (!user) { navigate("/login"); return; }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, selected_plan, payment_status, account_status, phone")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      if (!data) { navigate("/onboarding"); return; }
-      // Already approved → straight to dashboard
-      if (data.account_status === "active") { navigate("/dashboard", { replace: true }); return; }
-      if (data.payment_status === "pending") { navigate("/payment/review", { replace: true }); return; }
-      setProfile(data as any);
-      const initialPlan = (data.selected_plan as PaymentPlanId) || "premium";
-      if (data.selected_plan) setPlan(data.selected_plan as PaymentPlanId);
-      if (data.phone) setPhone(data.phone);
-      setHydrating(false);
-      // Fire InitiateCheckout once user lands on the payment screen
-      const planMeta = PAYMENT_PLANS.find((p) => p.id === initialPlan);
-      const value = parseInt((planMeta?.price ?? "0").replace(/\D/g, ""), 10) || 0;
-      trackMetaEvent("InitiateCheckout", {
-        event_id: `checkout_${user.id}`,
-        phone: data.phone,
-        custom_data: {
-          currency: "INR",
-          value,
-          content_name: planMeta?.name ?? initialPlan,
-          content_ids: [initialPlan],
-          content_type: "subscription",
-        },
-      });
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, selected_plan, payment_status, account_status, phone")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (cancelled) return;
+        if (error) {
+          console.error("[payment] profile fetch error", error);
+          toast.error("Couldn't load your profile. Please refresh.");
+          setHydrating(false);
+          return;
+        }
+        if (!data) { navigate("/onboarding", { replace: true }); return; }
+        // Already approved → straight to dashboard
+        if (data.account_status === "active") { navigate("/dashboard", { replace: true }); return; }
+        if (data.payment_status === "pending") { navigate("/payment/review", { replace: true }); return; }
+        setProfile(data as any);
+        const initialPlan = (data.selected_plan as PaymentPlanId) || "premium";
+        if (data.selected_plan) setPlan(data.selected_plan as PaymentPlanId);
+        if (data.phone) setPhone(data.phone);
+        setHydrating(false);
+        // Fire InitiateCheckout — fully isolated, never breaks UX
+        try {
+          const planMeta = PAYMENT_PLANS.find((p) => p.id === initialPlan);
+          const value = parseInt((planMeta?.price ?? "0").replace(/\D/g, ""), 10) || 0;
+          void trackMetaEvent("InitiateCheckout", {
+            event_id: `checkout_${user.id}`,
+            phone: data.phone,
+            custom_data: {
+              currency: "INR",
+              value,
+              content_name: planMeta?.name ?? initialPlan,
+              content_ids: [initialPlan],
+              content_type: "subscription",
+            },
+          });
+        } catch (e) {
+          console.warn("[payment] tracking failed (ignored)", e);
+        }
+      } catch (e) {
+        console.error("[payment] hydrate failed", e);
+        if (!cancelled) {
+          toast.error("Something went wrong. Please refresh.");
+          setHydrating(false);
+        }
+      }
     })();
     return () => { cancelled = true; };
   }, [user, loading, navigate]);
