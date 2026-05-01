@@ -41,8 +41,8 @@ const Signup = () => {
         toast.error(error.message);
         return;
       }
-      // Fire CompleteRegistration on successful signup (server hashes the email)
-      trackMetaEvent("CompleteRegistration", {
+      // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)
+      void trackMetaEvent("CompleteRegistration", {
         event_id: `signup_${data.user?.id ?? email}`,
         email,
         custom_data: { content_name: "Signup", status: "submitted" },
