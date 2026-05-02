@@ -177,8 +177,8 @@ const Signup = () => {
           <Checkbox id="terms" checked={accepted} onCheckedChange={(v) => setAccepted(!!v)} className="mt-0.5" />
           <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
             I agree to Unveil's{" "}
-            <a href="#" className="text-foreground underline underline-offset-2">community guidelines</a> and{" "}
-            <a href="#" className="text-foreground underline underline-offset-2">privacy policy</a>.
+            <Link to="/terms" className="text-foreground underline underline-offset-2">community guidelines</Link> and{" "}
+            <Link to="/privacy" className="text-foreground underline underline-offset-2">privacy policy</Link>.
           </label>
         </div>
 

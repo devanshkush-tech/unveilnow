@@ -17,10 +17,22 @@ export const Footer = () => {
               Looks later. Vibes first. Meaningful dating for people who value connection over appearances.
             </p>
             <div className="flex gap-3 pt-2">
-              <a href="#" className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors">
+              <a
+                href="https://instagram.com/unveilnow"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors"
+              >
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors">
+              <a
+                href="https://twitter.com/unveilnow"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors"
+              >
                 <Twitter className="h-4 w-4" />
               </a>
             </div>
@@ -38,9 +50,7 @@ export const Footer = () => {
           <div>
             <h4 className="font-display text-base mb-4">Company</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground">About</a></li>
-              <li><a href="#" className="hover:text-foreground">Stories</a></li>
-              <li><a href="#" className="hover:text-foreground">Careers</a></li>
+              <li><Link to="/trust" className="hover:text-foreground">About</Link></li>
               <li><Link to="/contact" className="hover:text-foreground">Contact Us</Link></li>
             </ul>
           </div>
