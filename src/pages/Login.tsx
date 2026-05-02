@@ -56,7 +56,7 @@ const Login = () => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <Label htmlFor="password">Password</Label>
-            <a href="#" className="text-xs text-muted-foreground hover:text-foreground">Forgot?</a>
+            <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">Forgot?</Link>
           </div>
           <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 rounded-xl" placeholder="••••••••" />
         </div>
