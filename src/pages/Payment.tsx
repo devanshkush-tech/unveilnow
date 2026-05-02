@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Check, ArrowRight, Copy, MessageCircle, ShieldCheck } from "lucide-react";
@@ -6,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { PAYMENT_PLANS, PaymentPlanId, UPI_ID, WHATSAPP_URL } from "@/lib/payment";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import upiQr from "@/assets/upi-qr.jpeg";
@@ -20,8 +21,9 @@ type Profile = {
 };
 
 const Payment = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // ✅ ONLY ONCE
   const navigate = useNavigate();
+
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hydrating, setHydrating] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -32,10 +34,22 @@ const Payment = () => {
     document.title = "Choose your plan · Unveil";
   }, []);
 
+  // ✅ AUTH GUARD (VERY IMPORTANT)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
   useEffect(() => {
-    if (loading) return;
-    if (!user) { navigate("/login"); return; }
     let cancelled = false;
+
     (async () => {
       try {
         const { data, error } = await supabase
@@ -43,26 +57,59 @@ const Payment = () => {
           .select("id, selected_plan, payment_status, account_status, phone")
           .eq("id", user.id)
           .maybeSingle();
+
         if (cancelled) return;
+
         if (error) {
           console.error("[payment] profile fetch error", error);
           toast.error("Couldn't load your profile. Please refresh.");
           setHydrating(false);
           return;
         }
-        if (!data) { navigate("/onboarding", { replace: true }); return; }
-        // Already approved → straight to dashboard
-        if (data.account_status === "active") { navigate("/dashboard", { replace: true }); return; }
-        if (data.payment_status === "pending") { navigate("/payment/review", { replace: true }); return; }
+
+        if (!data) {
+          navigate("/onboarding", { replace: true });
+          return;
+        }
+
+        // ✅ Redirect logic
+        if (data.account_status === "active") {
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+
+        if (data.payment_status === "pending") {
+          navigate("/payment/review", { replace: true });
+          return;
+        }
+
         setProfile(data as any);
-        const initialPlan = (data.selected_plan as PaymentPlanId) || "premium";
-        if (data.selected_plan) setPlan(data.selected_plan as PaymentPlanId);
-        if (data.phone) setPhone(data.phone);
+
+        const initialPlan =
+          (data.selected_plan as PaymentPlanId) || "premium";
+
+        if (data.selected_plan) {
+          setPlan(data.selected_plan as PaymentPlanId);
+        }
+
+        if (data.phone) {
+          setPhone(data.phone);
+        }
+
         setHydrating(false);
-        // Fire InitiateCheckout — fully isolated, never breaks UX
+
+        // ✅ Safe Meta Event (non-blocking)
         try {
-          const planMeta = PAYMENT_PLANS.find((p) => p.id === initialPlan);
-          const value = parseInt((planMeta?.price ?? "0").replace(/\D/g, ""), 10) || 0;
+          const planMeta = PAYMENT_PLANS.find(
+            (p) => p.id === initialPlan
+          );
+
+          const value =
+            parseInt(
+              (planMeta?.price ?? "0").replace(/\D/g, ""),
+              10
+            ) || 0;
+
           void trackMetaEvent("InitiateCheckout", {
             event_id: `checkout_${user.id}`,
             phone: data.phone,
@@ -75,19 +122,20 @@ const Payment = () => {
             },
           });
         } catch (e) {
-          console.warn("[payment] tracking failed (ignored)", e);
+          console.warn("Meta event failed", e);
         }
-      } catch (e) {
-        console.error("[payment] hydrate failed", e);
-        if (!cancelled) {
-          toast.error("Something went wrong. Please refresh.");
-          setHydrating(false);
-        }
+
+      } catch (err) {
+        console.error(err);
+        toast.error("Something went wrong.");
+        setHydrating(false);
       }
     })();
-    return () => { cancelled = true; };
-  }, [user, loading, navigate]);
 
+    return () => {
+      cancelled = true;
+    };
+  
   const selected = useMemo(() => PAYMENT_PLANS.find((p) => p.id === plan)!, [plan]);
 
   const copyUpi = async () => {
@@ -129,7 +177,7 @@ const Payment = () => {
     }
   };
 
-  if (loading || hydrating) {
+ if (authLoading || hydrating) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   }
 
