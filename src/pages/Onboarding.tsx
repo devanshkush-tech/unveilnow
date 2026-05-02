@@ -14,9 +14,24 @@ const stepLabels = ["Basics", "Preferences", "Prompts", "Story", "Voice", "Photo
 const TOTAL_STEPS = stepLabels.length;
 
 const interestOptions = [
-  "Travel", "Books", "Fitness", "Music", "Food", "Entrepreneurship",
-  "Films", "Art", "Yoga", "Tech", "Photography", "Writing", "Coffee",
-  "Hiking", "Cooking", "Theatre", "Spirituality", "Startups",
+  "Travel",
+  "Books",
+  "Fitness",
+  "Music",
+  "Food",
+  "Entrepreneurship",
+  "Films",
+  "Art",
+  "Yoga",
+  "Tech",
+  "Photography",
+  "Writing",
+  "Coffee",
+  "Hiking",
+  "Cooking",
+  "Theatre",
+  "Spirituality",
+  "Startups",
 ];
 
 const intents = [
@@ -81,7 +96,11 @@ const Onboarding = () => {
       const [{ data: prof }, { data: lib }, { data: prompts }, { data: ints }, { data: pics }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("prompts_library").select("id, text, category").eq("active", true).order("position"),
-        supabase.from("profile_prompts").select("id, question, answer, position").eq("user_id", user.id).order("position"),
+        supabase
+          .from("profile_prompts")
+          .select("id, question, answer, position")
+          .eq("user_id", user.id)
+          .order("position"),
         supabase.from("profile_interests").select("interest").eq("user_id", user.id),
         supabase.from("profile_photos").select("id, storage_path, position").eq("user_id", user.id).order("position"),
       ]);
@@ -136,8 +155,16 @@ const Onboarding = () => {
     if (!user) return;
     const updates: Partial<{
       onboarding_step: number;
-      first_name: string; age: number | null; gender: string; city: string; profession: string;
-      looking_for: string; age_min: number; age_max: number; distance_km: number; intent: string;
+      first_name: string;
+      age: number | null;
+      gender: string;
+      city: string;
+      profession: string;
+      looking_for: string;
+      age_min: number;
+      age_max: number;
+      distance_km: number;
+      intent: string;
       story: string;
     }> = { onboarding_step: nextStep };
 
@@ -180,9 +207,9 @@ const Onboarding = () => {
       // Save interests too (we expose interests on prompts step block)
       await supabase.from("profile_interests").delete().eq("user_id", user.id);
       if (selectedInterests.length) {
-        await supabase.from("profile_interests").insert(
-          selectedInterests.map((interest) => ({ user_id: user.id, interest })),
-        );
+        await supabase
+          .from("profile_interests")
+          .insert(selectedInterests.map((interest) => ({ user_id: user.id, interest })));
       }
     }
   };
@@ -257,43 +284,67 @@ const Onboarding = () => {
 
   const finish = async () => {
     if (!user) return;
+
     setSaving(true);
+
     try {
-      // Upload new photos in parallel
+      // Upload new photos
       const baseIdx = existingPhotos.length;
+
       const uploaded = await Promise.all(
         photos.map(async ({ file }, i) => {
           const ext = file.name.split(".").pop() ?? "jpg";
           const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+
           const { error: upErr } = await supabase.storage.from("photos").upload(path, file, {
             cacheControl: "3600",
             upsert: false,
           });
+
           if (upErr) throw upErr;
-          return { storage_path: path, position: baseIdx + i };
+
+          return {
+            storage_path: path,
+            position: baseIdx + i,
+          };
         }),
       );
+
+      // Save uploaded photos
       if (uploaded.length) {
         const { error: insErr } = await supabase
           .from("profile_photos")
           .insert(uploaded.map((u) => ({ user_id: user.id, ...u })));
+
         if (insErr) throw insErr;
       }
 
+      // Mark onboarding complete
       const { error: pErr } = await supabase
         .from("profiles")
-        .update({ onboarded: true, onboarding_step: TOTAL_STEPS - 1 })
+        .update({
+          onboarded: true,
+          onboarding_step: TOTAL_STEPS - 1,
+        })
         .eq("id", user.id);
+
       if (pErr) throw pErr;
 
-      toast.success(editMode ? "Profile updated." : "Almost there — one last step.");
-      // After onboarding, send new users to the payment flow.
-      // Existing/grandfathered users editing their profile go back to profile.
-      navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
+      // ✅ SUCCESS
+      toast.success(editMode ? "Profile updated." : "Profile created successfully!");
+
+      // ✅ STOP LOADING BEFORE NAVIGATION
+      setSaving(false);
+
+      // ✅ SAFE NAVIGATION (prevents white screen)
+      setTimeout(() => {
+        navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
+      }, 500);
     } catch (err) {
       console.error(err);
+
       toast.error(err instanceof Error ? err.message : "Could not save profile.");
-    } finally {
+
       setSaving(false);
     }
   };
@@ -337,7 +388,9 @@ const Onboarding = () => {
             </div>
             <span className="font-display text-lg">Unveil</span>
           </Link>
-          <div className="text-xs text-muted-foreground">Step {step + 1} of {TOTAL_STEPS}</div>
+          <div className="text-xs text-muted-foreground">
+            Step {step + 1} of {TOTAL_STEPS}
+          </div>
         </div>
         <div className="container max-w-3xl pb-3">
           <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
@@ -360,16 +413,54 @@ const Onboarding = () => {
               <h1 className="font-display text-4xl md:text-5xl mb-3">Tell us about you.</h1>
               <p className="text-muted-foreground mb-10">Just the basics. We'll get to the good stuff next.</p>
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="First name"><Input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="h-11 rounded-xl" placeholder="Aanya" /></Field>
-                <Field label="Age"><Input value={age} onChange={(e) => setAge(e.target.value)} className="h-11 rounded-xl" type="number" min={18} max={99} placeholder="28" /></Field>
+                <Field label="First name">
+                  <Input
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="h-11 rounded-xl"
+                    placeholder="Aanya"
+                  />
+                </Field>
+                <Field label="Age">
+                  <Input
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="h-11 rounded-xl"
+                    type="number"
+                    min={18}
+                    max={99}
+                    placeholder="28"
+                  />
+                </Field>
                 <Field label="Gender">
-                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm">
-                    <option>Woman</option><option>Man</option><option>Non-binary</option><option>Prefer not to say</option>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm"
+                  >
+                    <option>Woman</option>
+                    <option>Man</option>
+                    <option>Non-binary</option>
+                    <option>Prefer not to say</option>
                   </select>
                 </Field>
-                <Field label="City"><Input value={city} onChange={(e) => setCity(e.target.value)} className="h-11 rounded-xl" placeholder="Bengaluru" /></Field>
+                <Field label="City">
+                  <Input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="h-11 rounded-xl"
+                    placeholder="Bengaluru"
+                  />
+                </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Occupation"><Input value={profession} onChange={(e) => setProfession(e.target.value)} className="h-11 rounded-xl" placeholder="Product designer at Acme" /></Field>
+                  <Field label="Occupation">
+                    <Input
+                      value={profession}
+                      onChange={(e) => setProfession(e.target.value)}
+                      className="h-11 rounded-xl"
+                      placeholder="Product designer at Acme"
+                    />
+                  </Field>
                 </div>
               </div>
             </>
@@ -389,7 +480,9 @@ const Onboarding = () => {
                         type="button"
                         onClick={() => setLookingFor(o)}
                         className={`px-4 py-2 rounded-full text-sm border transition-all ${
-                          lookingFor === o ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-background border-border hover:border-accent/60"
+                          lookingFor === o
+                            ? "bg-primary text-primary-foreground border-primary shadow-soft"
+                            : "bg-background border-border hover:border-accent/60"
                         }`}
                       >
                         {o}
@@ -399,13 +492,36 @@ const Onboarding = () => {
                 </Field>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Field label="Age range"><div className="flex items-center gap-3">
-                    <Input value={ageMin} onChange={(e) => setAgeMin(e.target.value)} type="number" min={18} max={99} className="h-11 rounded-xl" />
-                    <span className="text-muted-foreground">to</span>
-                    <Input value={ageMax} onChange={(e) => setAgeMax(e.target.value)} type="number" min={18} max={99} className="h-11 rounded-xl" />
-                  </div></Field>
+                  <Field label="Age range">
+                    <div className="flex items-center gap-3">
+                      <Input
+                        value={ageMin}
+                        onChange={(e) => setAgeMin(e.target.value)}
+                        type="number"
+                        min={18}
+                        max={99}
+                        className="h-11 rounded-xl"
+                      />
+                      <span className="text-muted-foreground">to</span>
+                      <Input
+                        value={ageMax}
+                        onChange={(e) => setAgeMax(e.target.value)}
+                        type="number"
+                        min={18}
+                        max={99}
+                        className="h-11 rounded-xl"
+                      />
+                    </div>
+                  </Field>
                   <Field label="Distance preference (km)">
-                    <Input value={distanceKm} onChange={(e) => setDistanceKm(e.target.value)} type="number" min={1} max={5000} className="h-11 rounded-xl" />
+                    <Input
+                      value={distanceKm}
+                      onChange={(e) => setDistanceKm(e.target.value)}
+                      type="number"
+                      min={1}
+                      max={5000}
+                      className="h-11 rounded-xl"
+                    />
                   </Field>
                 </div>
 
@@ -419,11 +535,15 @@ const Onboarding = () => {
                           type="button"
                           onClick={() => setIntent(i.id)}
                           className={`w-full text-left p-5 rounded-2xl border transition-all ${
-                            active ? "bg-card border-primary shadow-elegant" : "bg-card border-border hover:border-accent/60"
+                            active
+                              ? "bg-card border-primary shadow-elegant"
+                              : "bg-card border-border hover:border-accent/60"
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`}>
+                            <div
+                              className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`}
+                            >
                               {active && <Check className="h-3 w-3 text-primary-foreground" />}
                             </div>
                             <div>
@@ -443,7 +563,9 @@ const Onboarding = () => {
           {step === 2 && (
             <>
               <h1 className="font-display text-4xl md:text-5xl mb-3">Choose 5 prompts.</h1>
-              <p className="text-muted-foreground mb-6">These are how people first meet you. Pick the 5 that feel most you.</p>
+              <p className="text-muted-foreground mb-6">
+                These are how people first meet you. Pick the 5 that feel most you.
+              </p>
               <p className="text-sm text-primary font-medium mb-6">{picked.length}/5 chosen</p>
 
               <div className="grid sm:grid-cols-2 gap-2 mb-10">
@@ -480,9 +602,7 @@ const Onboarding = () => {
                       <Textarea
                         value={p.answer}
                         onChange={(e) =>
-                          setPicked((prev) =>
-                            prev.map((x, idx) => (idx === i ? { ...x, answer: e.target.value } : x)),
-                          )
+                          setPicked((prev) => prev.map((x, idx) => (idx === i ? { ...x, answer: e.target.value } : x)))
                         }
                         placeholder="A few honest sentences…"
                         className="rounded-2xl min-h-[88px] resize-none"
@@ -504,7 +624,9 @@ const Onboarding = () => {
                         type="button"
                         onClick={() => toggleInterest(i)}
                         className={`px-4 py-2 rounded-full text-sm border transition-all ${
-                          active ? "bg-primary text-primary-foreground border-primary shadow-soft" : "bg-background border-border hover:border-accent/60"
+                          active
+                            ? "bg-primary text-primary-foreground border-primary shadow-soft"
+                            : "bg-background border-border hover:border-accent/60"
                         }`}
                       >
                         {active && <Check className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />}
@@ -520,7 +642,9 @@ const Onboarding = () => {
           {step === 3 && (
             <>
               <h1 className="font-display text-4xl md:text-5xl mb-3">My story.</h1>
-              <p className="text-muted-foreground mb-10">Read me before you judge me. Tell people who you are, what shaped you, and what you're looking for.</p>
+              <p className="text-muted-foreground mb-10">
+                Read me before you judge me. Tell people who you are, what shaped you, and what you're looking for.
+              </p>
               <Textarea
                 value={story}
                 onChange={(e) => setStory(e.target.value)}
@@ -535,7 +659,9 @@ const Onboarding = () => {
           {step === 4 && (
             <>
               <h1 className="font-display text-4xl md:text-5xl mb-3">Your voice.</h1>
-              <p className="text-muted-foreground mb-10">Optional. Let people hear your vibe before seeing your face.</p>
+              <p className="text-muted-foreground mb-10">
+                Optional. Let people hear your vibe before seeing your face.
+              </p>
               <VoiceRecorder
                 existingPath={voicePath}
                 onUploaded={async (path) => {
@@ -559,12 +685,21 @@ const Onboarding = () => {
           {step === 5 && (
             <>
               <h1 className="font-display text-4xl md:text-5xl mb-3">Photos. Hidden by default.</h1>
-              <p className="text-muted-foreground mb-10">Upload up to 6. They stay private until you and a match both choose to unveil.</p>
+              <p className="text-muted-foreground mb-10">
+                Upload up to 6. They stay private until you and a match both choose to unveil.
+              </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {existingPhotos.map((p) => (
-                  <div key={p.id} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-border bg-secondary/40 flex items-center justify-center">
+                  <div
+                    key={p.id}
+                    className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-border bg-secondary/40 flex items-center justify-center"
+                  >
                     <EyeOff className="h-6 w-6 text-muted-foreground" />
-                    <button onClick={() => removeExistingPhoto(p.id, p.storage_path)} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/90 flex items-center justify-center shadow-soft" aria-label="Remove photo">
+                    <button
+                      onClick={() => removeExistingPhoto(p.id, p.storage_path)}
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/90 flex items-center justify-center shadow-soft"
+                      aria-label="Remove photo"
+                    >
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -572,7 +707,11 @@ const Onboarding = () => {
                 {photos.map((p, i) => (
                   <div key={i} className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-border">
                     <img src={p.preview} alt="upload" className="w-full h-full object-cover" />
-                    <button onClick={() => removeNewPhoto(i)} className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/90 flex items-center justify-center shadow-soft" aria-label="Remove photo">
+                    <button
+                      onClick={() => removeNewPhoto(i)}
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/90 flex items-center justify-center shadow-soft"
+                      aria-label="Remove photo"
+                    >
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -601,9 +740,13 @@ const Onboarding = () => {
           </Button>
           <Button variant="hero" onClick={next} disabled={saving} className="rounded-full">
             {saving ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+              </>
             ) : (
-              <>{step === TOTAL_STEPS - 1 ? "Finish" : "Continue"} <ArrowRight className="h-4 w-4" /></>
+              <>
+                {step === TOTAL_STEPS - 1 ? "Finish" : "Continue"} <ArrowRight className="h-4 w-4" />
+              </>
             )}
           </Button>
         </div>
