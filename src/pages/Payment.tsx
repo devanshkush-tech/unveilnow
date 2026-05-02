@@ -135,7 +135,8 @@ const Payment = () => {
     return () => {
       cancelled = true;
     };
-  
+  }, [user, navigate]);
+
   const selected = useMemo(() => PAYMENT_PLANS.find((p) => p.id === plan)!, [plan]);
 
   const copyUpi = async () => {
