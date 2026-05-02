@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { Navigate, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +49,7 @@ const Onboarding = () => {
   const { user, loading: authLoading } = useAuth();
   const [searchParams] = useSearchParams();
   const editMode = searchParams.get("edit") === "1";
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
   const [step, setStep] = useState(0);
   const [hydrating, setHydrating] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,7 +89,7 @@ const Onboarding = () => {
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      navigate("/login");
+      setHydrating(false);
       return;
     }
     let cancelled = false;
@@ -123,7 +124,14 @@ const Onboarding = () => {
         const savedStep = Math.min(Math.max(prof.onboarding_step ?? 0, 0), TOTAL_STEPS - 1);
         setStep(savedStep);
         if (prof.onboarded && !editMode) {
-          navigate("/dashboard");
+          const destination =
+            prof.account_status === "active"
+              ? "/dashboard"
+              : prof.payment_status === "pending"
+                ? "/payment/review"
+                : "/payment";
+          setRedirectTo(destination);
+          setHydrating(false);
           return;
         }
       }
@@ -149,7 +157,7 @@ const Onboarding = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, editMode]);
 
   const persistStep = async (nextStep: number) => {
     if (!user) return;
@@ -370,7 +378,15 @@ const Onboarding = () => {
 
   const back = () => step > 0 && setStep((s) => s - 1);
 
-  if (hydrating) {
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (redirectTo) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  if (authLoading || hydrating) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
