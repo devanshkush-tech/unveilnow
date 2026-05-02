@@ -35,7 +35,11 @@ const Payment = () => {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (authLoading) return;
+    if (!user) {
+      setHydrating(false);
+      return;
+    }
     let cancelled = false;
 
     (async () => {
@@ -123,7 +127,7 @@ const Payment = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const selected = useMemo(() => PAYMENT_PLANS.find((p) => p.id === plan)!, [plan]);
 
