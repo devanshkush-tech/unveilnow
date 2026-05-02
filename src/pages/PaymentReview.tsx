@@ -40,7 +40,7 @@ const PaymentReview = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate("/login"); return; }
+    if (!user) { setHydrating(false); navigate("/login", { replace: true }); return; }
     refresh();
     // Realtime: listen for profile changes (e.g. admin approves)
     const channel = supabase
