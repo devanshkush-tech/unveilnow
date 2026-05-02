@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound.tsx";
 import Signup from "./pages/Signup.tsx";
 import Login from "./pages/Login.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import PricingPage from "./pages/PricingPage.tsx";
 import Trust from "./pages/Trust.tsx";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/onboarding"
