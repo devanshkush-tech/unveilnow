@@ -63,6 +63,10 @@ export const Hero = () => {
                 className="w-full h-full object-cover"
                 width={1600}
                 height={1024}
+                loading="eager"
+                decoding="async"
+                // @ts-expect-error - fetchpriority is a valid HTML attribute
+                fetchpriority="high"
               />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
             </div>
