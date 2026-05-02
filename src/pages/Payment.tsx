@@ -34,20 +34,8 @@ const Payment = () => {
     document.title = "Choose your plan · Unveil";
   }, []);
 
-  // ✅ AUTH GUARD (VERY IMPORTANT)
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
   useEffect(() => {
+    if (!user) return;
     let cancelled = false;
 
     (async () => {
