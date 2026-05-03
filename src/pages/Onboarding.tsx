@@ -338,16 +338,11 @@ const Onboarding = () => {
 
       if (pErr) throw pErr;
 
-      // ✅ SUCCESS
       toast.success(editMode ? "Profile updated." : "Profile created successfully!");
 
-      // ✅ STOP LOADING BEFORE NAVIGATION
-      setSaving(false);
-
-      // ✅ SAFE NAVIGATION (prevents white screen)
-      setTimeout(() => {
-        navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
-      }, 500);
+      // Navigate immediately. RequireAuth refetches the profile gate on
+      // route change so /payment will see onboarded=true on first paint.
+      navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
     } catch (err) {
       console.error(err);
 
