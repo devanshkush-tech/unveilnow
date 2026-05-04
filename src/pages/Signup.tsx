@@ -3,13 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink } from "lucide-react";
+import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { trackMetaEvent } from "@/lib/metaCapi";
+
+const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code and digits
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ const Signup = () => {
   const [resending, setResending] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
 
