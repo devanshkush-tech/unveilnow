@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.mark_lead_completed_on_profile() FROM PUBLIC, anon, authenticated;
