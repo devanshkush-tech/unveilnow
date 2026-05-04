@@ -376,9 +376,28 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'assign_plan') {
-      const { user_id, plan } = await req.json();
+      const { user_id, plan, plan_started_at, plan_expires_at, duration_days } = await req.json();
       if (!user_id || !plan) return json({ error: 'user_id and plan required' }, 400);
-      const { error } = await admin.from('profiles').update({ plan, selected_plan: plan }).eq('id', user_id);
+      const patch: Record<string, unknown> = { plan, selected_plan: plan };
+
+      // Resolve start date (defaults to now when not provided)
+      let startISO: string | null = null;
+      if (plan_started_at) startISO = new Date(plan_started_at).toISOString();
+      else startISO = new Date().toISOString();
+      patch.plan_started_at = startISO;
+
+      // Resolve expiry: explicit date wins, else duration_days from start, else null (no expiry)
+      if (plan_expires_at) {
+        patch.plan_expires_at = new Date(plan_expires_at).toISOString();
+      } else if (duration_days && Number.isFinite(Number(duration_days))) {
+        const start = new Date(startISO);
+        start.setDate(start.getDate() + Number(duration_days));
+        patch.plan_expires_at = start.toISOString();
+      } else {
+        patch.plan_expires_at = null;
+      }
+
+      const { error } = await admin.from('profiles').update(patch).eq('id', user_id);
       if (error) return json({ error: error.message }, 500);
       return json({ ok: true });
     }
