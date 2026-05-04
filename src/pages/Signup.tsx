@@ -31,6 +31,11 @@ const Signup = () => {
       toast.error("Please accept the community guidelines.");
       return;
     }
+    const trimmedPhone = phone.trim().replace(/\s+/g, "");
+    if (!PHONE_REGEX.test(trimmedPhone)) {
+      toast.error("Enter a valid phone number with country code (e.g. +911234567890).");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -38,12 +43,16 @@ const Signup = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
-          data: { first_name: firstName },
+          data: { first_name: firstName, phone: trimmedPhone },
         },
       });
       if (error) {
         toast.error(error.message);
         return;
+      }
+      // Persist phone on the profile (handle_new_user trigger creates the row).
+      if (data.user?.id) {
+        await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", data.user.id);
       }
       // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)
       void trackMetaEvent("CompleteRegistration", {
