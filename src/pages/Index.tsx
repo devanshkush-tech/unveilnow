@@ -7,6 +7,7 @@ import { Testimonials } from "@/components/landing/Testimonials";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
+import { FloatingSignupCTA } from "@/components/landing/FloatingSignupCTA";
 import { useEffect } from "react";
 import { trackMetaEvent } from "@/lib/metaCapi";
 
@@ -41,6 +42,7 @@ const Index = () => {
         <FinalCTA />
       </main>
       <Footer />
+      <FloatingSignupCTA />
     </div>
   );
 };

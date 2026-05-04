@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -150,7 +151,7 @@ const Settings = () => {
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="newpw">New password</Label>
-            <Input id="newpw" type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="h-11 rounded-xl" />
+            <PasswordInput id="newpw" value={newPw} onChange={(e) => setNewPw(e.target.value)} className="h-11 rounded-xl" />
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setPwOpen(false)}>Cancel</Button>

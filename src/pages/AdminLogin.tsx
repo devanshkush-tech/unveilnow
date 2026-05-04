@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ShieldCheck, Loader2 } from "lucide-react";
@@ -66,7 +67,7 @@ const AdminLogin = () => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
+            <PasswordInput id="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 rounded-xl" />
           </div>
           <Button type="submit" variant="hero" size="lg" className="w-full h-12 rounded-full" disabled={loading}>
             {loading ? "Signing in…" : "Sign in to admin"}

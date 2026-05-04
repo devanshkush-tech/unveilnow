@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +39,7 @@ const ResetPassword = () => {
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="pw">New password</Label>
-          <Input id="pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 rounded-xl" />
+          <PasswordInput id="pw" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 rounded-xl" />
         </div>
         <Button type="submit" variant="hero" size="lg" className="w-full h-12 rounded-full" disabled={loading || !ready}>
           {loading ? "Saving…" : ready ? "Update password" : "Verifying link…"}

@@ -44,7 +44,8 @@ type Metrics = {
 type UserRow = {
   id: string; name: string; email: string; gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
-  plan: string; utm_source: string; utm_campaign: string; device: string;
+  plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
+  utm_source: string; utm_campaign: string; device: string;
   verified: string; suspended: string; banned: string;
 };
 
@@ -158,6 +159,25 @@ const Admin = () => {
       toast.success("User deleted.");
       setConfirmDelete(null); setDetailId(null);
       loadUsers();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const assignPlan = async (
+    id: string,
+    plan: string,
+    plan_started_at?: string | null,
+    plan_expires_at?: string | null,
+  ) => {
+    try {
+      await adminAuth.call("assign_plan", {
+        user_id: id,
+        plan,
+        plan_started_at: plan_started_at || undefined,
+        plan_expires_at: plan_expires_at || undefined,
+      });
+      toast.success("Plan updated.");
+      loadUsers();
+      if (detailId === id) openDetail(id);
     } catch (e: any) { toast.error(e.message); }
   };
 
@@ -281,7 +301,7 @@ const Admin = () => {
 
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[1100px]">
+                <table className="w-full text-sm min-w-[1300px]">
                   <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="text-left px-4 py-3">Name</th>
@@ -293,15 +313,17 @@ const Admin = () => {
                       <th className="text-left px-4 py-3">Joined</th>
                       <th className="text-left px-4 py-3">Last active</th>
                       <th className="text-left px-4 py-3">Plan</th>
+                      <th className="text-left px-4 py-3">Plan expiry</th>
+                      <th className="text-left px-4 py-3">Days left</th>
                       <th className="text-left px-4 py-3">Source</th>
                       <th className="text-left px-4 py-3">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {usersLoading ? (
-                      <tr><td colSpan={11} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
+                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
-                      <tr><td colSpan={11} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
+                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
                     ) : users.map((u) => (
                       <tr key={u.id} onClick={() => openDetail(u.id)} className="border-t border-border/60 hover:bg-secondary/30 transition-colors cursor-pointer">
                         <td className="px-4 py-3">
@@ -318,6 +340,13 @@ const Admin = () => {
                         <td className="px-4 py-3 text-muted-foreground">{u.signup_date ? new Date(u.signup_date).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.last_active ? new Date(u.last_active).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 capitalize">{u.plan}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{u.plan_expires_at ? new Date(u.plan_expires_at).toLocaleDateString() : "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{(() => {
+                          if (!u.plan_expires_at) return "—";
+                          const days = Math.ceil((new Date(u.plan_expires_at).getTime() - Date.now()) / 86400000);
+                          if (days <= 0) return <span className="text-destructive">Expired</span>;
+                          return `${days}d`;
+                        })()}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.utm_source || "direct"}</td>
                         <td className="px-4 py-3">
                           {u.banned === "Yes" ? (
@@ -460,6 +489,8 @@ const Admin = () => {
                 )}
               </Section>
 
+              <PlanControl profile={detail.profile} onSave={assignPlan} />
+
               {/* Actions */}
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -536,4 +567,102 @@ const Stat = ({ label, value }: { label: string; value: any }) => (
   </div>
 );
 
+
+const toDateInput = (iso?: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  // Format as yyyy-mm-dd in local time
+  const tz = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - tz).toISOString().slice(0, 10);
+};
+
+const PLAN_OPTIONS = ["free", "starter", "premium", "elite"] as const;
+
+const PlanControl = ({
+  profile,
+  onSave,
+}: {
+  profile: any;
+  onSave: (id: string, plan: string, started?: string | null, expires?: string | null) => void;
+}) => {
+  const [plan, setPlan] = useState<string>(profile?.plan ?? "free");
+  const [startedAt, setStartedAt] = useState<string>(toDateInput(profile?.plan_started_at) || toDateInput(new Date().toISOString()));
+  const [expiresAt, setExpiresAt] = useState<string>(toDateInput(profile?.plan_expires_at));
+
+  // Re-sync when a different user is loaded
+  useEffect(() => {
+    setPlan(profile?.plan ?? "free");
+    setStartedAt(toDateInput(profile?.plan_started_at) || toDateInput(new Date().toISOString()));
+    setExpiresAt(toDateInput(profile?.plan_expires_at));
+  }, [profile?.id]);
+
+  const daysRemaining = (() => {
+    if (!expiresAt) return null;
+    const ms = new Date(expiresAt + "T23:59:59").getTime() - Date.now();
+    return Math.ceil(ms / (1000 * 60 * 60 * 24));
+  })();
+
+  const setQuickDuration = (days: number) => {
+    const start = startedAt ? new Date(startedAt) : new Date();
+    const end = new Date(start);
+    end.setDate(end.getDate() + days);
+    setExpiresAt(toDateInput(end.toISOString()));
+  };
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Plan & expiry</p>
+        <span className="text-[11px] text-muted-foreground capitalize">Current: {profile?.plan ?? "free"}</span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="col-span-2">
+          <Label className="text-xs">Plan</Label>
+          <select
+            value={plan}
+            onChange={(e) => setPlan(e.target.value)}
+            className="mt-1 h-10 w-full rounded-xl border border-border/60 bg-background px-3 text-sm capitalize"
+          >
+            {PLAN_OPTIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label className="text-xs">Start date</Label>
+          <Input type="date" value={startedAt} onChange={(e) => setStartedAt(e.target.value)} className="mt-1 h-10 rounded-xl" />
+        </div>
+        <div>
+          <Label className="text-xs">Expiry date</Label>
+          <Input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className="mt-1 h-10 rounded-xl" />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5">
+        <Button type="button" size="sm" variant="outline" className="rounded-full h-7 text-xs" onClick={() => setQuickDuration(30)}>+30d</Button>
+        <Button type="button" size="sm" variant="outline" className="rounded-full h-7 text-xs" onClick={() => setQuickDuration(90)}>+90d</Button>
+        <Button type="button" size="sm" variant="outline" className="rounded-full h-7 text-xs" onClick={() => setQuickDuration(365)}>+1y</Button>
+        <Button type="button" size="sm" variant="ghost" className="rounded-full h-7 text-xs" onClick={() => setExpiresAt("")}>No expiry</Button>
+      </div>
+
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">Days remaining</span>
+        <span className={`font-medium ${daysRemaining !== null && daysRemaining <= 0 ? "text-destructive" : "text-foreground"}`}>
+          {daysRemaining === null ? "No expiry set" : daysRemaining <= 0 ? "Expired" : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`}
+        </span>
+      </div>
+
+      <Button
+        variant="hero"
+        size="sm"
+        className="w-full rounded-full"
+        onClick={() => onSave(profile.id, plan, startedAt || null, expiresAt || null)}
+      >
+        Save plan changes
+      </Button>
+    </div>
+  );
+};
+
 export default Admin;
+

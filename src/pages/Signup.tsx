@@ -3,13 +3,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink } from "lucide-react";
+import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { trackMetaEvent } from "@/lib/metaCapi";
+
+const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code and digits
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ const Signup = () => {
   const [resending, setResending] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
 
@@ -27,6 +31,11 @@ const Signup = () => {
       toast.error("Please accept the community guidelines.");
       return;
     }
+    const trimmedPhone = phone.trim().replace(/\s+/g, "");
+    if (!PHONE_REGEX.test(trimmedPhone)) {
+      toast.error("Enter a valid phone number with country code (e.g. +911234567890).");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -34,12 +43,16 @@ const Signup = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
-          data: { first_name: firstName },
+          data: { first_name: firstName, phone: trimmedPhone },
         },
       });
       if (error) {
         toast.error(error.message);
         return;
+      }
+      // Persist phone on the profile (handle_new_user trigger creates the row).
+      if (data.user?.id) {
+        await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", data.user.id);
       }
       // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)
       void trackMetaEvent("CompleteRegistration", {
@@ -169,8 +182,27 @@ const Signup = () => {
           </div>
         </div>
         <div className="space-y-2">
+          <Label htmlFor="phone">Phone number</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="phone"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 9876543210"
+              required
+              pattern="^\+[1-9]\d{7,14}$"
+              title="Include country code, e.g. +911234567890"
+              className="h-11 rounded-xl pl-10"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">Include your country code (e.g. +91 for India).</p>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required minLength={8} className="h-11 rounded-xl" />
+          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required minLength={8} className="h-11 rounded-xl" />
         </div>
 
         <div className="flex items-start gap-3 pt-2">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,7 +59,7 @@ const Login = () => {
             <Label htmlFor="password">Password</Label>
             <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline">Forgot?</Link>
           </div>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 rounded-xl" placeholder="••••••••" />
+          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 rounded-xl" placeholder="••••••••" />
         </div>
         <Button type="submit" variant="hero" className="w-full h-12 rounded-full" size="lg" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}

@@ -150,6 +150,8 @@ Deno.serve(async (req) => {
         signup_date: p.created_at ?? '',
         last_active: p.last_active_at ?? '',
         plan: p.plan ?? 'free',
+        plan_started_at: p.plan_started_at ?? '',
+        plan_expires_at: p.plan_expires_at ?? '',
         utm_source: p.utm_source ?? '',
         utm_campaign: p.utm_campaign ?? '',
         device: p.device ?? '',
@@ -345,6 +347,11 @@ Deno.serve(async (req) => {
         profPatch.account_status = 'active';
         profPatch.plan = sub.plan;
         profPatch.selected_plan = sub.plan;
+        const start = new Date();
+        const end = new Date(start);
+        end.setDate(end.getDate() + 30); // default 30-day cycle; admin can override later
+        profPatch.plan_started_at = start.toISOString();
+        profPatch.plan_expires_at = end.toISOString();
       } else if (status === 'rejected') {
         profPatch.account_status = 'locked';
       }
@@ -376,9 +383,28 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'assign_plan') {
-      const { user_id, plan } = await req.json();
+      const { user_id, plan, plan_started_at, plan_expires_at, duration_days } = await req.json();
       if (!user_id || !plan) return json({ error: 'user_id and plan required' }, 400);
-      const { error } = await admin.from('profiles').update({ plan, selected_plan: plan }).eq('id', user_id);
+      const patch: Record<string, unknown> = { plan, selected_plan: plan };
+
+      // Resolve start date (defaults to now when not provided)
+      let startISO: string | null = null;
+      if (plan_started_at) startISO = new Date(plan_started_at).toISOString();
+      else startISO = new Date().toISOString();
+      patch.plan_started_at = startISO;
+
+      // Resolve expiry: explicit date wins, else duration_days from start, else null (no expiry)
+      if (plan_expires_at) {
+        patch.plan_expires_at = new Date(plan_expires_at).toISOString();
+      } else if (duration_days && Number.isFinite(Number(duration_days))) {
+        const start = new Date(startISO);
+        start.setDate(start.getDate() + Number(duration_days));
+        patch.plan_expires_at = start.toISOString();
+      } else {
+        patch.plan_expires_at = null;
+      }
+
+      const { error } = await admin.from('profiles').update(patch).eq('id', user_id);
       if (error) return json({ error: error.message }, 500);
       return json({ ok: true });
     }
