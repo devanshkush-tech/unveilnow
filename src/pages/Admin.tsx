@@ -44,7 +44,8 @@ type Metrics = {
 type UserRow = {
   id: string; name: string; email: string; gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
-  plan: string; utm_source: string; utm_campaign: string; device: string;
+  plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
+  utm_source: string; utm_campaign: string; device: string;
   verified: string; suspended: string; banned: string;
 };
 
