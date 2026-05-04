@@ -161,6 +161,25 @@ const Admin = () => {
     } catch (e: any) { toast.error(e.message); }
   };
 
+  const assignPlan = async (
+    id: string,
+    plan: string,
+    plan_started_at?: string | null,
+    plan_expires_at?: string | null,
+  ) => {
+    try {
+      await adminAuth.call("assign_plan", {
+        user_id: id,
+        plan,
+        plan_started_at: plan_started_at || undefined,
+        plan_expires_at: plan_expires_at || undefined,
+      });
+      toast.success("Plan updated.");
+      loadUsers();
+      if (detailId === id) openDetail(id);
+    } catch (e: any) { toast.error(e.message); }
+  };
+
   const onLogout = async () => {
     await adminAuth.logout();
     navigate("/admindashboard/login", { replace: true });
