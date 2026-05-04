@@ -475,6 +475,8 @@ export type Database = {
           payment_status: string
           phone: string | null
           plan: string
+          plan_expires_at: string | null
+          plan_started_at: string | null
           profession: string | null
           selected_plan: string | null
           story: string | null
@@ -512,6 +514,8 @@ export type Database = {
           payment_status?: string
           phone?: string | null
           plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
           profession?: string | null
           selected_plan?: string | null
           story?: string | null
@@ -549,6 +553,8 @@ export type Database = {
           payment_status?: string
           phone?: string | null
           plan?: string
+          plan_expires_at?: string | null
+          plan_started_at?: string | null
           profession?: string | null
           selected_plan?: string | null
           story?: string | null
