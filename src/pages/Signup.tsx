@@ -32,6 +32,21 @@ const Signup = () => {
       return;
     }
     const trimmedPhone = phone.trim().replace(/\s+/g, "");
+    const trimmedEmail = email.trim();
+
+    // Capture lead BEFORE auth.signUp so we record every attempt — even invalid phone, weak password,
+    // already-registered emails, or users who never click the verification link.
+    void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: trimmedEmail || undefined,
+        phone: trimmedPhone || undefined,
+        first_name: firstName || undefined,
+        source: "signup_form",
+      }),
+    }).catch(() => {});
+
     if (!PHONE_REGEX.test(trimmedPhone)) {
       toast.error("Enter a valid phone number with country code (e.g. +911234567890).");
       return;
@@ -39,7 +54,7 @@ const Signup = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: trimmedEmail,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
@@ -47,6 +62,12 @@ const Signup = () => {
         },
       });
       if (error) {
+        // Record the failure on the lead so admins can see why signup didn't complete.
+        void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message }),
+        }).catch(() => {});
         toast.error(error.message);
         return;
       }
@@ -54,10 +75,22 @@ const Signup = () => {
       if (data.user?.id) {
         await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", data.user.id);
       }
+      // Mark lead as having a real auth user attached.
+      void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          auth_user_id: data.user?.id,
+          signup_completed: !!data.session,
+          email_verified: !!data.session,
+        }),
+      }).catch(() => {});
       // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)
       void trackMetaEvent("CompleteRegistration", {
-        event_id: `signup_${data.user?.id ?? email}`,
-        email,
+        event_id: `signup_${data.user?.id ?? trimmedEmail}`,
+        email: trimmedEmail,
         custom_data: { content_name: "Signup", status: "submitted" },
       });
       // If session is returned, email confirmation is disabled — go straight to onboarding
@@ -66,7 +99,7 @@ const Signup = () => {
         navigate("/onboarding");
         return;
       }
-      setSentTo(email);
+      setSentTo(trimmedEmail);
     } finally {
       setLoading(false);
     }
