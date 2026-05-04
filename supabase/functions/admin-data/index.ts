@@ -150,6 +150,8 @@ Deno.serve(async (req) => {
         signup_date: p.created_at ?? '',
         last_active: p.last_active_at ?? '',
         plan: p.plan ?? 'free',
+        plan_started_at: p.plan_started_at ?? '',
+        plan_expires_at: p.plan_expires_at ?? '',
         utm_source: p.utm_source ?? '',
         utm_campaign: p.utm_campaign ?? '',
         device: p.device ?? '',
