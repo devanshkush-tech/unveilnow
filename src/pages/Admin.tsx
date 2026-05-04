@@ -479,6 +479,8 @@ const Admin = () => {
                 )}
               </Section>
 
+              <PlanControl profile={detail.profile} onSave={assignPlan} />
+
               {/* Actions */}
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
                 <div className="flex items-center justify-between">
