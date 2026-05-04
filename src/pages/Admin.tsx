@@ -313,15 +313,17 @@ const Admin = () => {
                       <th className="text-left px-4 py-3">Joined</th>
                       <th className="text-left px-4 py-3">Last active</th>
                       <th className="text-left px-4 py-3">Plan</th>
+                      <th className="text-left px-4 py-3">Plan expiry</th>
+                      <th className="text-left px-4 py-3">Days left</th>
                       <th className="text-left px-4 py-3">Source</th>
                       <th className="text-left px-4 py-3">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {usersLoading ? (
-                      <tr><td colSpan={11} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
+                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
-                      <tr><td colSpan={11} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
+                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
                     ) : users.map((u) => (
                       <tr key={u.id} onClick={() => openDetail(u.id)} className="border-t border-border/60 hover:bg-secondary/30 transition-colors cursor-pointer">
                         <td className="px-4 py-3">
@@ -338,6 +340,13 @@ const Admin = () => {
                         <td className="px-4 py-3 text-muted-foreground">{u.signup_date ? new Date(u.signup_date).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.last_active ? new Date(u.last_active).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 capitalize">{u.plan}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{u.plan_expires_at ? new Date(u.plan_expires_at).toLocaleDateString() : "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{(() => {
+                          if (!u.plan_expires_at) return "—";
+                          const days = Math.ceil((new Date(u.plan_expires_at).getTime() - Date.now()) / 86400000);
+                          if (days <= 0) return <span className="text-destructive">Expired</span>;
+                          return `${days}d`;
+                        })()}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.utm_source || "direct"}</td>
                         <td className="px-4 py-3">
                           {u.banned === "Yes" ? (
