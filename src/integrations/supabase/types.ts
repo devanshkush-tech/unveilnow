@@ -625,6 +625,69 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_leads: {
+        Row: {
+          attempts: number
+          auth_user_id: string | null
+          created_at: string
+          email: string | null
+          email_verified_at: string | null
+          first_name: string | null
+          id: string
+          ip: string | null
+          last_error: string | null
+          phone: string | null
+          signup_attempted_at: string
+          signup_completed_at: string | null
+          source: string | null
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          attempts?: number
+          auth_user_id?: string | null
+          created_at?: string
+          email?: string | null
+          email_verified_at?: string | null
+          first_name?: string | null
+          id?: string
+          ip?: string | null
+          last_error?: string | null
+          phone?: string | null
+          signup_attempted_at?: string
+          signup_completed_at?: string | null
+          source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          attempts?: number
+          auth_user_id?: string | null
+          created_at?: string
+          email?: string | null
+          email_verified_at?: string | null
+          first_name?: string | null
+          id?: string
+          ip?: string | null
+          last_error?: string | null
+          phone?: string | null
+          signup_attempted_at?: string
+          signup_completed_at?: string | null
+          source?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
