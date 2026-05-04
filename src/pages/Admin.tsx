@@ -34,6 +34,7 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
+import AdminLeads from "@/components/admin/AdminLeads";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; verified: number; active7d: number;
@@ -253,6 +254,7 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
+            <TabsTrigger value="leads" className="rounded-full px-5">Leads</TabsTrigger>
             <TabsTrigger value="payments" className="rounded-full px-5">Payments</TabsTrigger>
             <TabsTrigger value="payment-history" className="rounded-full px-5">Payment history</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
@@ -363,6 +365,10 @@ const Admin = () => {
                 </table>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="leads">
+            <AdminLeads />
           </TabsContent>
 
           <TabsContent value="payments">

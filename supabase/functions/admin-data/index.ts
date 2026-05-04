@@ -551,6 +551,50 @@ Deno.serve(async (req) => {
       return json({ profile, matches, photo_urls });
     }
 
+    if (action === 'list_leads' || action === 'export_leads') {
+      const body = await req.clone().json().catch(() => ({}));
+      let q = admin.from('signup_leads').select('*').order('created_at', { ascending: false }).limit(action === 'export_leads' ? 5000 : 500);
+      if (body.search) {
+        const s = String(body.search).trim();
+        q = q.or(`email.ilike.%${s}%,phone.ilike.%${s}%,first_name.ilike.%${s}%`);
+      }
+      if (body.status === 'unverified') q = q.is('email_verified_at', null);
+      if (body.status === 'verified') q = q.not('email_verified_at', 'is', null);
+      if (body.status === 'incomplete') q = q.is('signup_completed_at', null);
+      if (body.status === 'completed') q = q.not('signup_completed_at', 'is', null);
+      const { data, error } = await q;
+      if (error) return json({ error: error.message }, 500);
+      const rows = (data ?? []).map((l) => ({
+        id: l.id,
+        first_name: l.first_name ?? '',
+        email: l.email ?? '',
+        phone: l.phone ?? '',
+        attempts: l.attempts ?? 1,
+        attempted_at: l.signup_attempted_at,
+        verified_at: l.email_verified_at,
+        completed_at: l.signup_completed_at,
+        auth_user_id: l.auth_user_id ?? '',
+        last_error: l.last_error ?? '',
+        source: l.source ?? '',
+        utm_source: l.utm_source ?? '',
+        ip: l.ip ?? '',
+        created_at: l.created_at,
+      }));
+      if (action === 'export_leads') {
+        const cols = ['first_name','email','phone','attempts','attempted_at','verified_at','completed_at','auth_user_id','last_error','source','utm_source','ip','created_at'];
+        const csv = toCsv(rows as any, cols);
+        return new Response(csv, { headers: { ...corsHeaders, 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="leads.csv"' } });
+      }
+      return json({ leads: rows });
+    }
+
+    if (action === 'delete_lead') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { error } = await admin.from('signup_leads').delete().eq('id', body.id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);
