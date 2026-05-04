@@ -182,8 +182,27 @@ const Signup = () => {
           </div>
         </div>
         <div className="space-y-2">
+          <Label htmlFor="phone">Phone number</Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="phone"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 9876543210"
+              required
+              pattern="^\+[1-9]\d{7,14}$"
+              title="Include country code, e.g. +911234567890"
+              className="h-11 rounded-xl pl-10"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">Include your country code (e.g. +91 for India).</p>
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required minLength={8} className="h-11 rounded-xl" />
+          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" required minLength={8} className="h-11 rounded-xl" />
         </div>
 
         <div className="flex items-start gap-3 pt-2">
