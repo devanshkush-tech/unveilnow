@@ -347,6 +347,11 @@ Deno.serve(async (req) => {
         profPatch.account_status = 'active';
         profPatch.plan = sub.plan;
         profPatch.selected_plan = sub.plan;
+        const start = new Date();
+        const end = new Date(start);
+        end.setDate(end.getDate() + 30); // default 30-day cycle; admin can override later
+        profPatch.plan_started_at = start.toISOString();
+        profPatch.plan_expires_at = end.toISOString();
       } else if (status === 'rejected') {
         profPatch.account_status = 'locked';
       }
