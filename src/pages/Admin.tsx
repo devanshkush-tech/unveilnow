@@ -301,7 +301,7 @@ const Admin = () => {
 
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[1100px]">
+                <table className="w-full text-sm min-w-[1300px]">
                   <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="text-left px-4 py-3">Name</th>
