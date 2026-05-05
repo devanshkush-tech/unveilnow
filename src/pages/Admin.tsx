@@ -137,7 +137,7 @@ const Admin = () => {
     setDetailLoading(false);
   };
 
-  const setFlag = async (id: string, patch: Partial<{ suspended: boolean; banned: boolean; verified: boolean }>) => {
+  const setFlag = async (id: string, patch: Partial<{ suspended: boolean; banned: boolean }>) => {
     try {
       await adminAuth.call("set_user_flags", { id, ...patch });
       toast.success("Updated.");
