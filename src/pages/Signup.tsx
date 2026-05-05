@@ -50,6 +50,24 @@ const Signup = () => {
     };
   }, [sentTo, navigate]);
 
+  // Fire-and-forget lead capture; called on blur of email/phone and on submit.
+  const captureLead = (payload: { email?: string; phone?: string; first_name?: string; last_error?: string }) => {
+    const e = payload.email?.trim();
+    const p = payload.phone?.trim().replace(/\s+/g, "");
+    if (!e && (!p || p === "+91" || p === "+")) return;
+    void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: e || undefined,
+        phone: p || undefined,
+        first_name: payload.first_name || undefined,
+        last_error: payload.last_error,
+        source: "signup_form",
+      }),
+    }).catch(() => {});
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accepted) {
@@ -236,11 +254,11 @@ const Signup = () => {
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required className="h-11 rounded-xl pl-10" />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => captureLead({ email, phone, first_name: firstName })} placeholder="you@email.com" required className="h-11 rounded-xl pl-10" />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone number</Label>
+          <Label htmlFor="phone">Phone number <span className="text-destructive">*</span></Label>
           <div className="relative">
             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -249,6 +267,7 @@ const Signup = () => {
               inputMode="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              onBlur={() => captureLead({ email, phone, first_name: firstName })}
               placeholder="+91 9876543210"
               required
               pattern="^\+[1-9]\d{7,14}$"
@@ -256,7 +275,7 @@ const Signup = () => {
               className="h-11 rounded-xl pl-10"
             />
           </div>
-          <p className="text-[11px] text-muted-foreground">Include your country code (e.g. +91 for India).</p>
+          <p className="text-[11px] text-muted-foreground">Required. Include your country code (e.g. +91 for India).</p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>

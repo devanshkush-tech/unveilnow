@@ -103,7 +103,8 @@ Deno.serve(async (req) => {
       const body = await req.json().catch(() => ({} as any));
       const { search, gender, interestedIn, city, plan, active, source, dateFrom, dateTo } = body ?? {};
 
-      let q = admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(action === 'export_users' ? 5000 : 200);
+      const limit = action === 'export_users' ? 5000 : 500;
+      let q = admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(limit);
       if (gender) q = q.eq('gender', gender);
       if (interestedIn) q = q.eq('looking_for', interestedIn);
       if (city) q = q.ilike('city', `%${city}%`);
@@ -125,46 +126,111 @@ Deno.serve(async (req) => {
         rows = rows.filter((r: any) => !r.last_active_at || new Date(r.last_active_at).getTime() <= cutoff);
       }
 
-      // Build auth-user maps. Only include profiles that correspond to a fully
-      // registered (email-confirmed) auth user OR were created by an admin —
-      // unverified / incomplete signups belong in the Leads tab.
-      const authMap = new Map<string, { email: string; confirmed: boolean }>();
+      // Build auth-user map (email + verification status for every profile).
+      const authMap = new Map<string, { email: string; confirmed: boolean; phone: string }>();
+      const emailToAuthId = new Map<string, string>();
       const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
       for (const u of authPage?.users ?? []) {
+        const email = (u.email ?? '').toLowerCase();
         authMap.set(u.id, {
           email: u.email ?? '',
-          confirmed: !!(u.email_confirmed_at || u.confirmed_at || u.phone_confirmed_at),
+          confirmed: !!(u.email_confirmed_at || (u as any).confirmed_at || u.phone_confirmed_at),
+          phone: u.phone ?? '',
+        });
+        if (email) emailToAuthId.set(email, u.id);
+      }
+
+      // Pull every signup lead — we will merge in any lead that hasn't graduated
+      // to a profile so admins see EVERY signup attempt (verified or not).
+      const { data: leadsAll } = await admin
+        .from('signup_leads').select('*').order('created_at', { ascending: false }).limit(limit);
+      const profileIds = new Set(rows.map((r: any) => r.id));
+      const leadByProfileId = new Map<string, any>();
+      const orphanLeads: any[] = [];
+      for (const l of leadsAll ?? []) {
+        const linkedId = l.auth_user_id || (l.email ? emailToAuthId.get(String(l.email).toLowerCase()) : null);
+        if (linkedId && profileIds.has(linkedId)) {
+          leadByProfileId.set(linkedId, l);
+        } else {
+          orphanLeads.push(l);
+        }
+      }
+
+      const flat = rows.map((p: any) => {
+        const a = authMap.get(p.id);
+        const lead = leadByProfileId.get(p.id);
+        const verified = !!(a?.confirmed);
+        const stage = !verified ? 'Email unverified'
+          : !p.onboarded ? 'Onboarding'
+          : (p.payment_status === 'approved' || (p.plan && p.plan !== 'free')) ? 'Active'
+          : 'Awaiting payment';
+        return {
+          id: p.id,
+          source_kind: 'profile',
+          name: p.first_name ?? lead?.first_name ?? '',
+          email: a?.email ?? lead?.email ?? '',
+          phone: p.phone ?? a?.phone ?? lead?.phone ?? '',
+          gender: p.gender ?? '',
+          interested_in: p.looking_for ?? p.interested_in ?? '',
+          age: p.age ?? '',
+          city: p.city ?? '',
+          signup_date: lead?.created_at ?? p.created_at ?? '',
+          last_active: p.last_active_at ?? '',
+          plan: p.plan ?? 'free',
+          plan_started_at: p.plan_started_at ?? '',
+          plan_expires_at: p.plan_expires_at ?? '',
+          utm_source: p.utm_source ?? lead?.utm_source ?? '',
+          utm_campaign: p.utm_campaign ?? lead?.utm_campaign ?? '',
+          device: p.device ?? '',
+          suspended: p.suspended ? 'Yes' : 'No',
+          banned: p.banned ? 'Yes' : 'No',
+          email_verified: verified ? 'Yes' : 'No',
+          onboarded: p.onboarded ? 'Yes' : 'No',
+          payment_status: p.payment_status ?? 'none',
+          stage,
+        };
+      });
+
+      // Append orphan leads (people who entered email/phone but never produced a profile)
+      const term = (search || '').toString().trim().toLowerCase();
+      for (const l of orphanLeads) {
+        if (term) {
+          const hay = `${l.first_name ?? ''} ${l.email ?? ''} ${l.phone ?? ''}`.toLowerCase();
+          if (!hay.includes(term)) continue;
+        }
+        if (gender || interestedIn || city || plan || source || active !== undefined) continue;
+        const verified = !!l.email_verified_at;
+        flat.push({
+          id: `lead:${l.id}`,
+          source_kind: 'lead',
+          name: l.first_name ?? '',
+          email: l.email ?? '',
+          phone: l.phone ?? '',
+          gender: '',
+          interested_in: '',
+          age: '',
+          city: '',
+          signup_date: l.created_at ?? '',
+          last_active: '',
+          plan: '',
+          plan_started_at: '',
+          plan_expires_at: '',
+          utm_source: l.utm_source ?? '',
+          utm_campaign: l.utm_campaign ?? '',
+          device: '',
+          suspended: 'No',
+          banned: 'No',
+          email_verified: verified ? 'Yes' : 'No',
+          onboarded: 'No',
+          payment_status: 'none',
+          stage: l.last_error ? 'Signup error' : verified ? 'Verified, no profile' : 'Form filled',
         });
       }
 
-      rows = rows.filter((r: any) => {
-        if (r.is_admin_created) return true;
-        const a = authMap.get(r.id);
-        return !!(a && a.confirmed);
-      });
-
-      const flat = rows.map((p: any) => ({
-        id: p.id,
-        name: p.first_name ?? '',
-        email: authMap.get(p.id)?.email ?? '',
-        gender: p.gender ?? '',
-        interested_in: p.looking_for ?? p.interested_in ?? '',
-        age: p.age ?? '',
-        city: p.city ?? '',
-        signup_date: p.created_at ?? '',
-        last_active: p.last_active_at ?? '',
-        plan: p.plan ?? 'free',
-        plan_started_at: p.plan_started_at ?? '',
-        plan_expires_at: p.plan_expires_at ?? '',
-        utm_source: p.utm_source ?? '',
-        utm_campaign: p.utm_campaign ?? '',
-        device: p.device ?? '',
-        suspended: p.suspended ? 'Yes' : 'No',
-        banned: p.banned ? 'Yes' : 'No',
-      }));
+      flat.sort((a, b) => (b.signup_date || '').localeCompare(a.signup_date || ''));
 
       if (action === 'export_users') {
-        const cols = ['name','email','gender','interested_in','age','city','signup_date','last_active','plan','utm_source','utm_campaign','device','suspended','banned'];
+        const cols = ['name','email','phone','gender','interested_in','age','city','signup_date','last_active','plan','stage','email_verified','onboarded','payment_status','utm_source','utm_campaign','device','suspended','banned'];
         const csv = toCsv(flat, cols);
         return new Response(csv, {
           status: 200,
@@ -181,6 +247,35 @@ Deno.serve(async (req) => {
     if (action === 'user_detail') {
       const { id } = await req.json();
       if (!id) return json({ error: 'id required' }, 400);
+
+      // Lead-only entry (no profile yet) — return a synthetic detail with full journey.
+      if (typeof id === 'string' && id.startsWith('lead:')) {
+        const leadId = id.slice(5);
+        const { data: lead } = await admin.from('signup_leads').select('*').eq('id', leadId).maybeSingle();
+        if (!lead) return json({ error: 'Lead not found' }, 404);
+        const verified = !!lead.email_verified_at;
+        const journey = [
+          { key: 'form_filled', label: 'Form filled (email/phone entered)', completed: true, at: lead.created_at, detail: `${lead.attempts ?? 1} attempt(s)` },
+          { key: 'account_created', label: 'Account created', completed: !!lead.auth_user_id, at: null, detail: lead.last_error ? `Error: ${lead.last_error}` : null },
+          { key: 'email_verified', label: 'Email verified', completed: verified, at: lead.email_verified_at },
+          { key: 'onboarding_completed', label: 'Onboarding completed', completed: false, at: null },
+          { key: 'plan_selected', label: 'Plan selected', completed: false, at: null },
+          { key: 'payment_submitted', label: 'Payment submitted', completed: false, at: null },
+          { key: 'payment_approved', label: 'Payment approved · account active', completed: false, at: null },
+        ];
+        const droppedAtIndex = journey.findIndex((s) => !s.completed);
+        return json({
+          profile: { id, first_name: lead.first_name, phone: lead.phone, plan: 'free', is_lead_only: true },
+          email: lead.email,
+          last_sign_in_at: null,
+          prompts: [], photo_urls: [], interests: [],
+          chats_count: 0, matches_count: 0, reports: [],
+          journey,
+          dropped_off_at: droppedAtIndex === -1 ? null : journey[droppedAtIndex].label,
+          last_error: lead.last_error,
+          lead,
+        });
+      }
       const [{ data: profile }, { data: prompts }, { data: photos }, { data: interests }, { data: chatsCount }, { data: matchesCount }, { data: reportsAgainst }] = await Promise.all([
         admin.from('profiles').select('*').eq('id', id).maybeSingle(),
         admin.from('profile_prompts').select('question, answer, position').eq('user_id', id).order('position'),
@@ -200,6 +295,79 @@ Deno.serve(async (req) => {
 
       const { data: authUser } = await admin.auth.admin.getUserById(id);
 
+      // Build the signup funnel/journey for this user.
+      const email = (authUser?.user?.email ?? '').toLowerCase();
+      let lead: any = null;
+      if (email) {
+        const { data } = await admin.from('signup_leads').select('*').ilike('email', email).maybeSingle();
+        lead = data;
+      }
+      if (!lead) {
+        const { data } = await admin.from('signup_leads').select('*').eq('auth_user_id', id).maybeSingle();
+        lead = data;
+      }
+
+      const { data: payments } = await admin.from('payment_submissions')
+        .select('id, plan, status, created_at, reviewed_at')
+        .eq('user_id', id).order('created_at', { ascending: true });
+
+      const firstApprovedPayment = (payments ?? []).find((p: any) => p.status === 'approved');
+      const journey = [
+        {
+          key: 'form_filled',
+          label: 'Form filled (email/phone entered)',
+          completed: !!lead || !!profile,
+          at: lead?.created_at ?? profile?.created_at ?? null,
+          detail: lead ? `${lead.attempts ?? 1} attempt${(lead.attempts ?? 1) > 1 ? 's' : ''}` : null,
+        },
+        {
+          key: 'account_created',
+          label: 'Account created',
+          completed: !!authUser?.user,
+          at: authUser?.user?.created_at ?? null,
+          detail: authUser?.user?.email ?? null,
+        },
+        {
+          key: 'email_verified',
+          label: 'Email verified',
+          completed: !!(authUser?.user?.email_confirmed_at || (authUser?.user as any)?.confirmed_at),
+          at: authUser?.user?.email_confirmed_at ?? (authUser?.user as any)?.confirmed_at ?? lead?.email_verified_at ?? null,
+        },
+        {
+          key: 'onboarding_completed',
+          label: 'Onboarding completed',
+          completed: !!profile?.onboarded,
+          at: profile?.onboarded ? profile?.updated_at ?? null : null,
+          detail: !profile?.onboarded
+            ? `Stopped at step ${profile?.onboarding_step ?? 0}`
+            : null,
+        },
+        {
+          key: 'plan_selected',
+          label: 'Plan selected',
+          completed: !!profile?.selected_plan,
+          at: null,
+          detail: profile?.selected_plan ?? null,
+        },
+        {
+          key: 'payment_submitted',
+          label: 'Payment submitted',
+          completed: (payments ?? []).length > 0,
+          at: payments?.[0]?.created_at ?? null,
+          detail: (payments ?? []).length ? `${payments?.length} submission(s)` : null,
+        },
+        {
+          key: 'payment_approved',
+          label: 'Payment approved · account active',
+          completed: !!firstApprovedPayment || profile?.account_status === 'active',
+          at: firstApprovedPayment?.reviewed_at ?? null,
+          detail: firstApprovedPayment?.plan ?? profile?.plan ?? null,
+        },
+      ];
+      const droppedAtIndex = journey.findIndex((s) => !s.completed);
+      const dropped_off_at = droppedAtIndex === -1 ? null : journey[droppedAtIndex].label;
+      const last_error = lead?.last_error ?? null;
+
       return json({
         profile,
         email: authUser?.user?.email ?? null,
@@ -210,6 +378,10 @@ Deno.serve(async (req) => {
         chats_count: (chatsCount as any)?.count ?? 0,
         matches_count: (matchesCount as any)?.count ?? 0,
         reports: reportsAgainst ?? [],
+        journey,
+        dropped_off_at,
+        last_error,
+        lead,
       });
     }
 

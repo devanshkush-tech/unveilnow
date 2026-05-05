@@ -34,7 +34,6 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
-import AdminLeads from "@/components/admin/AdminLeads";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
@@ -43,17 +42,22 @@ type Metrics = {
 };
 
 type UserRow = {
-  id: string; name: string; email: string; gender: string; interested_in: string;
+  id: string; source_kind?: "profile" | "lead"; name: string; email: string; phone?: string;
+  gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
   utm_source: string; utm_campaign: string; device: string;
   suspended: string; banned: string;
+  email_verified?: string; onboarded?: string; payment_status?: string; stage?: string;
 };
+
+type JourneyStep = { key: string; label: string; completed: boolean; at: string | null; detail?: string | null };
 
 type UserDetail = {
   profile: any; email: string | null; last_sign_in_at: string | null;
   prompts: { question: string; answer: string }[]; photo_urls: string[];
   interests: string[]; chats_count: number; matches_count: number; reports: any[];
+  journey?: JourneyStep[]; dropped_off_at?: string | null; last_error?: string | null; lead?: any;
 };
 
 const Admin = () => {
@@ -253,7 +257,6 @@ const Admin = () => {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="rounded-full p-1 h-12 bg-secondary flex-wrap">
             <TabsTrigger value="users" className="rounded-full px-5">User management</TabsTrigger>
-            <TabsTrigger value="leads" className="rounded-full px-5">Leads</TabsTrigger>
             <TabsTrigger value="payments" className="rounded-full px-5">Payments</TabsTrigger>
             <TabsTrigger value="payment-history" className="rounded-full px-5">Payment history</TabsTrigger>
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
@@ -298,14 +301,14 @@ const Admin = () => {
 
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[1300px]">
+                <table className="w-full text-sm min-w-[1400px]">
                   <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="text-left px-4 py-3">Name</th>
                       <th className="text-left px-4 py-3">Email</th>
+                      <th className="text-left px-4 py-3">Phone</th>
+                      <th className="text-left px-4 py-3">Stage</th>
                       <th className="text-left px-4 py-3">Gender</th>
-                      <th className="text-left px-4 py-3">Interested in</th>
-                      <th className="text-left px-4 py-3">Age</th>
                       <th className="text-left px-4 py-3">City</th>
                       <th className="text-left px-4 py-3">Joined</th>
                       <th className="text-left px-4 py-3">Last active</th>
@@ -321,19 +324,29 @@ const Admin = () => {
                       <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
                       <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
-                    ) : users.map((u) => (
+                    ) : users.map((u) => {
+                      const isLead = u.source_kind === "lead";
+                      const stageTone = u.stage === "Active" ? "bg-primary/15 text-primary"
+                        : u.stage === "Awaiting payment" ? "bg-accent/30 text-accent-foreground"
+                        : u.stage === "Onboarding" ? "bg-secondary text-foreground"
+                        : u.stage === "Signup error" ? "bg-destructive/15 text-destructive"
+                        : "bg-secondary text-muted-foreground";
+                      return (
                       <tr key={u.id} onClick={() => openDetail(u.id)} className="border-t border-border/60 hover:bg-secondary/30 transition-colors cursor-pointer">
                         <td className="px-4 py-3">
                           <span>{u.name || "—"}</span>
+                          {isLead && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">Lead</span>}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">{u.email || "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{u.phone || "—"}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs ${stageTone}`}>{u.stage || "—"}</span>
+                        </td>
                         <td className="px-4 py-3 text-muted-foreground">{u.gender || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{u.interested_in || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{u.age || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.city || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.signup_date ? new Date(u.signup_date).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.last_active ? new Date(u.last_active).toLocaleDateString() : "—"}</td>
-                        <td className="px-4 py-3 capitalize">{u.plan}</td>
+                        <td className="px-4 py-3 capitalize">{u.plan || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.plan_expires_at ? new Date(u.plan_expires_at).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{(() => {
                           if (!u.plan_expires_at) return "—";
@@ -352,15 +365,11 @@ const Admin = () => {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    );})}
                   </tbody>
                 </table>
               </div>
             </div>
-          </TabsContent>
-
-          <TabsContent value="leads">
-            <AdminLeads />
           </TabsContent>
 
           <TabsContent value="payments">
@@ -486,14 +495,46 @@ const Admin = () => {
                 )}
               </Section>
 
-              <PlanControl profile={detail.profile} onSave={assignPlan} />
+              {/* Signup journey / funnel */}
+              {detail.journey && detail.journey.length > 0 && (
+                <Section title="Signup journey">
+                  {detail.dropped_off_at && (
+                    <div className="mb-3 px-3 py-2 rounded-xl bg-accent/30 text-xs">
+                      Dropped off at: <span className="font-medium">{detail.dropped_off_at}</span>
+                      {detail.last_error && <div className="text-destructive mt-1">Error: {detail.last_error}</div>}
+                    </div>
+                  )}
+                  <ol className="space-y-2">
+                    {detail.journey.map((step, idx) => {
+                      const isDropoff = !step.completed && detail.journey!.slice(0, idx).every((s) => s.completed);
+                      return (
+                        <li key={step.key} className="flex items-start gap-3">
+                          <div className={`mt-0.5 h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-medium ${
+                            step.completed ? "bg-primary text-primary-foreground"
+                              : isDropoff ? "bg-destructive/20 text-destructive border border-destructive/40"
+                              : "bg-secondary text-muted-foreground"
+                          }`}>
+                            {step.completed ? <CheckCircle className="h-3.5 w-3.5" /> : idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm ${step.completed ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {step.at ? new Date(step.at).toLocaleString() : (step.completed ? "" : "Not yet")}
+                              {step.detail ? <span className="ml-2">· {step.detail}</span> : null}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </Section>
+              )}
+
+              {!detail.profile?.is_lead_only && <PlanControl profile={detail.profile} onSave={assignPlan} />}
 
               {/* Actions */}
+              {!detail.profile?.is_lead_only && (
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Suspended</Label>
-                  <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
-                </div>
                 <div className="flex items-center justify-between">
                   <Label>Suspended</Label>
                   <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
@@ -519,6 +560,7 @@ const Admin = () => {
                   </Button>
                 </div>
               </div>
+              )}
             </div>
           )}
         </SheetContent>
