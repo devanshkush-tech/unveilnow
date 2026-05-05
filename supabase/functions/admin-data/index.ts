@@ -101,15 +101,13 @@ Deno.serve(async (req) => {
 
     if (action === 'list_users' || action === 'export_users') {
       const body = await req.json().catch(() => ({} as any));
-      const { search, gender, interestedIn, city, plan, verified, active, source, dateFrom, dateTo } = body ?? {};
+      const { search, gender, interestedIn, city, plan, active, source, dateFrom, dateTo } = body ?? {};
 
       let q = admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(action === 'export_users' ? 5000 : 200);
       if (gender) q = q.eq('gender', gender);
       if (interestedIn) q = q.eq('looking_for', interestedIn);
       if (city) q = q.ilike('city', `%${city}%`);
       if (plan) q = q.eq('plan', plan);
-      if (verified === true) q = q.eq('verified', true);
-      if (verified === false) q = q.eq('verified', false);
       if (source) q = q.eq('utm_source', source);
       if (dateFrom) q = q.gte('created_at', dateFrom);
       if (dateTo) q = q.lte('created_at', dateTo);
@@ -127,19 +125,28 @@ Deno.serve(async (req) => {
         rows = rows.filter((r: any) => !r.last_active_at || new Date(r.last_active_at).getTime() <= cutoff);
       }
 
-      // Enrich with email from auth.users (admin only)
-      const ids = rows.map((r: any) => r.id);
-      const emails = new Map<string, string>();
-      if (ids.length) {
-        // listUsers paginates; for now first page (max 1000).
-        const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-        for (const u of authPage?.users ?? []) emails.set(u.id, u.email ?? '');
+      // Build auth-user maps. Only include profiles that correspond to a fully
+      // registered (email-confirmed) auth user OR were created by an admin —
+      // unverified / incomplete signups belong in the Leads tab.
+      const authMap = new Map<string, { email: string; confirmed: boolean }>();
+      const { data: authPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      for (const u of authPage?.users ?? []) {
+        authMap.set(u.id, {
+          email: u.email ?? '',
+          confirmed: !!(u.email_confirmed_at || u.confirmed_at || u.phone_confirmed_at),
+        });
       }
+
+      rows = rows.filter((r: any) => {
+        if (r.is_admin_created) return true;
+        const a = authMap.get(r.id);
+        return !!(a && a.confirmed);
+      });
 
       const flat = rows.map((p: any) => ({
         id: p.id,
         name: p.first_name ?? '',
-        email: emails.get(p.id) ?? '',
+        email: authMap.get(p.id)?.email ?? '',
         gender: p.gender ?? '',
         interested_in: p.looking_for ?? p.interested_in ?? '',
         age: p.age ?? '',
@@ -152,13 +159,12 @@ Deno.serve(async (req) => {
         utm_source: p.utm_source ?? '',
         utm_campaign: p.utm_campaign ?? '',
         device: p.device ?? '',
-        verified: p.verified ? 'Yes' : 'No',
         suspended: p.suspended ? 'Yes' : 'No',
         banned: p.banned ? 'Yes' : 'No',
       }));
 
       if (action === 'export_users') {
-        const cols = ['name','email','gender','interested_in','age','city','signup_date','last_active','plan','utm_source','utm_campaign','device','verified','suspended','banned'];
+        const cols = ['name','email','gender','interested_in','age','city','signup_date','last_active','plan','utm_source','utm_campaign','device','suspended','banned'];
         const csv = toCsv(flat, cols);
         return new Response(csv, {
           status: 200,
