@@ -491,8 +491,8 @@ const Admin = () => {
               {/* Actions */}
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Verified manually</Label>
-                  <Switch checked={!!detail.profile?.verified} onCheckedChange={(v) => setFlag(detail.profile.id, { verified: v })} />
+                  <Label>Suspended</Label>
+                  <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>Suspended</Label>
