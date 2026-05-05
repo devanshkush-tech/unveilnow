@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "How do you keep the community safe?",
-    a: "Every profile is face-verified, AI moderated for harmful behaviour, and reports are reviewed by humans within 24 hours.",
+    a: "Every profile is reviewed by humans, AI moderated for harmful behaviour, and reports are actioned within 24 hours.",
   },
   {
     q: "Can I use Unveil for free?",
