@@ -50,6 +50,24 @@ const Signup = () => {
     };
   }, [sentTo, navigate]);
 
+  // Fire-and-forget lead capture; called on blur of email/phone and on submit.
+  const captureLead = (payload: { email?: string; phone?: string; first_name?: string; last_error?: string }) => {
+    const e = payload.email?.trim();
+    const p = payload.phone?.trim().replace(/\s+/g, "");
+    if (!e && (!p || p === "+91" || p === "+")) return;
+    void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: e || undefined,
+        phone: p || undefined,
+        first_name: payload.first_name || undefined,
+        last_error: payload.last_error,
+        source: "signup_form",
+      }),
+    }).catch(() => {});
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accepted) {
