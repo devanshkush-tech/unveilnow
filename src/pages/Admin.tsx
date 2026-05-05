@@ -37,7 +37,7 @@ import AdminImpersonate from "@/components/admin/AdminImpersonate";
 import AdminLeads from "@/components/admin/AdminLeads";
 
 type Metrics = {
-  totalUsers: number; signupsToday: number; verified: number; active7d: number;
+  totalUsers: number; signupsToday: number; active7d: number;
   paid: number; interestsSent: number; matches: number; revealRequested: number;
   revealsBoth: number; messages: number; revenue: number;
 };
@@ -47,7 +47,7 @@ type UserRow = {
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
   utm_source: string; utm_campaign: string; device: string;
-  verified: string; suspended: string; banned: string;
+  suspended: string; banned: string;
 };
 
 type UserDetail = {
