@@ -29,13 +29,13 @@ export const PAYMENT_PLANS: { id: PaymentPlanId; name: string; price: string; ta
   },
   {
     id: "elite",
-    name: "Elite Verified",
+    name: "Elite",
     price: "₹999",
     tag: "Hand-picked",
     perks: [
       "Unlimited matches",
       "Unlimited likes & requests",
-      "4× profile visibility · Verified badge",
+      "4× profile visibility",
     ],
   },
 ];

@@ -121,7 +121,7 @@ const Terms = () => (
         </Section>
 
         <Section n={7} title="Paid Plans & Subscriptions">
-          <p>Unveil Now may offer paid memberships such as Starter, Premium, or Elite Verified.</p>
+          <p>Unveil Now may offer paid memberships such as Starter, Premium, or Elite.</p>
           <p>By subscribing, you agree that:</p>
           <Bullets
             items={[

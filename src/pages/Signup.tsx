@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,31 @@ const Signup = () => {
   const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+
+  // Auto-advance the moment Supabase confirms the email — works whether the
+  // confirmation link opens this tab or another tab on the same browser
+  // (BroadcastChannel/localStorage events propagate the new session here).
+  useEffect(() => {
+    if (!sentTo) return;
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
+        toast.success("Email verified — let's set up your profile.");
+        navigate("/onboarding", { replace: true });
+      }
+    });
+    // Also poll once a few seconds in case the listener missed the cross-tab event.
+    const interval = setInterval(async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) {
+        clearInterval(interval);
+        navigate("/onboarding", { replace: true });
+      }
+    }, 3000);
+    return () => {
+      sub.subscription.unsubscribe();
+      clearInterval(interval);
+    };
+  }, [sentTo, navigate]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

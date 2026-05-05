@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users, Heart, Eye, Activity, CheckCircle, Sparkles, Loader2, ArrowLeft,
-  LogOut, ShieldCheck, Download, Search, Filter, BadgeCheck, Ban, Trash2,
+  LogOut, ShieldCheck, Download, Search, Filter, Ban, Trash2,
   KeyRound, MessageCircle, IndianRupee, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ import AdminImpersonate from "@/components/admin/AdminImpersonate";
 import AdminLeads from "@/components/admin/AdminLeads";
 
 type Metrics = {
-  totalUsers: number; signupsToday: number; verified: number; active7d: number;
+  totalUsers: number; signupsToday: number; active7d: number;
   paid: number; interestsSent: number; matches: number; revealRequested: number;
   revealsBoth: number; messages: number; revenue: number;
 };
@@ -47,7 +47,7 @@ type UserRow = {
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
   utm_source: string; utm_campaign: string; device: string;
-  verified: string; suspended: string; banned: string;
+  suspended: string; banned: string;
 };
 
 type UserDetail = {
@@ -70,7 +70,7 @@ const Admin = () => {
   const [interestedIn, setInterestedIn] = useState("");
   const [city, setCity] = useState("");
   const [plan, setPlan] = useState("");
-  const [verifiedFilter, setVerifiedFilter] = useState<"" | "true" | "false">("");
+  
   const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
   const [source, setSource] = useState("");
   const [dateFrom, setDateFrom] = useState("");
@@ -106,12 +106,11 @@ const Admin = () => {
     interestedIn: interestedIn || undefined,
     city: city.trim() || undefined,
     plan: plan || undefined,
-    verified: verifiedFilter === "" ? undefined : verifiedFilter === "true",
     active: activeFilter === "" ? undefined : activeFilter === "true",
     source: source.trim() || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
-  }), [search, gender, interestedIn, city, plan, verifiedFilter, activeFilter, source, dateFrom, dateTo]);
+  }), [search, gender, interestedIn, city, plan, activeFilter, source, dateFrom, dateTo]);
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -138,7 +137,7 @@ const Admin = () => {
     setDetailLoading(false);
   };
 
-  const setFlag = async (id: string, patch: Partial<{ suspended: boolean; banned: boolean; verified: boolean }>) => {
+  const setFlag = async (id: string, patch: Partial<{ suspended: boolean; banned: boolean }>) => {
     try {
       await adminAuth.call("set_user_flags", { id, ...patch });
       toast.success("Updated.");
@@ -194,7 +193,7 @@ const Admin = () => {
   const cards = [
     { icon: Users, label: "Total users", value: metrics?.totalUsers ?? 0 },
     { icon: Sparkles, label: "New today", value: metrics?.signupsToday ?? 0 },
-    { icon: BadgeCheck, label: "Verified", value: metrics?.verified ?? 0 },
+    
     { icon: Activity, label: "Active (7d)", value: metrics?.active7d ?? 0 },
     { icon: ShieldCheck, label: "Paid subscribers", value: metrics?.paid ?? 0 },
     { icon: IndianRupee, label: "Revenue", value: `₹${(metrics?.revenue ?? 0).toLocaleString("en-IN")}` },
@@ -288,10 +287,6 @@ const Admin = () => {
                   <option value="free">Free</option><option value="starter">Starter</option><option value="premium">Premium</option><option value="elite">Elite</option>
                 </select>
                 <Input value={source} onChange={(e) => setSource(e.target.value)} placeholder="UTM source" className="h-10 rounded-xl" />
-                <select value={verifiedFilter} onChange={(e) => setVerifiedFilter(e.target.value as any)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
-                  <option value="">Verified (any)</option>
-                  <option value="true">Verified</option><option value="false">Not verified</option>
-                </select>
                 <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as any)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
                   <option value="">Activity (any)</option>
                   <option value="true">Active (14d)</option><option value="false">Inactive</option>
@@ -329,10 +324,7 @@ const Admin = () => {
                     ) : users.map((u) => (
                       <tr key={u.id} onClick={() => openDetail(u.id)} className="border-t border-border/60 hover:bg-secondary/30 transition-colors cursor-pointer">
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span>{u.name || "—"}</span>
-                            {u.verified === "Yes" && <BadgeCheck className="h-3.5 w-3.5 text-primary" />}
-                          </div>
+                          <span>{u.name || "—"}</span>
                         </td>
                         <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">{u.email || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.gender || "—"}</td>
@@ -412,7 +404,6 @@ const Admin = () => {
                 <div className="flex-1 min-w-0">
                   <div className="font-display text-2xl flex items-center gap-2">
                     {detail.profile?.first_name ?? "—"}
-                    {detail.profile?.verified && <BadgeCheck className="h-5 w-5 text-primary" />}
                   </div>
                   <div className="text-sm text-muted-foreground">{detail.email ?? "—"}</div>
                   <div className="text-xs text-muted-foreground mt-1">
@@ -500,8 +491,8 @@ const Admin = () => {
               {/* Actions */}
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>Verified manually</Label>
-                  <Switch checked={!!detail.profile?.verified} onCheckedChange={(v) => setFlag(detail.profile.id, { verified: v })} />
+                  <Label>Suspended</Label>
+                  <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>Suspended</Label>

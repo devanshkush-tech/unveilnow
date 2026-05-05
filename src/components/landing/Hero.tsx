@@ -48,7 +48,7 @@ export const Hero = () => {
             </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-xs text-muted-foreground animate-fade-up delay-300">
-              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-accent" /> Verified profiles</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-accent" /> Real, intentional members</span>
               <span className="inline-flex items-center gap-1.5"><EyeOff className="h-3.5 w-3.5 text-accent" /> Photos stay hidden</span>
               <span>Free to join</span>
             </div>

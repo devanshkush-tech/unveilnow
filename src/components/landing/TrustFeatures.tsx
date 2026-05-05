@@ -1,7 +1,7 @@
 import { BadgeCheck, Lock, Sparkles, Users } from "lucide-react";
 
 const features = [
-  { icon: BadgeCheck, title: "Face verified", desc: "Every profile passes a liveness check. No fakes, no catfishing." },
+  { icon: BadgeCheck, title: "Real members", desc: "Every profile is reviewed by humans. No fakes, no catfishing." },
   { icon: Lock, title: "Photos stay private", desc: "Reveal only with mutual consent. You're always in control." },
   { icon: Users, title: "Intentional only", desc: "Built for people serious about a real relationship — not a thrill." },
   { icon: Sparkles, title: "AI moderated", desc: "Bad actors get filtered out before they ever reach your inbox." },

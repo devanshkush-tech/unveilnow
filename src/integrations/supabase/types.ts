@@ -485,7 +485,6 @@ export type Database = {
           utm_campaign: string | null
           utm_medium: string | null
           utm_source: string | null
-          verified: boolean
           voice_intro_path: string | null
         }
         Insert: {
@@ -524,7 +523,6 @@ export type Database = {
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
-          verified?: boolean
           voice_intro_path?: string | null
         }
         Update: {
@@ -563,7 +561,6 @@ export type Database = {
           utm_campaign?: string | null
           utm_medium?: string | null
           utm_source?: string | null
-          verified?: boolean
           voice_intro_path?: string | null
         }
         Relationships: []
