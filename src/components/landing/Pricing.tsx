@@ -43,7 +43,7 @@ export const plans: Plan[] = [
     ],
   },
   {
-    name: "Elite Verified",
+    name: "Elite",
     price: "₹999",
     period: "/month",
     tag: "Hand-picked",
@@ -52,7 +52,6 @@ export const plans: Plan[] = [
       "Unlimited matches",
       "Unlimited likes & requests",
       "4× profile visibility",
-      "Verified Elite badge",
       "Concierge support",
     ],
   },
