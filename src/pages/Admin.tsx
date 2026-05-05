@@ -34,7 +34,6 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
-import AdminLeads from "@/components/admin/AdminLeads";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
@@ -43,17 +42,22 @@ type Metrics = {
 };
 
 type UserRow = {
-  id: string; name: string; email: string; gender: string; interested_in: string;
+  id: string; source_kind?: "profile" | "lead"; name: string; email: string; phone?: string;
+  gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
   utm_source: string; utm_campaign: string; device: string;
   suspended: string; banned: string;
+  email_verified?: string; onboarded?: string; payment_status?: string; stage?: string;
 };
+
+type JourneyStep = { key: string; label: string; completed: boolean; at: string | null; detail?: string | null };
 
 type UserDetail = {
   profile: any; email: string | null; last_sign_in_at: string | null;
   prompts: { question: string; answer: string }[]; photo_urls: string[];
   interests: string[]; chats_count: number; matches_count: number; reports: any[];
+  journey?: JourneyStep[]; dropped_off_at?: string | null; last_error?: string | null; lead?: any;
 };
 
 const Admin = () => {
