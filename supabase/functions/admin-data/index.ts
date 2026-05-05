@@ -214,12 +214,11 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'set_user_flags') {
-      const { id, suspended, banned, verified } = await req.json();
+      const { id, suspended, banned } = await req.json();
       if (!id) return json({ error: 'id required' }, 400);
       const patch: Record<string, unknown> = {};
       if (typeof suspended === 'boolean') patch.suspended = suspended;
       if (typeof banned === 'boolean') patch.banned = banned;
-      if (typeof verified === 'boolean') patch.verified = verified;
       const { error } = await admin.from('profiles').update(patch).eq('id', id);
       if (error) return json({ error: error.message }, 500);
       return json({ ok: true });
