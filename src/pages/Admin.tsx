@@ -495,14 +495,46 @@ const Admin = () => {
                 )}
               </Section>
 
-              <PlanControl profile={detail.profile} onSave={assignPlan} />
+              {/* Signup journey / funnel */}
+              {detail.journey && detail.journey.length > 0 && (
+                <Section title="Signup journey">
+                  {detail.dropped_off_at && (
+                    <div className="mb-3 px-3 py-2 rounded-xl bg-accent/30 text-xs">
+                      Dropped off at: <span className="font-medium">{detail.dropped_off_at}</span>
+                      {detail.last_error && <div className="text-destructive mt-1">Error: {detail.last_error}</div>}
+                    </div>
+                  )}
+                  <ol className="space-y-2">
+                    {detail.journey.map((step, idx) => {
+                      const isDropoff = !step.completed && detail.journey!.slice(0, idx).every((s) => s.completed);
+                      return (
+                        <li key={step.key} className="flex items-start gap-3">
+                          <div className={`mt-0.5 h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-[10px] font-medium ${
+                            step.completed ? "bg-primary text-primary-foreground"
+                              : isDropoff ? "bg-destructive/20 text-destructive border border-destructive/40"
+                              : "bg-secondary text-muted-foreground"
+                          }`}>
+                            {step.completed ? <CheckCircle className="h-3.5 w-3.5" /> : idx + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm ${step.completed ? "text-foreground" : "text-muted-foreground"}`}>{step.label}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {step.at ? new Date(step.at).toLocaleString() : (step.completed ? "" : "Not yet")}
+                              {step.detail ? <span className="ml-2">· {step.detail}</span> : null}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </Section>
+              )}
+
+              {!detail.profile?.is_lead_only && <PlanControl profile={detail.profile} onSave={assignPlan} />}
 
               {/* Actions */}
+              {!detail.profile?.is_lead_only && (
               <div className="rounded-2xl border border-border/60 bg-secondary/30 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label>Suspended</Label>
-                  <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
-                </div>
                 <div className="flex items-center justify-between">
                   <Label>Suspended</Label>
                   <Switch checked={!!detail.profile?.suspended} onCheckedChange={(v) => setFlag(detail.profile.id, { suspended: v })} />
@@ -528,6 +560,7 @@ const Admin = () => {
                   </Button>
                 </div>
               </div>
+              )}
             </div>
           )}
         </SheetContent>
