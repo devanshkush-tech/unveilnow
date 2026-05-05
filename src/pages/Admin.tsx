@@ -70,7 +70,7 @@ const Admin = () => {
   const [interestedIn, setInterestedIn] = useState("");
   const [city, setCity] = useState("");
   const [plan, setPlan] = useState("");
-  const [verifiedFilter, setVerifiedFilter] = useState<"" | "true" | "false">("");
+  
   const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
   const [source, setSource] = useState("");
   const [dateFrom, setDateFrom] = useState("");
