@@ -106,12 +106,11 @@ const Admin = () => {
     interestedIn: interestedIn || undefined,
     city: city.trim() || undefined,
     plan: plan || undefined,
-    verified: verifiedFilter === "" ? undefined : verifiedFilter === "true",
     active: activeFilter === "" ? undefined : activeFilter === "true",
     source: source.trim() || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
-  }), [search, gender, interestedIn, city, plan, verifiedFilter, activeFilter, source, dateFrom, dateTo]);
+  }), [search, gender, interestedIn, city, plan, activeFilter, source, dateFrom, dateTo]);
 
   const loadUsers = async () => {
     setUsersLoading(true);
