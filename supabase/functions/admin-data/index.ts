@@ -66,7 +66,6 @@ Deno.serve(async (req) => {
       const [
         { count: totalUsers },
         { count: signupsToday },
-        { count: verified },
         { count: active7d },
         { count: paid },
         { count: interestsSent },
@@ -77,7 +76,6 @@ Deno.serve(async (req) => {
       ] = await Promise.all([
         admin.from('profiles').select('*', { count: 'exact', head: true }),
         admin.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
-        admin.from('profiles').select('*', { count: 'exact', head: true }).eq('verified', true),
         admin.from('profiles').select('*', { count: 'exact', head: true }).gte('last_active_at', sevenDaysAgo),
         admin.from('profiles').select('*', { count: 'exact', head: true }).neq('plan', 'free'),
         admin.from('interest_requests').select('*', { count: 'exact', head: true }),
@@ -90,7 +88,6 @@ Deno.serve(async (req) => {
       return json({
         totalUsers: totalUsers ?? 0,
         signupsToday: signupsToday ?? 0,
-        verified: verified ?? 0,
         active7d: active7d ?? 0,
         paid: paid ?? 0,
         interestsSent: interestsSent ?? 0,
@@ -98,7 +95,7 @@ Deno.serve(async (req) => {
         revealRequested: revealRequested ?? 0,
         revealsBoth: revealsBoth ?? 0,
         messages: messagesCount ?? 0,
-        revenue: (paid ?? 0) * 0, // placeholder until payment integration logs revenue
+        revenue: (paid ?? 0) * 0,
       });
     }
 
