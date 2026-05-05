@@ -23,7 +23,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Users, Heart, Eye, Activity, CheckCircle, Sparkles, Loader2, ArrowLeft,
-  LogOut, ShieldCheck, Download, Search, Filter, BadgeCheck, Ban, Trash2,
+  LogOut, ShieldCheck, Download, Search, Filter, Ban, Trash2,
   KeyRound, MessageCircle, IndianRupee, EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
