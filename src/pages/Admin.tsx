@@ -301,14 +301,14 @@ const Admin = () => {
 
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm min-w-[1300px]">
+                <table className="w-full text-sm min-w-[1400px]">
                   <thead className="bg-secondary/60 text-xs uppercase tracking-wider text-muted-foreground">
                     <tr>
                       <th className="text-left px-4 py-3">Name</th>
                       <th className="text-left px-4 py-3">Email</th>
+                      <th className="text-left px-4 py-3">Phone</th>
+                      <th className="text-left px-4 py-3">Stage</th>
                       <th className="text-left px-4 py-3">Gender</th>
-                      <th className="text-left px-4 py-3">Interested in</th>
-                      <th className="text-left px-4 py-3">Age</th>
                       <th className="text-left px-4 py-3">City</th>
                       <th className="text-left px-4 py-3">Joined</th>
                       <th className="text-left px-4 py-3">Last active</th>
@@ -324,19 +324,29 @@ const Admin = () => {
                       <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
                       <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
-                    ) : users.map((u) => (
+                    ) : users.map((u) => {
+                      const isLead = u.source_kind === "lead";
+                      const stageTone = u.stage === "Active" ? "bg-primary/15 text-primary"
+                        : u.stage === "Awaiting payment" ? "bg-accent/30 text-accent-foreground"
+                        : u.stage === "Onboarding" ? "bg-secondary text-foreground"
+                        : u.stage === "Signup error" ? "bg-destructive/15 text-destructive"
+                        : "bg-secondary text-muted-foreground";
+                      return (
                       <tr key={u.id} onClick={() => openDetail(u.id)} className="border-t border-border/60 hover:bg-secondary/30 transition-colors cursor-pointer">
                         <td className="px-4 py-3">
                           <span>{u.name || "—"}</span>
+                          {isLead && <span className="ml-2 text-[10px] uppercase tracking-wider text-muted-foreground">Lead</span>}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground truncate max-w-[200px]">{u.email || "—"}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{u.phone || "—"}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded-full text-xs ${stageTone}`}>{u.stage || "—"}</span>
+                        </td>
                         <td className="px-4 py-3 text-muted-foreground">{u.gender || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{u.interested_in || "—"}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{u.age || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.city || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.signup_date ? new Date(u.signup_date).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.last_active ? new Date(u.last_active).toLocaleDateString() : "—"}</td>
-                        <td className="px-4 py-3 capitalize">{u.plan}</td>
+                        <td className="px-4 py-3 capitalize">{u.plan || "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{u.plan_expires_at ? new Date(u.plan_expires_at).toLocaleDateString() : "—"}</td>
                         <td className="px-4 py-3 text-muted-foreground">{(() => {
                           if (!u.plan_expires_at) return "—";
@@ -355,7 +365,7 @@ const Admin = () => {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    );})}
                   </tbody>
                 </table>
               </div>
