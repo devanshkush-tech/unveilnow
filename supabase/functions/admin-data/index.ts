@@ -247,6 +247,35 @@ Deno.serve(async (req) => {
     if (action === 'user_detail') {
       const { id } = await req.json();
       if (!id) return json({ error: 'id required' }, 400);
+
+      // Lead-only entry (no profile yet) — return a synthetic detail with full journey.
+      if (typeof id === 'string' && id.startsWith('lead:')) {
+        const leadId = id.slice(5);
+        const { data: lead } = await admin.from('signup_leads').select('*').eq('id', leadId).maybeSingle();
+        if (!lead) return json({ error: 'Lead not found' }, 404);
+        const verified = !!lead.email_verified_at;
+        const journey = [
+          { key: 'form_filled', label: 'Form filled (email/phone entered)', completed: true, at: lead.created_at, detail: `${lead.attempts ?? 1} attempt(s)` },
+          { key: 'account_created', label: 'Account created', completed: !!lead.auth_user_id, at: null, detail: lead.last_error ? `Error: ${lead.last_error}` : null },
+          { key: 'email_verified', label: 'Email verified', completed: verified, at: lead.email_verified_at },
+          { key: 'onboarding_completed', label: 'Onboarding completed', completed: false, at: null },
+          { key: 'plan_selected', label: 'Plan selected', completed: false, at: null },
+          { key: 'payment_submitted', label: 'Payment submitted', completed: false, at: null },
+          { key: 'payment_approved', label: 'Payment approved · account active', completed: false, at: null },
+        ];
+        const droppedAtIndex = journey.findIndex((s) => !s.completed);
+        return json({
+          profile: { id, first_name: lead.first_name, phone: lead.phone, plan: 'free', is_lead_only: true },
+          email: lead.email,
+          last_sign_in_at: null,
+          prompts: [], photo_urls: [], interests: [],
+          chats_count: 0, matches_count: 0, reports: [],
+          journey,
+          dropped_off_at: droppedAtIndex === -1 ? null : journey[droppedAtIndex].label,
+          last_error: lead.last_error,
+          lead,
+        });
+      }
       const [{ data: profile }, { data: prompts }, { data: photos }, { data: interests }, { data: chatsCount }, { data: matchesCount }, { data: reportsAgainst }] = await Promise.all([
         admin.from('profiles').select('*').eq('id', id).maybeSingle(),
         admin.from('profile_prompts').select('question, answer, position').eq('user_id', id).order('position'),
