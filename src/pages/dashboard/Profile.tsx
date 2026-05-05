@@ -72,7 +72,6 @@ const Profile = () => {
           <div aria-hidden className="absolute inset-0 bg-gradient-veil opacity-50" />
           <div className="relative text-primary-foreground flex items-center gap-3">
             <h2 className="font-display text-4xl">{profile?.first_name ?? "You"}{profile?.age ? `, ${profile.age}` : ""}</h2>
-            <BadgeCheck className="h-6 w-6" />
           </div>
         </div>
         <div className="p-6 md:p-8 space-y-6">
