@@ -193,7 +193,7 @@ const Admin = () => {
   const cards = [
     { icon: Users, label: "Total users", value: metrics?.totalUsers ?? 0 },
     { icon: Sparkles, label: "New today", value: metrics?.signupsToday ?? 0 },
-    { icon: BadgeCheck, label: "Verified", value: metrics?.verified ?? 0 },
+    
     { icon: Activity, label: "Active (7d)", value: metrics?.active7d ?? 0 },
     { icon: ShieldCheck, label: "Paid subscribers", value: metrics?.paid ?? 0 },
     { icon: IndianRupee, label: "Revenue", value: `₹${(metrics?.revenue ?? 0).toLocaleString("en-IN")}` },
