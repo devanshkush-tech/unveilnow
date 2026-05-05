@@ -362,10 +362,6 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="leads">
-            <AdminLeads />
-          </TabsContent>
-
           <TabsContent value="payments">
             <AdminPayments />
           </TabsContent>
