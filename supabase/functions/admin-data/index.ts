@@ -266,6 +266,79 @@ Deno.serve(async (req) => {
 
       const { data: authUser } = await admin.auth.admin.getUserById(id);
 
+      // Build the signup funnel/journey for this user.
+      const email = (authUser?.user?.email ?? '').toLowerCase();
+      let lead: any = null;
+      if (email) {
+        const { data } = await admin.from('signup_leads').select('*').ilike('email', email).maybeSingle();
+        lead = data;
+      }
+      if (!lead) {
+        const { data } = await admin.from('signup_leads').select('*').eq('auth_user_id', id).maybeSingle();
+        lead = data;
+      }
+
+      const { data: payments } = await admin.from('payment_submissions')
+        .select('id, plan, status, created_at, reviewed_at')
+        .eq('user_id', id).order('created_at', { ascending: true });
+
+      const firstApprovedPayment = (payments ?? []).find((p: any) => p.status === 'approved');
+      const journey = [
+        {
+          key: 'form_filled',
+          label: 'Form filled (email/phone entered)',
+          completed: !!lead || !!profile,
+          at: lead?.created_at ?? profile?.created_at ?? null,
+          detail: lead ? `${lead.attempts ?? 1} attempt${(lead.attempts ?? 1) > 1 ? 's' : ''}` : null,
+        },
+        {
+          key: 'account_created',
+          label: 'Account created',
+          completed: !!authUser?.user,
+          at: authUser?.user?.created_at ?? null,
+          detail: authUser?.user?.email ?? null,
+        },
+        {
+          key: 'email_verified',
+          label: 'Email verified',
+          completed: !!(authUser?.user?.email_confirmed_at || (authUser?.user as any)?.confirmed_at),
+          at: authUser?.user?.email_confirmed_at ?? (authUser?.user as any)?.confirmed_at ?? lead?.email_verified_at ?? null,
+        },
+        {
+          key: 'onboarding_completed',
+          label: 'Onboarding completed',
+          completed: !!profile?.onboarded,
+          at: profile?.onboarded ? profile?.updated_at ?? null : null,
+          detail: !profile?.onboarded
+            ? `Stopped at step ${profile?.onboarding_step ?? 0}`
+            : null,
+        },
+        {
+          key: 'plan_selected',
+          label: 'Plan selected',
+          completed: !!profile?.selected_plan,
+          at: null,
+          detail: profile?.selected_plan ?? null,
+        },
+        {
+          key: 'payment_submitted',
+          label: 'Payment submitted',
+          completed: (payments ?? []).length > 0,
+          at: payments?.[0]?.created_at ?? null,
+          detail: (payments ?? []).length ? `${payments?.length} submission(s)` : null,
+        },
+        {
+          key: 'payment_approved',
+          label: 'Payment approved · account active',
+          completed: !!firstApprovedPayment || profile?.account_status === 'active',
+          at: firstApprovedPayment?.reviewed_at ?? null,
+          detail: firstApprovedPayment?.plan ?? profile?.plan ?? null,
+        },
+      ];
+      const droppedAtIndex = journey.findIndex((s) => !s.completed);
+      const dropped_off_at = droppedAtIndex === -1 ? null : journey[droppedAtIndex].label;
+      const last_error = lead?.last_error ?? null;
+
       return json({
         profile,
         email: authUser?.user?.email ?? null,
@@ -276,6 +349,10 @@ Deno.serve(async (req) => {
         chats_count: (chatsCount as any)?.count ?? 0,
         matches_count: (matchesCount as any)?.count ?? 0,
         reports: reportsAgainst ?? [],
+        journey,
+        dropped_off_at,
+        last_error,
+        lead,
       });
     }
 
