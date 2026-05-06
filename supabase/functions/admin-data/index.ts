@@ -237,7 +237,7 @@ Deno.serve(async (req) => {
       flat.sort((a, b) => (b.signup_date || '').localeCompare(a.signup_date || ''));
 
       if (action === 'export_users') {
-        const cols = ['name','email','phone','gender','interested_in','age','city','signup_date','last_active','plan','stage','email_verified','onboarded','payment_status','utm_source','utm_campaign','device','suspended','banned'];
+        const cols = ['name','email','phone','gender','interested_in','age','city','signup_date','last_active','plan','stage','email_verified','onboarded','payment_status','utm_source','utm_medium','utm_campaign','utm_content','utm_term','device','suspended','banned'];
         const csv = toCsv(flat, cols);
         return new Response(csv, {
           status: 200,
