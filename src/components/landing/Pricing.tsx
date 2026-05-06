@@ -16,7 +16,7 @@ type Plan = {
 export const plans: Plan[] = [
   {
     name: "Starter",
-    price: "₹299",
+    price: "₹99",
     period: "/month",
     tag: "Get going",
     priceId: "starter_monthly",
@@ -29,7 +29,7 @@ export const plans: Plan[] = [
   },
   {
     name: "Premium",
-    price: "₹499",
+    price: "₹199",
     period: "/month",
     tag: "Most loved",
     highlighted: true,
@@ -44,7 +44,7 @@ export const plans: Plan[] = [
   },
   {
     name: "Elite",
-    price: "₹999",
+    price: "₹299",
     period: "/month",
     tag: "Hand-picked",
     priceId: "elite_monthly",

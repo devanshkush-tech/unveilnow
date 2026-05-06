@@ -8,7 +8,7 @@ export const PAYMENT_PLANS: { id: PaymentPlanId; name: string; price: string; ta
   {
     id: "starter",
     name: "Starter",
-    price: "₹299",
+    price: "₹99",
     tag: "Get going",
     perks: [
       "Up to 5 matches / month",
@@ -19,7 +19,7 @@ export const PAYMENT_PLANS: { id: PaymentPlanId; name: string; price: string; ta
   {
     id: "premium",
     name: "Premium",
-    price: "₹499",
+    price: "₹199",
     tag: "Most loved",
     perks: [
       "Up to 10 matches / month",
@@ -30,7 +30,7 @@ export const PAYMENT_PLANS: { id: PaymentPlanId; name: string; price: string; ta
   {
     id: "elite",
     name: "Elite",
-    price: "₹999",
+    price: "₹299",
     tag: "Hand-picked",
     perks: [
       "Unlimited matches",
