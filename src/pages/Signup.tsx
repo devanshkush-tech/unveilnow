@@ -97,6 +97,8 @@ const Signup = () => {
     const trimmedPhone = phone.trim().replace(/\s+/g, "");
     const trimmedEmail = email.trim();
 
+    const utm = { ...captureUtmFromUrl(), ...getStoredUtm() };
+
     // Capture lead BEFORE auth.signUp so we record every attempt — even invalid phone, weak password,
     // already-registered emails, or users who never click the verification link.
     void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
@@ -107,6 +109,7 @@ const Signup = () => {
         phone: trimmedPhone || undefined,
         first_name: firstName || undefined,
         source: "signup_form",
+        ...utm,
       }),
     }).catch(() => {});
 
@@ -121,7 +124,7 @@ const Signup = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
-          data: { first_name: firstName, phone: trimmedPhone },
+          data: { first_name: firstName, phone: trimmedPhone, ...utm },
         },
       });
       if (error) {
@@ -129,12 +132,12 @@ const Signup = () => {
         void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message }),
+          body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message, ...utm }),
         }).catch(() => {});
         toast.error(error.message);
         return;
       }
-      // Phone is persisted by the handle_new_user trigger from raw_user_meta_data.
+      // Phone & UTMs are persisted by the handle_new_user trigger from raw_user_meta_data.
       // Mark lead as having a real auth user attached.
       void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
         method: "POST",
@@ -145,6 +148,7 @@ const Signup = () => {
           auth_user_id: data.user?.id,
           signup_completed: !!data.session,
           email_verified: !!data.session,
+          ...utm,
         }),
       }).catch(() => {});
       // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)
