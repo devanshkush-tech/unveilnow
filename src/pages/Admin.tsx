@@ -159,7 +159,11 @@ const Admin = () => {
 
   const deleteUser = async (id: string) => {
     try {
-      await adminAuth.call("delete_user", { id });
+      if (id.startsWith("lead:")) {
+        await adminAuth.call("delete_lead", { id: id.slice(5) });
+      } else {
+        await adminAuth.call("delete_user", { id });
+      }
       toast.success("User deleted.");
       setConfirmDelete(null); setDetailId(null);
       loadUsers();
