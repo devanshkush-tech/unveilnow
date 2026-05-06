@@ -296,6 +296,7 @@ const Admin = () => {
                   <option value="free">Free</option><option value="starter">Starter</option><option value="premium">Premium</option><option value="elite">Elite</option>
                 </select>
                 <Input value={source} onChange={(e) => setSource(e.target.value)} placeholder="UTM source" className="h-10 rounded-xl" />
+                <Input value={utmCampaign} onChange={(e) => setUtmCampaign(e.target.value)} placeholder="UTM campaign" className="h-10 rounded-xl" />
                 <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as any)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
                   <option value="">Activity (any)</option>
                   <option value="true">Active (14d)</option><option value="false">Inactive</option>
