@@ -369,6 +369,16 @@ const Admin = () => {
                             <span className="px-2 py-1 rounded-full text-xs bg-secondary text-muted-foreground">Active</span>
                           )}
                         </td>
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setConfirmDelete(u)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
                       </tr>
                     );})}
                   </tbody>
