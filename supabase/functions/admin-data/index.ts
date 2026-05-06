@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
 
     if (action === 'list_users' || action === 'export_users') {
       const body = await req.json().catch(() => ({} as any));
-      const { search, gender, interestedIn, city, plan, active, source, dateFrom, dateTo } = body ?? {};
+      const { search, gender, interestedIn, city, plan, active, source, utmCampaign, dateFrom, dateTo } = body ?? {};
 
       const limit = action === 'export_users' ? 5000 : 500;
       let q = admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(limit);
@@ -109,7 +109,8 @@ Deno.serve(async (req) => {
       if (interestedIn) q = q.eq('looking_for', interestedIn);
       if (city) q = q.ilike('city', `%${city}%`);
       if (plan) q = q.eq('plan', plan);
-      if (source) q = q.eq('utm_source', source);
+      if (source) q = q.ilike('utm_source', `%${source}%`);
+      if (utmCampaign) q = q.ilike('utm_campaign', `%${utmCampaign}%`);
       if (dateFrom) q = q.gte('created_at', dateFrom);
       if (dateTo) q = q.lte('created_at', dateTo);
       if (search) q = q.or(`first_name.ilike.%${search}%,city.ilike.%${search}%`);
