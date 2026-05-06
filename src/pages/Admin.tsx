@@ -491,7 +491,10 @@ const Admin = () => {
               <Section title="Acquisition & device">
                 <div className="text-xs text-muted-foreground space-y-1">
                   <div>UTM source: <span className="text-foreground">{detail.profile?.utm_source ?? "direct"}</span></div>
+                  <div>UTM medium: <span className="text-foreground">{detail.profile?.utm_medium ?? "—"}</span></div>
                   <div>UTM campaign: <span className="text-foreground">{detail.profile?.utm_campaign ?? "—"}</span></div>
+                  <div>UTM content: <span className="text-foreground">{detail.profile?.utm_content ?? "—"}</span></div>
+                  <div>UTM term: <span className="text-foreground">{detail.profile?.utm_term ?? "—"}</span></div>
                   <div>Device: <span className="text-foreground">{detail.profile?.device ?? "—"}</span></div>
                   <div>Last sign in: <span className="text-foreground">{detail.last_sign_in_at ? new Date(detail.last_sign_in_at).toLocaleString() : "—"}</span></div>
                 </div>
