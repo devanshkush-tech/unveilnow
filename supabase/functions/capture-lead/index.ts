@@ -37,6 +37,8 @@ Deno.serve(async (req) => {
       utm_source: body.utm_source ?? null,
       utm_medium: body.utm_medium ?? null,
       utm_campaign: body.utm_campaign ?? null,
+      utm_content: body.utm_content ?? null,
+      utm_term: body.utm_term ?? null,
       user_agent: ua,
       ip,
       last_error: body.last_error ?? null,

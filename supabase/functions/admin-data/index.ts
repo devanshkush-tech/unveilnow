@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
 
     if (action === 'list_users' || action === 'export_users') {
       const body = await req.json().catch(() => ({} as any));
-      const { search, gender, interestedIn, city, plan, active, source, dateFrom, dateTo } = body ?? {};
+      const { search, gender, interestedIn, city, plan, active, source, utmCampaign, dateFrom, dateTo } = body ?? {};
 
       const limit = action === 'export_users' ? 5000 : 500;
       let q = admin.from('profiles').select('*').order('created_at', { ascending: false }).limit(limit);
@@ -109,7 +109,8 @@ Deno.serve(async (req) => {
       if (interestedIn) q = q.eq('looking_for', interestedIn);
       if (city) q = q.ilike('city', `%${city}%`);
       if (plan) q = q.eq('plan', plan);
-      if (source) q = q.eq('utm_source', source);
+      if (source) q = q.ilike('utm_source', `%${source}%`);
+      if (utmCampaign) q = q.ilike('utm_campaign', `%${utmCampaign}%`);
       if (dateFrom) q = q.gte('created_at', dateFrom);
       if (dateTo) q = q.lte('created_at', dateTo);
       if (search) q = q.or(`first_name.ilike.%${search}%,city.ilike.%${search}%`);
@@ -180,7 +181,10 @@ Deno.serve(async (req) => {
           plan_started_at: p.plan_started_at ?? '',
           plan_expires_at: p.plan_expires_at ?? '',
           utm_source: p.utm_source ?? lead?.utm_source ?? '',
+          utm_medium: p.utm_medium ?? lead?.utm_medium ?? '',
           utm_campaign: p.utm_campaign ?? lead?.utm_campaign ?? '',
+          utm_content: p.utm_content ?? lead?.utm_content ?? '',
+          utm_term: p.utm_term ?? lead?.utm_term ?? '',
           device: p.device ?? '',
           suspended: p.suspended ? 'Yes' : 'No',
           banned: p.banned ? 'Yes' : 'No',
@@ -198,7 +202,7 @@ Deno.serve(async (req) => {
           const hay = `${l.first_name ?? ''} ${l.email ?? ''} ${l.phone ?? ''}`.toLowerCase();
           if (!hay.includes(term)) continue;
         }
-        if (gender || interestedIn || city || plan || source || active !== undefined) continue;
+        if (gender || interestedIn || city || plan || source || utmCampaign || active !== undefined) continue;
         const verified = !!l.email_verified_at;
         flat.push({
           id: `lead:${l.id}`,
@@ -216,7 +220,10 @@ Deno.serve(async (req) => {
           plan_started_at: '',
           plan_expires_at: '',
           utm_source: l.utm_source ?? '',
+          utm_medium: l.utm_medium ?? '',
           utm_campaign: l.utm_campaign ?? '',
+          utm_content: l.utm_content ?? '',
+          utm_term: l.utm_term ?? '',
           device: '',
           suspended: 'No',
           banned: 'No',
@@ -230,7 +237,7 @@ Deno.serve(async (req) => {
       flat.sort((a, b) => (b.signup_date || '').localeCompare(a.signup_date || ''));
 
       if (action === 'export_users') {
-        const cols = ['name','email','phone','gender','interested_in','age','city','signup_date','last_active','plan','stage','email_verified','onboarded','payment_status','utm_source','utm_campaign','device','suspended','banned'];
+        const cols = ['name','email','phone','gender','interested_in','age','city','signup_date','last_active','plan','stage','email_verified','onboarded','payment_status','utm_source','utm_medium','utm_campaign','utm_content','utm_term','device','suspended','banned'];
         const csv = toCsv(flat, cols);
         return new Response(csv, {
           status: 200,

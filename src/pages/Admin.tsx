@@ -46,7 +46,7 @@ type UserRow = {
   gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
-  utm_source: string; utm_campaign: string; device: string;
+  utm_source: string; utm_medium?: string; utm_campaign: string; utm_content?: string; utm_term?: string; device: string;
   suspended: string; banned: string;
   email_verified?: string; onboarded?: string; payment_status?: string; stage?: string;
 };
@@ -77,6 +77,7 @@ const Admin = () => {
   
   const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
   const [source, setSource] = useState("");
+  const [utmCampaign, setUtmCampaign] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -112,9 +113,10 @@ const Admin = () => {
     plan: plan || undefined,
     active: activeFilter === "" ? undefined : activeFilter === "true",
     source: source.trim() || undefined,
+    utmCampaign: utmCampaign.trim() || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
-  }), [search, gender, interestedIn, city, plan, activeFilter, source, dateFrom, dateTo]);
+  }), [search, gender, interestedIn, city, plan, activeFilter, source, utmCampaign, dateFrom, dateTo]);
 
   const loadUsers = async () => {
     setUsersLoading(true);
@@ -294,6 +296,7 @@ const Admin = () => {
                   <option value="free">Free</option><option value="starter">Starter</option><option value="premium">Premium</option><option value="elite">Elite</option>
                 </select>
                 <Input value={source} onChange={(e) => setSource(e.target.value)} placeholder="UTM source" className="h-10 rounded-xl" />
+                <Input value={utmCampaign} onChange={(e) => setUtmCampaign(e.target.value)} placeholder="UTM campaign" className="h-10 rounded-xl" />
                 <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as any)} className="h-10 rounded-xl border border-border/60 bg-background px-3">
                   <option value="">Activity (any)</option>
                   <option value="true">Active (14d)</option><option value="false">Inactive</option>
@@ -488,7 +491,10 @@ const Admin = () => {
               <Section title="Acquisition & device">
                 <div className="text-xs text-muted-foreground space-y-1">
                   <div>UTM source: <span className="text-foreground">{detail.profile?.utm_source ?? "direct"}</span></div>
+                  <div>UTM medium: <span className="text-foreground">{detail.profile?.utm_medium ?? "—"}</span></div>
                   <div>UTM campaign: <span className="text-foreground">{detail.profile?.utm_campaign ?? "—"}</span></div>
+                  <div>UTM content: <span className="text-foreground">{detail.profile?.utm_content ?? "—"}</span></div>
+                  <div>UTM term: <span className="text-foreground">{detail.profile?.utm_term ?? "—"}</span></div>
                   <div>Device: <span className="text-foreground">{detail.profile?.device ?? "—"}</span></div>
                   <div>Last sign in: <span className="text-foreground">{detail.last_sign_in_at ? new Date(detail.last_sign_in_at).toLocaleString() : "—"}</span></div>
                 </div>

@@ -11,6 +11,7 @@ import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink, Phone } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { trackMetaEvent } from "@/lib/metaCapi";
+import { getStoredUtm, captureUtmFromUrl } from "@/lib/utm";
 
 const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code and digits
 
@@ -72,6 +73,7 @@ const Signup = () => {
     const e = payload.email?.trim();
     const p = payload.phone?.trim().replace(/\s+/g, "");
     if (!e && (!p || p === "+91" || p === "+")) return;
+    const utm = { ...captureUtmFromUrl(), ...getStoredUtm() };
     void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -81,6 +83,7 @@ const Signup = () => {
         first_name: payload.first_name || undefined,
         last_error: payload.last_error,
         source: "signup_form",
+        ...utm,
       }),
     }).catch(() => {});
   };
@@ -94,6 +97,8 @@ const Signup = () => {
     const trimmedPhone = phone.trim().replace(/\s+/g, "");
     const trimmedEmail = email.trim();
 
+    const utm = { ...captureUtmFromUrl(), ...getStoredUtm() };
+
     // Capture lead BEFORE auth.signUp so we record every attempt — even invalid phone, weak password,
     // already-registered emails, or users who never click the verification link.
     void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
@@ -104,6 +109,7 @@ const Signup = () => {
         phone: trimmedPhone || undefined,
         first_name: firstName || undefined,
         source: "signup_form",
+        ...utm,
       }),
     }).catch(() => {});
 
@@ -118,7 +124,7 @@ const Signup = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/onboarding`,
-          data: { first_name: firstName, phone: trimmedPhone },
+          data: { first_name: firstName, phone: trimmedPhone, ...utm },
         },
       });
       if (error) {
@@ -126,12 +132,12 @@ const Signup = () => {
         void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message }),
+          body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message, ...utm }),
         }).catch(() => {});
         toast.error(error.message);
         return;
       }
-      // Phone is persisted by the handle_new_user trigger from raw_user_meta_data.
+      // Phone & UTMs are persisted by the handle_new_user trigger from raw_user_meta_data.
       // Mark lead as having a real auth user attached.
       void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
         method: "POST",
@@ -142,6 +148,7 @@ const Signup = () => {
           auth_user_id: data.user?.id,
           signup_completed: !!data.session,
           email_verified: !!data.session,
+          ...utm,
         }),
       }).catch(() => {});
       // Fire CompleteRegistration on successful signup (fire-and-forget; never blocks UX)

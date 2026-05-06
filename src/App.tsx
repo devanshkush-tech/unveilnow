@@ -31,8 +31,12 @@ import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { captureUtmFromUrl } from "./lib/utm";
 
 const queryClient = new QueryClient();
+
+// Capture UTMs from URL on first landing — persisted in localStorage.
+if (typeof window !== "undefined") captureUtmFromUrl();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
