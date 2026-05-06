@@ -30,23 +30,40 @@ const Signup = () => {
   // (BroadcastChannel/localStorage events propagate the new session here).
   useEffect(() => {
     if (!sentTo) return;
+    let done = false;
+    const goNext = () => {
+      if (done) return;
+      done = true;
+      toast.success("Email verified — let's set up your profile.");
+      navigate("/onboarding", { replace: true });
+    };
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
-        toast.success("Email verified — let's set up your profile.");
-        navigate("/onboarding", { replace: true });
+        goNext();
       }
     });
-    // Also poll once a few seconds in case the listener missed the cross-tab event.
-    const interval = setInterval(async () => {
+    const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user) {
-        clearInterval(interval);
-        navigate("/onboarding", { replace: true });
-      }
-    }, 3000);
+      if (data.session?.user) goNext();
+    };
+    // Poll frequently in case storage events are missed.
+    const interval = setInterval(checkSession, 1500);
+    // Re-check whenever the tab regains focus (user returns from email tab).
+    const onFocus = () => { void checkSession(); };
+    const onVisible = () => { if (document.visibilityState === "visible") void checkSession(); };
+    // Cross-tab broadcast — Supabase writes to localStorage on sign-in.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key && e.key.includes("auth-token")) void checkSession();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("storage", onStorage);
     return () => {
       sub.subscription.unsubscribe();
       clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("storage", onStorage);
     };
   }, [sentTo, navigate]);
 

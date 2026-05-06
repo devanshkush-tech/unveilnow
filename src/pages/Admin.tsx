@@ -159,7 +159,11 @@ const Admin = () => {
 
   const deleteUser = async (id: string) => {
     try {
-      await adminAuth.call("delete_user", { id });
+      if (id.startsWith("lead:")) {
+        await adminAuth.call("delete_lead", { id: id.slice(5) });
+      } else {
+        await adminAuth.call("delete_user", { id });
+      }
       toast.success("User deleted.");
       setConfirmDelete(null); setDetailId(null);
       loadUsers();
@@ -317,13 +321,14 @@ const Admin = () => {
                       <th className="text-left px-4 py-3">Days left</th>
                       <th className="text-left px-4 py-3">Source</th>
                       <th className="text-left px-4 py-3">Status</th>
+                      <th className="text-right px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {usersLoading ? (
-                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
+                      <tr><td colSpan={14} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
-                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
+                      <tr><td colSpan={14} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
                     ) : users.map((u) => {
                       const isLead = u.source_kind === "lead";
                       const stageTone = u.stage === "Active" ? "bg-primary/15 text-primary"
@@ -363,6 +368,16 @@ const Admin = () => {
                           ) : (
                             <span className="px-2 py-1 rounded-full text-xs bg-secondary text-muted-foreground">Active</span>
                           )}
+                        </td>
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => setConfirmDelete(u)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </td>
                       </tr>
                     );})}
