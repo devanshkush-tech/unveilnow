@@ -77,6 +77,7 @@ const Admin = () => {
   
   const [activeFilter, setActiveFilter] = useState<"" | "true" | "false">("");
   const [source, setSource] = useState("");
+  const [utmCampaign, setUtmCampaign] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
