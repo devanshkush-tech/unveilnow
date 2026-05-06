@@ -113,9 +113,10 @@ const Admin = () => {
     plan: plan || undefined,
     active: activeFilter === "" ? undefined : activeFilter === "true",
     source: source.trim() || undefined,
+    utmCampaign: utmCampaign.trim() || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
-  }), [search, gender, interestedIn, city, plan, activeFilter, source, dateFrom, dateTo]);
+  }), [search, gender, interestedIn, city, plan, activeFilter, source, utmCampaign, dateFrom, dateTo]);
 
   const loadUsers = async () => {
     setUsersLoading(true);
