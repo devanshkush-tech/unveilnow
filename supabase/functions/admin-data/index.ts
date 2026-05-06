@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
           const hay = `${l.first_name ?? ''} ${l.email ?? ''} ${l.phone ?? ''}`.toLowerCase();
           if (!hay.includes(term)) continue;
         }
-        if (gender || interestedIn || city || plan || source || active !== undefined) continue;
+        if (gender || interestedIn || city || plan || source || utmCampaign || active !== undefined) continue;
         const verified = !!l.email_verified_at;
         flat.push({
           id: `lead:${l.id}`,
