@@ -4,9 +4,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { sendMetaEvent } from '../_shared/meta-capi.ts';
 
 const PLAN_PRICE_INR: Record<string, number> = {
-  starter: 299,
-  premium: 499,
-  elite: 999,
+  starter: 99,
+  premium: 199,
+  elite: 299,
 };
 
 const corsHeaders = {
