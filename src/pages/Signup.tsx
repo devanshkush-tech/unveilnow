@@ -114,10 +114,7 @@ const Signup = () => {
         toast.error(error.message);
         return;
       }
-      // Persist phone on the profile (handle_new_user trigger creates the row).
-      if (data.user?.id) {
-        await supabase.from("profiles").update({ phone: trimmedPhone }).eq("id", data.user.id);
-      }
+      // Phone is persisted by the handle_new_user trigger from raw_user_meta_data.
       // Mark lead as having a real auth user attached.
       void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
         method: "POST",

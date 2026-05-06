@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
         authMap.set(u.id, {
           email: u.email ?? '',
           confirmed: !!(u.email_confirmed_at || (u as any).confirmed_at || u.phone_confirmed_at),
-          phone: u.phone ?? '',
+          phone: u.phone || '',
         });
         if (email) emailToAuthId.set(email, u.id);
       }
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
           source_kind: 'profile',
           name: p.first_name ?? lead?.first_name ?? '',
           email: a?.email ?? lead?.email ?? '',
-          phone: p.phone ?? a?.phone ?? lead?.phone ?? '',
+          phone: p.phone || a?.phone || lead?.phone || '',
           gender: p.gender ?? '',
           interested_in: p.looking_for ?? p.interested_in ?? '',
           age: p.age ?? '',
