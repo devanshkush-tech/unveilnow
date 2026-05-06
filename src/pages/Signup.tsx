@@ -11,6 +11,7 @@ import { Mail, MailCheck, ArrowLeft, RefreshCw, ExternalLink, Phone } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { trackMetaEvent } from "@/lib/metaCapi";
+import { getStoredUtm, captureUtmFromUrl } from "@/lib/utm";
 
 const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code and digits
 
