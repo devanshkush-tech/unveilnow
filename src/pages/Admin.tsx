@@ -321,6 +321,7 @@ const Admin = () => {
                       <th className="text-left px-4 py-3">Days left</th>
                       <th className="text-left px-4 py-3">Source</th>
                       <th className="text-left px-4 py-3">Status</th>
+                      <th className="text-right px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
