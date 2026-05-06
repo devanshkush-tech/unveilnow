@@ -73,6 +73,7 @@ const Signup = () => {
     const e = payload.email?.trim();
     const p = payload.phone?.trim().replace(/\s+/g, "");
     if (!e && (!p || p === "+91" || p === "+")) return;
+    const utm = { ...captureUtmFromUrl(), ...getStoredUtm() };
     void fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-lead`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -82,6 +83,7 @@ const Signup = () => {
         first_name: payload.first_name || undefined,
         last_error: payload.last_error,
         source: "signup_form",
+        ...utm,
       }),
     }).catch(() => {});
   };
