@@ -46,7 +46,7 @@ type UserRow = {
   gender: string; interested_in: string;
   age: number | string; city: string; signup_date: string; last_active: string | null;
   plan: string; plan_started_at?: string | null; plan_expires_at?: string | null;
-  utm_source: string; utm_campaign: string; device: string;
+  utm_source: string; utm_medium?: string; utm_campaign: string; utm_content?: string; utm_term?: string; device: string;
   suspended: string; banned: string;
   email_verified?: string; onboarded?: string; payment_status?: string; stage?: string;
 };
