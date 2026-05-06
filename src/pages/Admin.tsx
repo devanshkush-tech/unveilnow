@@ -326,9 +326,9 @@ const Admin = () => {
                   </thead>
                   <tbody>
                     {usersLoading ? (
-                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
+                      <tr><td colSpan={14} className="p-10 text-center text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin inline" /></td></tr>
                     ) : users.length === 0 ? (
-                      <tr><td colSpan={13} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
+                      <tr><td colSpan={14} className="p-10 text-center text-muted-foreground">No members match these filters.</td></tr>
                     ) : users.map((u) => {
                       const isLead = u.source_kind === "lead";
                       const stageTone = u.stage === "Active" ? "bg-primary/15 text-primary"
