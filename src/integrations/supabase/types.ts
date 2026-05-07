@@ -628,6 +628,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sheet_sync_log: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: string
+          last_error: string | null
+          lead_id: string | null
+          request_id: number | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          lead_id?: string | null
+          request_id?: number | null
+          source: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          lead_id?: string | null
+          request_id?: number | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       signup_leads: {
         Row: {
           attempts: number
@@ -825,6 +864,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      enqueue_sheet_sync: {
+        Args: { _lead_id: string; _source: string; _user_id: string }
+        Returns: undefined
+      }
       get_my_match_usage: {
         Args: never
         Returns: {
