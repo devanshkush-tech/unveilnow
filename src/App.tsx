@@ -32,6 +32,14 @@ import Settings from "./pages/dashboard/Settings.tsx";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { captureUtmFromUrl } from "./lib/utm";
+import BlindDateLanding from "./features/blind-date/pages/Landing";
+import BlindDateSetup from "./features/blind-date/pages/Setup";
+import BlindDateMatching from "./features/blind-date/pages/Matching";
+import BlindDateChat from "./features/blind-date/pages/Chat";
+import BlindDateDecision from "./features/blind-date/pages/Decision";
+import BlindDateMatched from "./features/blind-date/pages/Matched";
+import BlindDateFullChat from "./features/blind-date/pages/FullChat";
+import BlindDatePremium from "./features/blind-date/pages/Premium";
 
 const queryClient = new QueryClient();
 
@@ -100,6 +108,14 @@ const App = () => (
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
             </Route>
+            <Route path="/blind-date" element={<BlindDateLanding />} />
+            <Route path="/blind-date/setup" element={<BlindDateSetup />} />
+            <Route path="/blind-date/matching" element={<BlindDateMatching />} />
+            <Route path="/blind-date/chat" element={<BlindDateChat />} />
+            <Route path="/blind-date/decision" element={<BlindDateDecision />} />
+            <Route path="/blind-date/matched" element={<BlindDateMatched />} />
+            <Route path="/blind-date/chat/full" element={<BlindDateFullChat />} />
+            <Route path="/blind-date/premium" element={<BlindDatePremium />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
