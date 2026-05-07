@@ -1,0 +1,72 @@
+.bd-root {
+  --bd-bg: #0A0A0F;
+  --bd-surface: #12121A;
+  --bd-accent: #C084FC;
+  --bd-accent2: #F472B6;
+  --bd-text: #F8FAFC;
+  --bd-muted: #94A3B8;
+  --bd-danger: #EF4444;
+  background: var(--bd-bg);
+  color: var(--bd-text);
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.bd-serif { font-family: 'Fraunces', Georgia, serif; font-style: italic; }
+.bd-surface { background: var(--bd-surface); }
+.bd-accent { color: var(--bd-accent); }
+.bd-muted { color: var(--bd-muted); }
+.bd-grad { background: linear-gradient(135deg, #C084FC, #F472B6); }
+.bd-grad-text {
+  background: linear-gradient(135deg, #C084FC, #F472B6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.bd-glow { box-shadow: 0 10px 40px -10px rgba(192, 132, 252, 0.6), 0 0 30px -8px rgba(244, 114, 182, 0.4); }
+
+.bd-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.bd-bg-anim {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+}
+.bd-anim-gradient {
+  position: absolute; inset: -20%;
+  background: radial-gradient(circle at 30% 30%, rgba(192,132,252,0.35), transparent 50%),
+              radial-gradient(circle at 70% 60%, rgba(244,114,182,0.30), transparent 55%),
+              radial-gradient(circle at 50% 90%, rgba(124,58,237,0.30), transparent 55%);
+  animation: bd-shift 18s ease-in-out infinite;
+}
+@keyframes bd-shift {
+  0%, 100% { transform: translate(0,0) scale(1); }
+  50% { transform: translate(2%, -3%) scale(1.05); }
+}
+@keyframes bd-pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.bd-ring {
+  position: absolute; inset: 0; border-radius: 9999px;
+  border: 2px solid rgba(192,132,252,0.6);
+  animation: bd-pulse-ring 2.4s ease-out infinite;
+}
+@keyframes bd-heartbeat {
+  0%, 100% { transform: scale(1); }
+  20% { transform: scale(1.12); }
+  40% { transform: scale(1); }
+  60% { transform: scale(1.08); }
+}
+.bd-heartbeat { animation: bd-heartbeat 0.9s ease-in-out infinite; }
+
+@keyframes bd-particle-up {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+.bd-particle {
+  position: absolute; width: 8px; height: 8px; border-radius: 9999px;
+  animation: bd-particle-up 1.6s ease-out forwards;
+}
