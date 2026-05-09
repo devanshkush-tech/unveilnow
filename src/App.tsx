@@ -31,6 +31,7 @@ import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { MetaPageViewTracker } from "./components/MetaPageViewTracker";
 import { captureUtmFromUrl } from "./lib/utm";
 import BlindDateLanding from "./features/blind-date/pages/Landing";
 import BlindDateSetup from "./features/blind-date/pages/Setup";
@@ -55,6 +56,7 @@ const App = () => (
         <ErrorBoundary>
           <AuthProvider>
             <PaymentTestModeBanner />
+            <MetaPageViewTracker />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
