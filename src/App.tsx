@@ -56,6 +56,7 @@ const App = () => (
         <ErrorBoundary>
           <AuthProvider>
             <PaymentTestModeBanner />
+            <MetaPageViewTracker />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
