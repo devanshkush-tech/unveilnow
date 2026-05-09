@@ -12,10 +12,33 @@ const corsHeaders = {
 };
 
 const ALLOWED = new Set([
+  "PageView",
   "ViewContent",
   "CompleteRegistration",
   "InitiateCheckout",
 ]);
+
+// Whitelist of custom_data keys forwarded to Meta. Drops any sensitive product data
+// (compatibility scores, relationship preferences, emotional state, chat data, etc.).
+const ALLOWED_CUSTOM_KEYS = new Set([
+  "currency",
+  "value",
+  "content_name",
+  "content_category",
+  "content_type",
+  "content_ids",
+  "num_items",
+  "status",
+]);
+
+function sanitize(input: unknown): Record<string, unknown> {
+  if (!input || typeof input !== "object") return {};
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
+    if (ALLOWED_CUSTOM_KEYS.has(k) && v !== undefined && v !== null) out[k] = v;
+  }
+  return out;
+}
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
