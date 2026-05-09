@@ -25,7 +25,14 @@ const Index = () => {
     }
     trackMetaEvent("ViewContent", {
       event_id: `view_landing_${Date.now()}`,
-      custom_data: { content_name: "Landing", content_category: "marketing" },
+      custom_data: {
+        content_name: "Landing",
+        content_category: "marketing",
+        content_type: "product_group",
+        content_ids: ["starter", "premium", "elite"],
+        currency: "INR",
+        value: 199,
+      },
     });
   }, []);
 
