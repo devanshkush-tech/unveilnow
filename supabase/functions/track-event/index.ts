@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
       event_name,
       event_id,
       event_source_url,
-      custom_data: custom_data ?? {},
+      custom_data: sanitize(custom_data),
       user: {
         email,
         phone,
