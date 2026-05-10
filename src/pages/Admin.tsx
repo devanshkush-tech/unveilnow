@@ -413,7 +413,10 @@ const Admin = () => {
               Open the user drawer to see reports filed against a member, and use the action buttons there to suspend, ban, or delete.
             </div>
           </TabsContent>
-        </Tabs>
+
+          <TabsContent value="blind-date">
+            <AdminBlindDate />
+          </TabsContent>
       </main>
 
       {/* User detail drawer */}
