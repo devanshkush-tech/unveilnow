@@ -66,7 +66,7 @@ export default function BlindDatePremium() {
                   <ul className="space-y-1.5 text-sm bd-muted my-4 flex-1">
                     {p.perks.map((f) => (<li key={f}>✦ {f}</li>))}
                   </ul>
-                  <GlowButton full variant={p.highlight ? "default" : "outline"}
+                  <GlowButton full variant={p.highlight ? "primary" : "outline"}
                     onClick={() => nav(`/blind-date/payment?plan=${p.id}`)}>
                     Choose {p.name.replace("Blind Date ", "")}
                   </GlowButton>
