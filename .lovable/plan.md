@@ -1,134 +1,98 @@
-## Goal
+# Blind Date — Full Feature Build
 
-Keep a single Google Sheet always in sync with Unveil user data — one row per user, keyed by `user_id`, updating live whenever anything important changes (signup, profile, onboarding, payment, status, last active).
+The Blind Date scaffold already exists at `/blind-date/*` with a 5-question setup, mock matching, timed chat, decision, matched, full chat, and a premium teaser page. This plan upgrades it into the production feature you described.
 
-## Approach
+## 1. Database (new tables, RLS-protected)
 
-Use the simplest, most reliable path that satisfies your requirements:
+- `blind_date_profiles` — one row per user
+  - `user_id` (PK, FK auth.users)
+  - `answers` jsonb (full questionnaire)
+  - `compat_vector` jsonb (derived numeric vector — server only)
+  - `plan` text (`free` | `expert` | `unlimited`)
+  - `sessions_used`, `sessions_limit`, `period_start`
+- `blind_date_sessions`
+  - `id`, `user_a`, `user_b`, `status` (`active` | `decided` | `revealed` | `expired`)
+  - `started_at`, `ends_at`, `decision_a`, `decision_b`, `revealed_at`
+- `blind_date_messages`
+  - `id`, `session_id`, `sender_id`, `body`, `created_at`
+- `blind_date_payments` — mirrors existing `payment_submissions` but tagged `feature='blind_date'` (we will actually reuse `payment_submissions` with a new `feature` column instead of a separate table to keep admin tooling unified)
 
-```text
-Supabase (profiles / payment_submissions / signup_leads)
-        │  on insert/update
-        ▼
-Postgres trigger → pg_net HTTP POST
-        ▼
-Edge Function: sync-user-to-sheets  (server-side, holds secrets)
-        ▼
-Zapier / Make webhook (Catch Hook)
-        ▼
-Google Sheets "Lookup row by user_id" → Update row, else Create row
-```
+RLS:
+- Users read/write only their own `blind_date_profiles`
+- Sessions/messages: only participants can read; messages insert only while session active
+- Admins (via `has_role`) full read; can insert sessions (manual matchmaking)
+- `compat_vector` never returned to client (column-level: kept server-side via RPC only)
 
-Why Zapier/Make instead of direct Google Sheets API:
-- No per-user OAuth, no token refresh code, no Google API keys in our code.
-- You configure the Zap once: Webhook → Lookup Spreadsheet Row (user_id) → Update/Create Row.
-- Matches exactly what you described in "Suggested approach".
+## 2. Questionnaire (15 sections, ~25 questions)
 
-Direct Google Sheets API via the connector is also possible, but it would sync from *your* Google account only and adds OAuth complexity. The webhook approach is cleaner for production.
+Categories: communication style, introvert/extrovert, relationship intent, hobbies, lifestyle, work-life balance, humour, emotional compatibility, travel, music/movies, future goals, sleep schedule, social energy, core values, dealbreakers. Mix of single-select, multi-select chips, and slider scales. Saved progressively to `blind_date_profiles.answers`. Premium aesthetic: glass cards, gradient progress, framer-motion transitions, category chips at top.
 
-## What gets built
+## 3. Matching
 
-### 1. Database — change-detection triggers
+- Edge function `bd-find-match`:
+  - Loads current user's vector
+  - Pulls candidate pool (opposite preference, active in last 14d, not previously matched/blocked)
+  - Computes cosine similarity on weighted dimensions
+  - Returns top match + compatibility % (only the % is sent to client; raw vectors stay server-side)
+- Fallback to mock when no candidates exist (preserves current demo).
 
-A new function `notify_user_sync(user_id)` that:
-- Builds the full user payload (joins `profiles`, `auth.users` for email/email_confirmed_at, latest approved `payment_submissions`, aggregated `profile_interests`, `profile_prompts`).
-- Calls `net.http_post` to the edge function with the `user_id` and an HMAC signature.
-- Writes a row to a new `sheet_sync_log` table (status: pending/success/failed, attempts, last_error, payload_hash).
+## 4. Session lifecycle
 
-Triggers (AFTER INSERT OR UPDATE) on:
-- `profiles` (covers name, phone, gender, age, city, story, plan, payment_status, account_status, onboarded, last_active_at, etc.)
-- `payment_submissions` (covers payment status changes + amount + completed date)
-- `signup_leads` (covers pre-verification leads so they appear in the sheet too)
+- Edge function `bd-start-session` creates session, sets 60s `ends_at`
+- Realtime subscription on `blind_date_messages` for live chat
+- Edge function `bd-decide` accepts `continue|pass`; when both `continue` → set `revealed_at`, unlock `/blind-date/chat/full`
 
-Triggers fire only when relevant columns actually change (compare OLD vs NEW) to avoid noisy duplicate webhooks.
+## 5. Pricing & payment
 
-### 2. Edge Function — `sync-user-to-sheets`
+Plans:
+- Free: 3 sessions / month
+- Blind Date Expert: ₹499 (₹399 for active Unveil subscribers) — 50 sessions
+- Blind Date Unlimited: ₹999 (₹399 for active Unveil subscribers) — unlimited
 
-- Receives `{ user_id }` (and `lead_id` for unverified leads).
-- Re-reads the user with service role to assemble a clean, current snapshot.
-- POSTs JSON to `SHEETS_WEBHOOK_URL` (Zapier/Make Catch Hook).
-- Retries on 5xx / network errors with exponential backoff (3 attempts).
-- Updates `sheet_sync_log` with status + error.
-- Returns 200 quickly so the DB trigger does not block writes.
+Reuse existing UPI QR + screenshot + WhatsApp flow:
+- New page `/blind-date/payment` mirrors `Payment.tsx` structure
+- New page `/blind-date/payment/review` mirrors `PaymentReview.tsx`
+- Insert into `payment_submissions` with `feature='blind_date'` and `plan` set to bd plan id
+- Discount auto-applied via `has_active_subscription()` check on the page
 
-Payload shape (one user per call):
-```json
-{
-  "user_id": "...",
-  "lead_id": null,
-  "name": "...",
-  "email": "...",
-  "phone": "+91...",
-  "gender": "...", "age": 28, "city": "...",
-  "story": "...",
-  "interests": "music, hiking, food",
-  "prompts": "Q1: A1 | Q2: A2",
-  "selected_plan": "premium",
-  "payment_status": "paid",
-  "payment_amount": "₹199",
-  "payment_completed_at": "2026-05-07T...",
-  "account_status": "active",
-  "onboarded": true,
-  "onboarding_step": 5,
-  "email_verified": true,
-  "created_at": "...", "last_active_at": "...",
-  "utm_source": "...", "utm_campaign": "...",
-  "updated_at": "..."
-}
-```
+Migration: add `feature text default 'core'` column to `payment_submissions`.
 
-### 3. Retry worker (cron)
+## 6. Admin panel
 
-A second small edge function `sync-user-to-sheets-retry` scheduled every 5 min via `pg_cron`:
-- Picks up rows in `sheet_sync_log` with `status = 'failed'` and `attempts < 5`.
-- Re-invokes `sync-user-to-sheets` for each.
+Add a top-level toggle in `/admindashboard` to switch between **Core** and **Blind Date** views. Blind Date view contains tabs:
+- **Users** — list of `blind_date_profiles` with plan, sessions used, last active
+- **Responses** — view a user's questionnaire answers
+- **Manual match** — pick two users → create session
+- **Payments** — filter `payment_submissions` where `feature='blind_date'`, approve/reject (reuses existing `AdminPayments` component with a feature filter)
+- **Active sessions** — live list with countdown
+- **Analytics** — funnel: setup → matched → continued → revealed → paid; conversion %
 
-### 4. Admin Panel — backup controls
+## 7. Analytics & privacy
 
-In `src/pages/Admin.tsx` user drawer:
-- "Resync to Google Sheet" button (calls edge function for that user_id).
-- A new "Sheet Sync" tab showing recent failed rows from `sheet_sync_log` with one-click retry.
-- Existing CSV export stays as-is (your "backup" requirement).
+- Track only generic events: `bd_setup_started`, `bd_setup_completed`, `bd_match_found`, `bd_session_started`, `bd_decision_made` (value: continue/pass count, not which user), `bd_revealed`, `bd_purchase` (with INR currency + value)
+- Existing `metaCapi.sanitize()` already strips compatibility/personality/chat fields — extend allowlist of stripped keys to cover new field names (`answers`, `compat_score`, `compat_vector`, `vibes`, `decision`, `session_id`, `match_id`)
+- No questionnaire data, no message bodies, no compatibility scores ever sent to Meta Pixel / CAPI
 
-### 5. Secrets
+## 8. UI updates
 
-Stored as Supabase secrets (server-only):
-- `SHEETS_WEBHOOK_URL` — the Zapier/Make Catch Hook URL.
-- `SHEETS_WEBHOOK_SECRET` — used to HMAC-sign the payload so Zapier can verify authenticity.
+- Header switch (already added) keeps working
+- Setup page: redesign into category-grouped flow with slider/chip inputs
+- Matching page: connect to real `bd-find-match` (keep current animation)
+- Decision page: call `bd-decide`
+- Premium page: real plans, "₹100 OFF for Unveil members" badge when active sub detected, CTA → `/blind-date/payment?plan=expert|unlimited`
 
-Nothing Google-related ever touches the frontend.
+## Technical notes
 
-## Zap/Scenario you set up once (outside Lovable)
+- All new edge functions: JWT-validated, CORS, Zod input validation, never return `compat_vector`
+- New supabase tables get standard `updated_at` trigger
+- `blind_date_profiles.compat_vector` populated by SECURITY DEFINER function `bd_compute_vector(answers jsonb)` on insert/update
+- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE blind_date_messages, blind_date_sessions`
+- Frontend store (`src/features/blind-date/store.ts`) extended to hold session id + remote match data; no compat vector stored client-side
 
-In Zapier (or Make):
-1. Trigger: **Webhook → Catch Hook** → copy URL → give it to us as `SHEETS_WEBHOOK_URL`.
-2. Action: **Google Sheets → Lookup Spreadsheet Row** by `user_id`.
-3. Path A (row found): **Update Spreadsheet Row** with the webhook fields.
-4. Path B (row not found): **Create Spreadsheet Row**.
+## Out of scope for this iteration
 
-This guarantees one row per user_id (your dedup requirement) and lets you change column order in the sheet without touching code.
+- Voice/video in blind chat
+- Group blind dates
+- Cross-city matching weights tuning (uses simple cosine v1)
 
-## Files to be created / changed
-
-**New**
-- `supabase/migrations/<ts>_sheet_sync.sql` — `sheet_sync_log` table + RLS, triggers on `profiles`, `payment_submissions`, `signup_leads`, helper function `build_user_sheet_payload(uuid)`.
-- `supabase/functions/sync-user-to-sheets/index.ts`
-- `supabase/functions/sync-user-to-sheets-retry/index.ts`
-- pg_cron job (via insert tool, not migration) to run retry every 5 min.
-
-**Edited**
-- `src/pages/Admin.tsx` — add "Resync to Sheet" action + Sheet Sync log section.
-- `supabase/config.toml` — register the two new functions if needed.
-
-## Open items I will default on (tell me if you want different)
-
-- Provider: **Zapier** flow described above. Make.com works identically — just give us the Make webhook URL instead.
-- Throttling: trigger debounces noisy `last_active_at` updates by only firing if it changed by ≥ 5 minutes (otherwise every page view would call Zapier).
-- Lead rows: unverified leads (from `signup_leads`) sync with `user_id` empty and `lead_id` set so they're visible but distinguishable in the sheet.
-
-## What you need to do after I implement
-
-1. Create a Zap/Make scenario as above and paste the Catch Hook URL when I ask for the secret.
-2. Pre-create a Google Sheet with a header row matching the payload field names (I'll give you the exact list).
-
-Once approved, I'll implement everything and ask you for the webhook URL at the right moment.
+After approval I'll execute the migration first, then edge functions + frontend + admin in one pass.
