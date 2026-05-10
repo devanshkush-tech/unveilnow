@@ -34,6 +34,7 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
+import AdminBlindDate from "@/components/admin/AdminBlindDate";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
@@ -268,6 +269,7 @@ const Admin = () => {
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
+            <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
@@ -410,6 +412,10 @@ const Admin = () => {
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft p-6 text-sm text-muted-foreground">
               Open the user drawer to see reports filed against a member, and use the action buttons there to suspend, ban, or delete.
             </div>
+          </TabsContent>
+
+          <TabsContent value="blind-date">
+            <AdminBlindDate />
           </TabsContent>
         </Tabs>
       </main>
