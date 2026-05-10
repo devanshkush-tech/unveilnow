@@ -124,6 +124,122 @@ export type Database = {
         }
         Relationships: []
       }
+      blind_date_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          session_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          session_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blind_date_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "blind_date_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blind_date_profiles: {
+        Row: {
+          answers: Json
+          compat_vector: Json
+          completed: boolean
+          created_at: string
+          period_start: string
+          plan: string
+          sessions_limit: number | null
+          sessions_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          compat_vector?: Json
+          completed?: boolean
+          created_at?: string
+          period_start?: string
+          plan?: string
+          sessions_limit?: number | null
+          sessions_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          compat_vector?: Json
+          completed?: boolean
+          created_at?: string
+          period_start?: string
+          plan?: string
+          sessions_limit?: number | null
+          sessions_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      blind_date_sessions: {
+        Row: {
+          compatibility: number | null
+          created_at: string
+          decision_a: string | null
+          decision_b: string | null
+          ends_at: string
+          id: string
+          revealed_at: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          compatibility?: number | null
+          created_at?: string
+          decision_a?: string | null
+          decision_b?: string | null
+          ends_at?: string
+          id?: string
+          revealed_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          compatibility?: number | null
+          created_at?: string
+          decision_a?: string | null
+          decision_b?: string | null
+          ends_at?: string
+          id?: string
+          revealed_at?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_id: string
@@ -315,6 +431,7 @@ export type Database = {
           admin_notes: string | null
           amount_label: string | null
           created_at: string
+          feature: string
           id: string
           phone: string | null
           plan: string
@@ -330,6 +447,7 @@ export type Database = {
           admin_notes?: string | null
           amount_label?: string | null
           created_at?: string
+          feature?: string
           id?: string
           phone?: string | null
           plan: string
@@ -345,6 +463,7 @@ export type Database = {
           admin_notes?: string | null
           amount_label?: string | null
           created_at?: string
+          feature?: string
           id?: string
           phone?: string | null
           plan?: string
@@ -868,6 +987,18 @@ export type Database = {
         Args: { _lead_id: string; _source: string; _user_id: string }
         Returns: undefined
       }
+      get_my_bd_profile: {
+        Args: never
+        Returns: {
+          answers: Json
+          completed: boolean
+          period_start: string
+          plan: string
+          sessions_limit: number
+          sessions_used: number
+          user_id: string
+        }[]
+      }
       get_my_match_usage: {
         Args: never
         Returns: {
@@ -891,6 +1022,10 @@ export type Database = {
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
       match_limit_for_plan: { Args: { _plan: string }; Returns: number }
       refresh_match_period: { Args: { _user_id: string }; Returns: undefined }
+      save_my_bd_answers: {
+        Args: { _answers: Json; _completed?: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
