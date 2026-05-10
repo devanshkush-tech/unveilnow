@@ -34,6 +34,7 @@ import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
+import AdminBlindDate from "@/components/admin/AdminBlindDate";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
