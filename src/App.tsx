@@ -120,6 +120,22 @@ const App = () => (
             <Route path="/blind-date/matched" element={<BlindDateMatched />} />
             <Route path="/blind-date/chat/full" element={<BlindDateFullChat />} />
             <Route path="/blind-date/premium" element={<BlindDatePremium />} />
+            <Route
+              path="/blind-date/payment"
+              element={
+                <RequireAuth requireOnboarded={false} requireActive={false}>
+                  <BlindDatePayment />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/blind-date/payment/review"
+              element={
+                <RequireAuth requireOnboarded={false} requireActive={false}>
+                  <BlindDatePaymentReview />
+                </RequireAuth>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
