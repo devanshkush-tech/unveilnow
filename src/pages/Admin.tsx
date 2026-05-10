@@ -417,6 +417,7 @@ const Admin = () => {
           <TabsContent value="blind-date">
             <AdminBlindDate />
           </TabsContent>
+        </Tabs>
       </main>
 
       {/* User detail drawer */}
