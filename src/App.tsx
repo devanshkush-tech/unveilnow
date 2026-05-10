@@ -41,6 +41,8 @@ import BlindDateDecision from "./features/blind-date/pages/Decision";
 import BlindDateMatched from "./features/blind-date/pages/Matched";
 import BlindDateFullChat from "./features/blind-date/pages/FullChat";
 import BlindDatePremium from "./features/blind-date/pages/Premium";
+import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
+import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
 
 const queryClient = new QueryClient();
 
