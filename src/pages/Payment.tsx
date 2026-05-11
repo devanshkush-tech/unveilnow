@@ -203,14 +203,13 @@ const Payment = () => {
       </header>
 
       <main className="container max-w-4xl py-10 md:py-14 space-y-10">
-        <section className="text-center max-w-2xl mx-auto animate-fade-up">
+        <section className="text-center max-w-xl mx-auto animate-fade-up">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">One last step</p>
-          <h1 className="font-display text-3xl md:text-5xl leading-tight">Pay a Small Fee to Keep Unveil Now Genuine</h1>
-          <p className="text-muted-foreground mt-4">
-            At Unveil Now, we charge a small fee to make sure everyone here is serious about finding a real connection.
-          </p>
-          <p className="text-muted-foreground mt-2">
-            This helps us keep the platform away from fake profiles, casual timepassers, and people who are not genuinely interested.
+          <h1 className="font-display text-3xl md:text-4xl leading-tight tracking-tight text-balance">
+            Keep Unveil Now genuine.
+          </h1>
+          <p className="text-muted-foreground mt-3 text-balance">
+            A small one-time fee filters out fake profiles and timepassers — so everyone here is serious about a real connection.
           </p>
         </section>
 
