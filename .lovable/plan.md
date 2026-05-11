@@ -1,98 +1,52 @@
-# Blind Date — Full Feature Build
+## Goal
+Fix three layout/flow issues on the Payment + PaymentReview screens.
 
-The Blind Date scaffold already exists at `/blind-date/*` with a 5-question setup, mock matching, timed chat, decision, matched, full chat, and a premium teaser page. This plan upgrades it into the production feature you described.
+---
 
-## 1. Database (new tables, RLS-protected)
+### 1. "Missed the QR / UPI ID? Go back" should actually return to the plan + QR page
 
-- `blind_date_profiles` — one row per user
-  - `user_id` (PK, FK auth.users)
-  - `answers` jsonb (full questionnaire)
-  - `compat_vector` jsonb (derived numeric vector — server only)
-  - `plan` text (`free` | `expert` | `unlimited`)
-  - `sessions_used`, `sessions_limit`, `period_start`
-- `blind_date_sessions`
-  - `id`, `user_a`, `user_b`, `status` (`active` | `decided` | `revealed` | `expired`)
-  - `started_at`, `ends_at`, `decision_a`, `decision_b`, `revealed_at`
-- `blind_date_messages`
-  - `id`, `session_id`, `sender_id`, `body`, `created_at`
-- `blind_date_payments` — mirrors existing `payment_submissions` but tagged `feature='blind_date'` (we will actually reuse `payment_submissions` with a new `feature` column instead of a separate table to keep admin tooling unified)
+**Problem:** The button on `/payment/review` does `navigate("/payment")`, but `Payment.tsx` auto-redirects back to `/payment/review` whenever `payment_status === "pending"`. So clicking the button does nothing visible.
 
-RLS:
-- Users read/write only their own `blind_date_profiles`
-- Sessions/messages: only participants can read; messages insert only while session active
-- Admins (via `has_role`) full read; can insert sessions (manual matchmaking)
-- `compat_vector` never returned to client (column-level: kept server-side via RPC only)
+**Fix in `src/pages/PaymentReview.tsx`:**
+- Change the button to `navigate("/payment?revisit=1")`.
 
-## 2. Questionnaire (15 sections, ~25 questions)
+**Fix in `src/pages/Payment.tsx`:**
+- Read `useSearchParams()`. If `revisit=1` is present, skip the `payment_status === "pending"` → `/payment/review` redirect so the user can see the QR, UPI ID, and plan cards again.
+- All other redirects (active account → dashboard, missing profile → onboarding) stay intact.
 
-Categories: communication style, introvert/extrovert, relationship intent, hobbies, lifestyle, work-life balance, humour, emotional compatibility, travel, music/movies, future goals, sleep schedule, social energy, core values, dealbreakers. Mix of single-select, multi-select chips, and slider scales. Saved progressively to `blind_date_profiles.answers`. Premium aesthetic: glass cards, gradient progress, framer-motion transitions, category chips at top.
+---
 
-## 3. Matching
+### 2. Buttons overflowing the card on `/payment/review`
 
-- Edge function `bd-find-match`:
-  - Loads current user's vector
-  - Pulls candidate pool (opposite preference, active in last 14d, not previously matched/blocked)
-  - Computes cosine similarity on weighted dimensions
-  - Returns top match + compatibility % (only the % is sent to client; raw vectors stay server-side)
-- Fallback to mock when no candidates exist (preserves current demo).
+**Problem:** Four buttons sit in a `flex flex-col sm:flex-row` row inside a max-width card; on small/medium widths they wrap awkwardly and clip the card edge.
 
-## 4. Session lifecycle
+**Fix in `src/pages/PaymentReview.tsx`:**
+- Switch the action row to a responsive grid that wraps cleanly:
+  - Mobile: stacked full-width buttons (`grid-cols-1`).
+  - ≥sm: `grid-cols-2` so 2×2 layout (or 2×1 when only two buttons).
+- Add `w-full` and `whitespace-normal` (or shorten label to "Missed QR? Go back") so long text doesn't push past the card.
+- Constrain action area with `max-w-md mx-auto`.
 
-- Edge function `bd-start-session` creates session, sets 60s `ends_at`
-- Realtime subscription on `blind_date_messages` for live chat
-- Edge function `bd-decide` accepts `continue|pass`; when both `continue` → set `revealed_at`, unlock `/blind-date/chat/full`
+---
 
-## 5. Pricing & payment
+### 3. Hero text on `/payment` and the QR section
 
-Plans:
-- Free: 3 sessions / month
-- Blind Date Expert: ₹499 (₹399 for active Unveil subscribers) — 50 sessions
-- Blind Date Unlimited: ₹999 (₹399 for active Unveil subscribers) — unlimited
+**Problem:** Hero headline "Pay a Small Fee to Keep Unveil Now Genuine" wraps awkwardly at this viewport, and the QR section (`grid md:grid-cols-2`) feels cramped.
 
-Reuse existing UPI QR + screenshot + WhatsApp flow:
-- New page `/blind-date/payment` mirrors `Payment.tsx` structure
-- New page `/blind-date/payment/review` mirrors `PaymentReview.tsx`
-- Insert into `payment_submissions` with `feature='blind_date'` and `plan` set to bd plan id
-- Discount auto-applied via `has_active_subscription()` check on the page
+**Fix in `src/pages/Payment.tsx`:**
+- Shorten and rebalance the hero:
+  - H1: **"Keep Unveil Now genuine."**
+  - Sub (single tighter paragraph, replacing the two existing paragraphs):
+    *"A small one-time fee filters out fake profiles and timepassers — so everyone here is serious about a real connection."*
+- Tighten typography: `text-3xl md:text-4xl`, `leading-tight tracking-tight`, `max-w-xl mx-auto`, single `mt-3` paragraph.
+- QR section: add `gap-10`, ensure the right column image is centered on mobile (already ok), and add `text-balance` to the H2 "Pay … via any UPI app." so it doesn't break mid-price.
 
-Migration: add `feature text default 'core'` column to `payment_submissions`.
+Apply the same hero shortening to `src/features/blind-date/pages/PaymentPage.tsx` for consistency (headline → "Pick your Blind Date plan." stays; just tighten widths if needed — minor).
 
-## 6. Admin panel
+---
 
-Add a top-level toggle in `/admindashboard` to switch between **Core** and **Blind Date** views. Blind Date view contains tabs:
-- **Users** — list of `blind_date_profiles` with plan, sessions used, last active
-- **Responses** — view a user's questionnaire answers
-- **Manual match** — pick two users → create session
-- **Payments** — filter `payment_submissions` where `feature='blind_date'`, approve/reject (reuses existing `AdminPayments` component with a feature filter)
-- **Active sessions** — live list with countdown
-- **Analytics** — funnel: setup → matched → continued → revealed → paid; conversion %
+### Files touched
+- `src/pages/PaymentReview.tsx` — button grid + new query param on Go back link.
+- `src/pages/Payment.tsx` — honor `?revisit=1`, shorten hero copy, tighten layout.
 
-## 7. Analytics & privacy
-
-- Track only generic events: `bd_setup_started`, `bd_setup_completed`, `bd_match_found`, `bd_session_started`, `bd_decision_made` (value: continue/pass count, not which user), `bd_revealed`, `bd_purchase` (with INR currency + value)
-- Existing `metaCapi.sanitize()` already strips compatibility/personality/chat fields — extend allowlist of stripped keys to cover new field names (`answers`, `compat_score`, `compat_vector`, `vibes`, `decision`, `session_id`, `match_id`)
-- No questionnaire data, no message bodies, no compatibility scores ever sent to Meta Pixel / CAPI
-
-## 8. UI updates
-
-- Header switch (already added) keeps working
-- Setup page: redesign into category-grouped flow with slider/chip inputs
-- Matching page: connect to real `bd-find-match` (keep current animation)
-- Decision page: call `bd-decide`
-- Premium page: real plans, "₹100 OFF for Unveil members" badge when active sub detected, CTA → `/blind-date/payment?plan=expert|unlimited`
-
-## Technical notes
-
-- All new edge functions: JWT-validated, CORS, Zod input validation, never return `compat_vector`
-- New supabase tables get standard `updated_at` trigger
-- `blind_date_profiles.compat_vector` populated by SECURITY DEFINER function `bd_compute_vector(answers jsonb)` on insert/update
-- Realtime: `ALTER PUBLICATION supabase_realtime ADD TABLE blind_date_messages, blind_date_sessions`
-- Frontend store (`src/features/blind-date/store.ts`) extended to hold session id + remote match data; no compat vector stored client-side
-
-## Out of scope for this iteration
-
-- Voice/video in blind chat
-- Group blind dates
-- Cross-city matching weights tuning (uses simple cosine v1)
-
-After approval I'll execute the migration first, then edge functions + frontend + admin in one pass.
+No backend, schema, or business-logic changes.

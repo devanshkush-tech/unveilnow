@@ -108,18 +108,18 @@ const PaymentReview = () => {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button variant="hero" className="rounded-full" onClick={() => window.open(WHATSAPP_URL, "_blank", "noopener")}>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md mx-auto">
+            <Button variant="hero" className="w-full rounded-full whitespace-normal h-auto min-h-11 py-2" onClick={() => window.open(WHATSAPP_URL, "_blank", "noopener")}>
               <MessageCircle className="h-4 w-4" /> Re-send on WhatsApp
             </Button>
-            <Button variant="soft" className="rounded-full" onClick={refresh}>
+            <Button variant="soft" className="w-full rounded-full whitespace-normal h-auto min-h-11 py-2" onClick={refresh}>
               <RefreshCw className="h-4 w-4" /> Check status
             </Button>
-            <Button variant="outline" className="rounded-full" onClick={() => navigate("/payment")}>
-              Missed the QR / UPI ID? Go back
+            <Button variant="outline" className="w-full rounded-full whitespace-normal h-auto min-h-11 py-2 sm:col-span-2" onClick={() => navigate("/payment?revisit=1")}>
+              Missed QR / UPI ID? Go back
             </Button>
             {status === "rejected" && (
-              <Button variant="outline" className="rounded-full" onClick={() => navigate("/payment")}>Choose another plan</Button>
+              <Button variant="outline" className="w-full rounded-full whitespace-normal h-auto min-h-11 py-2 sm:col-span-2" onClick={() => navigate("/payment?revisit=1")}>Choose another plan</Button>
             )}
           </div>
         </div>
