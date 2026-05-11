@@ -80,7 +80,7 @@ const Payment = () => {
           return;
         }
 
-        if (data.payment_status === "pending") {
+        if (data.payment_status === "pending" && !revisit) {
           navigate("/payment/review", { replace: true });
           return;
         }
