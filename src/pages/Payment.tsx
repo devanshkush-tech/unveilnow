@@ -23,6 +23,8 @@ type Profile = {
 const Payment = () => {
   const { user, loading: authLoading } = useAuth(); // ✅ ONLY ONCE
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const revisit = searchParams.get("revisit") === "1";
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hydrating, setHydrating] = useState(true);
