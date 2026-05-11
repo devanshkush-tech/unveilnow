@@ -43,6 +43,7 @@ import BlindDateFullChat from "./features/blind-date/pages/FullChat";
 import BlindDatePremium from "./features/blind-date/pages/Premium";
 import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
 import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
+import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 
 const queryClient = new QueryClient();
 
