@@ -251,7 +251,7 @@ const Payment = () => {
           <div className="space-y-5 order-2 md:order-1">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Step 1</p>
-              <h2 className="font-display text-2xl md:text-3xl">Pay {selected.price} via any UPI app.</h2>
+              <h2 className="font-display text-2xl md:text-3xl text-balance">Pay {selected.price} via any UPI app.</h2>
               <p className="text-sm text-muted-foreground mt-2">Scan the QR or pay to the UPI ID below.</p>
             </div>
 
