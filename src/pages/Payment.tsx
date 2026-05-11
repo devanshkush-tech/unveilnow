@@ -29,6 +29,14 @@ const Payment = () => {
   const [submitting, setSubmitting] = useState(false);
   const [phone, setPhone] = useState("");
   const [plan, setPlan] = useState<PaymentPlanId>("premium");
+  const qrRef = useRef<HTMLElement | null>(null);
+
+  const selectPlan = (id: PaymentPlanId) => {
+    setPlan(id);
+    requestAnimationFrame(() => {
+      qrRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   useEffect(() => {
     document.title = "Choose your plan · Unveil";
