@@ -43,6 +43,7 @@ import BlindDateFullChat from "./features/blind-date/pages/FullChat";
 import BlindDatePremium from "./features/blind-date/pages/Premium";
 import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
 import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
+import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 
 const queryClient = new QueryClient();
 
@@ -112,19 +113,19 @@ const App = () => (
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
             </Route>
-            <Route path="/blind-date" element={<BlindDateLanding />} />
-            <Route path="/blind-date/setup" element={<BlindDateSetup />} />
-            <Route path="/blind-date/matching" element={<BlindDateMatching />} />
-            <Route path="/blind-date/chat" element={<BlindDateChat />} />
-            <Route path="/blind-date/decision" element={<BlindDateDecision />} />
-            <Route path="/blind-date/matched" element={<BlindDateMatched />} />
-            <Route path="/blind-date/chat/full" element={<BlindDateFullChat />} />
-            <Route path="/blind-date/premium" element={<BlindDatePremium />} />
+            <Route path="/blind-date" element={<BlindDateGate><BlindDateLanding /></BlindDateGate>} />
+            <Route path="/blind-date/setup" element={<BlindDateGate><BlindDateSetup /></BlindDateGate>} />
+            <Route path="/blind-date/matching" element={<BlindDateGate><BlindDateMatching /></BlindDateGate>} />
+            <Route path="/blind-date/chat" element={<BlindDateGate><BlindDateChat /></BlindDateGate>} />
+            <Route path="/blind-date/decision" element={<BlindDateGate><BlindDateDecision /></BlindDateGate>} />
+            <Route path="/blind-date/matched" element={<BlindDateGate><BlindDateMatched /></BlindDateGate>} />
+            <Route path="/blind-date/chat/full" element={<BlindDateGate><BlindDateFullChat /></BlindDateGate>} />
+            <Route path="/blind-date/premium" element={<BlindDateGate><BlindDatePremium /></BlindDateGate>} />
             <Route
               path="/blind-date/payment"
               element={
                 <RequireAuth requireOnboarded={false} requireActive={false}>
-                  <BlindDatePayment />
+                  <BlindDateGate><BlindDatePayment /></BlindDateGate>
                 </RequireAuth>
               }
             />
@@ -132,7 +133,7 @@ const App = () => (
               path="/blind-date/payment/review"
               element={
                 <RequireAuth requireOnboarded={false} requireActive={false}>
-                  <BlindDatePaymentReview />
+                  <BlindDateGate><BlindDatePaymentReview /></BlindDateGate>
                 </RequireAuth>
               }
             />

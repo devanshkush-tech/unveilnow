@@ -115,6 +115,9 @@ const PaymentReview = () => {
             <Button variant="soft" className="rounded-full" onClick={refresh}>
               <RefreshCw className="h-4 w-4" /> Check status
             </Button>
+            <Button variant="outline" className="rounded-full" onClick={() => navigate("/payment")}>
+              Missed the QR / UPI ID? Go back
+            </Button>
             {status === "rejected" && (
               <Button variant="outline" className="rounded-full" onClick={() => navigate("/payment")}>Choose another plan</Button>
             )}

@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Check, ArrowRight, Copy, MessageCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,14 @@ const Payment = () => {
   const [submitting, setSubmitting] = useState(false);
   const [phone, setPhone] = useState("");
   const [plan, setPlan] = useState<PaymentPlanId>("premium");
+  const qrRef = useRef<HTMLElement | null>(null);
+
+  const selectPlan = (id: PaymentPlanId) => {
+    setPlan(id);
+    requestAnimationFrame(() => {
+      qrRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
 
   useEffect(() => {
     document.title = "Choose your plan · Unveil";
@@ -195,8 +203,13 @@ const Payment = () => {
       <main className="container max-w-4xl py-10 md:py-14 space-y-10">
         <section className="text-center max-w-2xl mx-auto animate-fade-up">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">One last step</p>
-          <h1 className="font-display text-3xl md:text-5xl leading-tight">Activate your Unveil membership.</h1>
-          <p className="text-muted-foreground mt-3">Likes are always unlimited. Pick a plan that matches how many <em>matches</em> you want each month.</p>
+          <h1 className="font-display text-3xl md:text-5xl leading-tight">Pay a Small Fee to Keep Unveil Now Genuine</h1>
+          <p className="text-muted-foreground mt-4">
+            At Unveil Now, we charge a small fee to make sure everyone here is serious about finding a real connection.
+          </p>
+          <p className="text-muted-foreground mt-2">
+            This helps us keep the platform away from fake profiles, casual timepassers, and people who are not genuinely interested.
+          </p>
         </section>
 
         {/* Plan picker */}
@@ -206,7 +219,7 @@ const Payment = () => {
             return (
               <button
                 key={p.id}
-                onClick={() => setPlan(p.id)}
+                onClick={() => selectPlan(p.id)}
                 className={`text-left p-5 md:p-6 rounded-3xl border transition-all flex flex-col ${
                   active
                     ? "bg-gradient-romance text-primary-foreground border-transparent shadow-elegant md:scale-[1.02]"
@@ -225,7 +238,7 @@ const Payment = () => {
                   ))}
                 </ul>
                 <div className={`mt-5 text-xs font-medium ${active ? "opacity-90" : "text-muted-foreground"}`}>
-                  {active ? "Selected" : "Tap to choose"}
+                  {active ? "Selected — scroll down to pay" : "Tap to choose"}
                 </div>
               </button>
             );
@@ -233,7 +246,7 @@ const Payment = () => {
         </section>
 
         {/* Pay via UPI */}
-        <section className="rounded-3xl bg-card border border-border/60 shadow-card p-6 md:p-10 grid md:grid-cols-2 gap-8 md:gap-10 items-center">
+        <section ref={qrRef} className="rounded-3xl bg-card border border-border/60 shadow-card p-6 md:p-10 grid md:grid-cols-2 gap-8 md:gap-10 items-center scroll-mt-20">
           <div className="space-y-5 order-2 md:order-1">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Step 1</p>
