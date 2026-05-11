@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,8 @@ type Profile = {
 const Payment = () => {
   const { user, loading: authLoading } = useAuth(); // ✅ ONLY ONCE
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const revisit = searchParams.get("revisit") === "1";
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hydrating, setHydrating] = useState(true);
@@ -78,7 +80,7 @@ const Payment = () => {
           return;
         }
 
-        if (data.payment_status === "pending") {
+        if (data.payment_status === "pending" && !revisit) {
           navigate("/payment/review", { replace: true });
           return;
         }
@@ -201,14 +203,13 @@ const Payment = () => {
       </header>
 
       <main className="container max-w-4xl py-10 md:py-14 space-y-10">
-        <section className="text-center max-w-2xl mx-auto animate-fade-up">
+        <section className="text-center max-w-xl mx-auto animate-fade-up">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">One last step</p>
-          <h1 className="font-display text-3xl md:text-5xl leading-tight">Pay a Small Fee to Keep Unveil Now Genuine</h1>
-          <p className="text-muted-foreground mt-4">
-            At Unveil Now, we charge a small fee to make sure everyone here is serious about finding a real connection.
-          </p>
-          <p className="text-muted-foreground mt-2">
-            This helps us keep the platform away from fake profiles, casual timepassers, and people who are not genuinely interested.
+          <h1 className="font-display text-3xl md:text-4xl leading-tight tracking-tight text-balance">
+            Keep Unveil Now genuine.
+          </h1>
+          <p className="text-muted-foreground mt-3 text-balance">
+            A small one-time fee filters out fake profiles and timepassers — so everyone here is serious about a real connection.
           </p>
         </section>
 
@@ -250,7 +251,7 @@ const Payment = () => {
           <div className="space-y-5 order-2 md:order-1">
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Step 1</p>
-              <h2 className="font-display text-2xl md:text-3xl">Pay {selected.price} via any UPI app.</h2>
+              <h2 className="font-display text-2xl md:text-3xl text-balance">Pay {selected.price} via any UPI app.</h2>
               <p className="text-sm text-muted-foreground mt-2">Scan the QR or pay to the UPI ID below.</p>
             </div>
 
