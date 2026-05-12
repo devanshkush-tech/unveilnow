@@ -482,7 +482,7 @@ Deno.serve(async (req) => {
       const profilesMap = new Map<string, any>();
       if (ids.length) {
         const { data: profs } = await admin.from('profiles')
-          .select('id, first_name, account_status, payment_status, selected_plan, phone, is_admin_created, plan')
+          .select('id, first_name, account_status, payment_status, selected_plan, phone, is_admin_created, plan, utm_source, utm_medium, utm_campaign, utm_content, utm_term')
           .in('id', ids);
         for (const p of profs ?? []) profilesMap.set(p.id, p);
       }
@@ -490,13 +490,35 @@ Deno.serve(async (req) => {
       const emails = new Map<string, string>();
       for (const u of authPage?.users ?? []) emails.set(u.id, u.email ?? '');
 
-      let rows = (subs ?? []).map((s: any) => ({
-        ...s,
-        name: profilesMap.get(s.user_id)?.first_name ?? '',
-        email: emails.get(s.user_id) ?? '',
-        account_status: profilesMap.get(s.user_id)?.account_status ?? 'locked',
-        is_admin_created: !!profilesMap.get(s.user_id)?.is_admin_created,
-      }));
+      // Fall back to signup_leads UTMs when profile has none.
+      const leadUtmByAuthId = new Map<string, any>();
+      const leadUtmByEmail = new Map<string, any>();
+      if (ids.length) {
+        const { data: leads } = await admin.from('signup_leads')
+          .select('auth_user_id, email, utm_source, utm_medium, utm_campaign, utm_content, utm_term');
+        for (const l of leads ?? []) {
+          if (l.auth_user_id) leadUtmByAuthId.set(l.auth_user_id, l);
+          if (l.email) leadUtmByEmail.set(String(l.email).toLowerCase(), l);
+        }
+      }
+
+      let rows = (subs ?? []).map((s: any) => {
+        const p = profilesMap.get(s.user_id);
+        const email = emails.get(s.user_id) ?? '';
+        const lead = leadUtmByAuthId.get(s.user_id) ?? (email ? leadUtmByEmail.get(email.toLowerCase()) : null);
+        return {
+          ...s,
+          name: p?.first_name ?? '',
+          email,
+          account_status: p?.account_status ?? 'locked',
+          is_admin_created: !!p?.is_admin_created,
+          utm_source: p?.utm_source ?? lead?.utm_source ?? '',
+          utm_medium: p?.utm_medium ?? lead?.utm_medium ?? '',
+          utm_campaign: p?.utm_campaign ?? lead?.utm_campaign ?? '',
+          utm_content: p?.utm_content ?? lead?.utm_content ?? '',
+          utm_term: p?.utm_term ?? lead?.utm_term ?? '',
+        };
+      });
 
       if (q && q.trim()) {
         const term = q.trim().toLowerCase();
