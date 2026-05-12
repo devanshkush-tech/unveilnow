@@ -22,6 +22,11 @@ type PaymentRow = {
   created_at: string;
   account_status: string;
   is_admin_created: boolean;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
 };
 
 const planBadge: Record<string, string> = {
