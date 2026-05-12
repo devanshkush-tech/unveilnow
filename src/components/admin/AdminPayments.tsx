@@ -95,7 +95,8 @@ const AdminPayments = () => {
                 <th className="text-left px-4 py-3">Phone</th>
                 <th className="text-left px-4 py-3">Plan</th>
                 <th className="text-left px-4 py-3">Amount</th>
-                <th className="text-left px-4 py-3">Source / Campaign</th>
+                <th className="text-left px-4 py-3">Source</th>
+                <th className="text-left px-4 py-3">Campaign</th>
                 <th className="text-left px-4 py-3">Submitted</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3">Account</th>
@@ -104,9 +105,9 @@ const AdminPayments = () => {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={9} className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-muted-foreground" /></td></tr>
+                <tr><td colSpan={10} className="p-10 text-center"><Loader2 className="h-5 w-5 animate-spin inline text-muted-foreground" /></td></tr>
               ) : rows.length === 0 ? (
-                <tr><td colSpan={9} className="p-10 text-center text-muted-foreground">No payments found.</td></tr>
+                <tr><td colSpan={10} className="p-10 text-center text-muted-foreground">No payments found.</td></tr>
               ) : rows.map((r) => (
                 <tr key={r.id} className="border-t border-border/60 hover:bg-secondary/30">
                   <td className="px-4 py-3">
@@ -121,15 +122,8 @@ const AdminPayments = () => {
                   <td className="px-4 py-3 text-muted-foreground">{r.phone || "—"}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs capitalize ${planBadge[r.plan] ?? "bg-secondary"}`}>{r.plan}</span></td>
                   <td className="px-4 py-3">{r.amount_label || "—"}</td>
-                  <td className="px-4 py-3 text-xs">
-                    {r.utm_source || r.utm_campaign || r.utm_medium ? (
-                      <div className="space-y-0.5 max-w-[180px]">
-                        <div className="font-medium truncate">{r.utm_source || "direct"}{r.utm_medium ? ` · ${r.utm_medium}` : ""}</div>
-                        {r.utm_campaign && <div className="text-muted-foreground truncate">{r.utm_campaign}</div>}
-                        {r.utm_content && <div className="text-muted-foreground truncate">{r.utm_content}</div>}
-                      </div>
-                    ) : <span className="text-muted-foreground">direct</span>}
-                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.utm_source || "direct"}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{r.utm_campaign || "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
                   <td className="px-4 py-3">
                     {r.status === "pending" ? (
