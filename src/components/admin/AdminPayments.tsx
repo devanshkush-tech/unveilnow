@@ -95,7 +95,8 @@ const AdminPayments = () => {
                 <th className="text-left px-4 py-3">Phone</th>
                 <th className="text-left px-4 py-3">Plan</th>
                 <th className="text-left px-4 py-3">Amount</th>
-                <th className="text-left px-4 py-3">Source / Campaign</th>
+                <th className="text-left px-4 py-3">Source</th>
+                <th className="text-left px-4 py-3">Campaign</th>
                 <th className="text-left px-4 py-3">Submitted</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3">Account</th>
