@@ -184,6 +184,18 @@ const AdminPayments = () => {
                   <div className="font-display">{active.amount_label || "—"}</div>
                 </div>
               </div>
+              <div className="rounded-xl border border-border/60 p-3 space-y-1">
+                <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Attribution</div>
+                {(active.utm_source || active.utm_medium || active.utm_campaign || active.utm_content || active.utm_term) ? (
+                  <div className="text-xs space-y-0.5">
+                    <div><span className="text-muted-foreground">source:</span> {active.utm_source || "—"}</div>
+                    <div><span className="text-muted-foreground">medium:</span> {active.utm_medium || "—"}</div>
+                    <div><span className="text-muted-foreground">campaign:</span> {active.utm_campaign || "—"}</div>
+                    {active.utm_content && <div><span className="text-muted-foreground">content:</span> {active.utm_content}</div>}
+                    {active.utm_term && <div><span className="text-muted-foreground">term:</span> {active.utm_term}</div>}
+                  </div>
+                ) : <div className="text-xs text-muted-foreground">Direct (no UTMs captured)</div>}
+              </div>
               <div className="space-y-2">
                 <Label>Internal notes</Label>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="rounded-xl min-h-[100px]" placeholder="UPI ref, screenshot link, etc." />
