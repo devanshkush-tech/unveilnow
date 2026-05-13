@@ -544,21 +544,41 @@ Deno.serve(async (req) => {
       const { error: upErr } = await admin.from('payment_submissions').update(patch).eq('id', id);
       if (upErr) return json({ error: upErr.message }, 500);
 
-      // Mirror to profile
-      const profPatch: any = { payment_status: status };
-      if (status === 'approved') {
-        profPatch.account_status = 'active';
-        profPatch.plan = sub.plan;
-        profPatch.selected_plan = sub.plan;
-        const start = new Date();
-        const end = new Date(start);
-        end.setDate(end.getDate() + 30); // default 30-day cycle; admin can override later
-        profPatch.plan_started_at = start.toISOString();
-        profPatch.plan_expires_at = end.toISOString();
-      } else if (status === 'rejected') {
-        profPatch.account_status = 'locked';
+      const isBd = sub.feature === 'blind_date' || (sub.plan && String(sub.plan).startsWith('bd_'));
+
+      if (isBd) {
+        // Blind Date: credit chats on approval, never touch core profile fields.
+        if (status === 'approved') {
+          const bdId = String(sub.plan).startsWith('bd_') ? String(sub.plan).slice(3) : String(sub.plan);
+          const credits = bdId === 'starter' ? 10 : bdId === 'premium' ? 30 : bdId === 'elite' ? 100 : 0;
+          // Upsert blind_date_profiles row, adding credits to any existing balance.
+          const { data: existing } = await admin.from('blind_date_profiles')
+            .select('chats_remaining').eq('user_id', sub.user_id).maybeSingle();
+          const newRemaining = (existing?.chats_remaining ?? 0) + credits;
+          await admin.from('blind_date_profiles').upsert({
+            user_id: sub.user_id,
+            paid: true,
+            plan: sub.plan,
+            chats_remaining: newRemaining,
+          }, { onConflict: 'user_id' });
+        }
+      } else {
+        // Mirror core plan to profile
+        const profPatch: any = { payment_status: status };
+        if (status === 'approved') {
+          profPatch.account_status = 'active';
+          profPatch.plan = sub.plan;
+          profPatch.selected_plan = sub.plan;
+          const start = new Date();
+          const end = new Date(start);
+          end.setDate(end.getDate() + 30);
+          profPatch.plan_started_at = start.toISOString();
+          profPatch.plan_expires_at = end.toISOString();
+        } else if (status === 'rejected') {
+          profPatch.account_status = 'locked';
+        }
+        await admin.from('profiles').update(profPatch).eq('id', sub.user_id);
       }
-      await admin.from('profiles').update(profPatch).eq('id', sub.user_id);
 
       // Fire Meta CAPI Purchase event ONCE per approval (only when transitioning to approved).
       if (status === 'approved' && sub.status !== 'approved') {

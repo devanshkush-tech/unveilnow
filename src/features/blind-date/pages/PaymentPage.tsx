@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UPI_ID, WHATSAPP_URL } from "@/lib/payment";
-import { BD_PLANS, BlindDatePlanId, bdPriceForUser, bdPriceLabelForUser } from "../lib/plans";
+import { BD_PLANS, BlindDatePlanId, bdPlan } from "../lib/plans";
 import upiQr from "@/assets/upi-qr.jpeg";
 import { trackMetaEvent } from "@/lib/metaCapi";
 
@@ -16,12 +16,13 @@ export default function BlindDatePayment() {
   const { user, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
-  const initial = (params.get("plan") as BlindDatePlanId) || "expert";
-  const [plan, setPlan] = useState<BlindDatePlanId>(BD_PLANS.find((p) => p.id === initial) ? initial : "expert");
+  const initial = (params.get("plan") as BlindDatePlanId) || "premium";
+  const validInitial: BlindDatePlanId = BD_PLANS.find((p) => p.id === initial) ? initial : "premium";
+  const [plan, setPlan] = useState<BlindDatePlanId>(validInitial);
   const [phone, setPhone] = useState("");
-  const [isMember, setIsMember] = useState(false);
   const [hydrating, setHydrating] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const reason = params.get("reason");
 
   useEffect(() => { document.title = "Blind Date — Choose your plan"; }, []);
 
@@ -30,16 +31,15 @@ export default function BlindDatePayment() {
     if (!user) { setHydrating(false); return; }
     (async () => {
       const { data } = await supabase.from("profiles")
-        .select("phone, account_status").eq("id", user.id).maybeSingle();
+        .select("phone").eq("id", user.id).maybeSingle();
       if (data?.phone) setPhone(data.phone);
-      if (data?.account_status === "active") setIsMember(true);
       setHydrating(false);
     })();
   }, [user, authLoading]);
 
-  const selected = useMemo(() => BD_PLANS.find((p) => p.id === plan)!, [plan]);
-  const priceInr = bdPriceForUser(plan, isMember);
-  const priceLabel = bdPriceLabelForUser(plan, isMember);
+  const selected = useMemo(() => bdPlan(plan), [plan]);
+  const priceInr = selected.priceInr;
+  const priceLabel = selected.priceLabel;
 
   const copyUpi = async () => {
     try { await navigator.clipboard.writeText(UPI_ID); toast.success("UPI ID copied"); }
@@ -99,17 +99,20 @@ export default function BlindDatePayment() {
         <section className="text-center max-w-2xl mx-auto">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">Activate Blind Date</p>
           <h1 className="font-display text-3xl md:text-5xl leading-tight">Pick your Blind Date plan.</h1>
-          {isMember && (
-            <p className="text-sm mt-3 inline-block rounded-full px-3 py-1 bg-accent/15 border border-accent/30">
-              ✨ ₹100+ OFF as an Unveil member — applied automatically
+          <p className="text-sm text-muted-foreground mt-3 max-w-xl mx-auto">
+            We keep Blind Date exclusive and serious by charging a small access fee. Quality over endless swiping.
+          </p>
+          {reason === "out" && (
+            <p className="text-sm mt-4 inline-block rounded-full px-3 py-1 bg-accent/15 border border-accent/30">
+              You've used all your chats — pick a plan to keep going.
             </p>
           )}
         </section>
 
-        <section className="grid md:grid-cols-2 gap-4 md:gap-5">
+        <section className="grid md:grid-cols-3 gap-4 md:gap-5">
           {BD_PLANS.map((p) => {
             const active = p.id === plan;
-            const youPay = bdPriceLabelForUser(p.id, isMember);
+            const youPay = p.priceLabel;
             return (
               <button key={p.id} onClick={() => setPlan(p.id)}
                 className={`text-left p-5 md:p-6 rounded-3xl border transition-all flex flex-col ${

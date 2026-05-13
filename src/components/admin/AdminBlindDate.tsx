@@ -10,7 +10,10 @@ type BdProfile = {
   plan: string;
   sessions_used: number;
   sessions_limit: number | null;
+  chats_remaining: number;
+  paid: boolean;
   completed: boolean;
+  extended_completed: boolean;
   updated_at: string;
   answers: Record<string, unknown>;
 };
@@ -93,16 +96,44 @@ export default function AdminBlindDate() {
           <div className="rounded-2xl border border-border/60 overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-secondary/40">
-                <tr><th className="text-left p-3">User ID</th><th className="text-left p-3">Plan</th><th className="text-left p-3">Sessions</th><th className="text-left p-3">Completed</th><th></th></tr>
+                <tr>
+                  <th className="text-left p-3">User ID</th>
+                  <th className="text-left p-3">Plan</th>
+                  <th className="text-left p-3">Paid</th>
+                  <th className="text-left p-3">Chats left</th>
+                  <th className="text-left p-3">Setup</th>
+                  <th></th>
+                </tr>
               </thead>
               <tbody>
                 {profiles.map((p) => (
                   <tr key={p.user_id} className="border-t border-border/40">
                     <td className="p-3 font-mono text-xs">{p.user_id.slice(0, 8)}…</td>
                     <td className="p-3">{p.plan}</td>
-                    <td className="p-3">{p.sessions_used} / {p.sessions_limit ?? "∞"}</td>
-                    <td className="p-3">{p.completed ? "✓" : "—"}</td>
-                    <td className="p-3"><Button size="sm" variant="outline" onClick={() => setSelected(p)}>Responses</Button></td>
+                    <td className="p-3">{p.paid ? "✓" : "—"}</td>
+                    <td className="p-3">
+                      <input
+                        type="number"
+                        defaultValue={p.chats_remaining ?? 0}
+                        className="w-20 rounded-md bg-secondary/60 px-2 py-1 text-sm"
+                        onBlur={async (e) => {
+                          const v = Math.max(0, Number(e.target.value) || 0);
+                          if (v === p.chats_remaining) return;
+                          await supabase.from("blind_date_profiles")
+                            .update({ chats_remaining: v, paid: v > 0 ? true : p.paid })
+                            .eq("user_id", p.user_id);
+                          setProfiles((arr) => arr.map((x) => x.user_id === p.user_id ? { ...x, chats_remaining: v, paid: v > 0 ? true : x.paid } : x));
+                        }}
+                      />
+                    </td>
+                    <td className="p-3">{p.completed ? (p.extended_completed ? "✓✓" : "✓") : "—"}</td>
+                    <td className="p-3 flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setSelected(p)}>Responses</Button>
+                      <Button size="sm" variant="ghost" onClick={async () => {
+                        await supabase.from("blind_date_profiles").update({ chats_remaining: 0, paid: false }).eq("user_id", p.user_id);
+                        setProfiles((arr) => arr.map((x) => x.user_id === p.user_id ? { ...x, chats_remaining: 0, paid: false } : x));
+                      }}>Reset</Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -2,16 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BlindDateLayout } from "../components/BlindDateLayout";
 import { GlowButton } from "../components/GlowButton";
-import { useBlindDateStore } from "../store";
 
 export default function BlindDateLanding() {
   const nav = useNavigate();
-  const sessions = useBlindDateStore((s) => s.sessionsRemaining);
-
-  const handleStart = () => {
-    if (sessions <= 0) return nav("/blind-date/premium");
-    nav("/blind-date/setup");
-  };
+  const handleStart = () => nav("/blind-date/setup");
 
   return (
     <BlindDateLayout showBack={false}>
@@ -38,7 +32,7 @@ export default function BlindDateLanding() {
           <GlowButton onClick={handleStart} className="text-base px-10 py-4">
             Start Blind Date
           </GlowButton>
-          <div className="bd-muted text-sm mt-5">{sessions} sessions remaining today</div>
+          <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
         </motion.div>
       </div>
     </BlindDateLayout>

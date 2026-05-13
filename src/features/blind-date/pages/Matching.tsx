@@ -6,45 +6,54 @@ import { GlowButton } from "../components/GlowButton";
 import { CompatibilityBadge } from "../components/CompatibilityBadge";
 import { BlurredAvatar } from "../components/BlurredAvatar";
 import { VibeTags } from "../components/VibeTags";
-import { useBlindDateStore, pickMatch } from "../store";
+import { useBlindDateStore } from "../store";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const TEXTS = ["Finding your match…", "Scanning for chemistry…", "Almost there…"];
+const TEXTS = ["Finding a real match…", "Scanning for chemistry…", "Almost there…"];
 
 export default function BlindDateMatching() {
   const nav = useNavigate();
   const [textIdx, setTextIdx] = useState(0);
-  const [found, setFound] = useState(false);
+  const [phase, setPhase] = useState<"searching" | "found" | "empty">("searching");
   const setMatch = useBlindDateStore((s) => s.setMatch);
   const match = useBlindDateStore((s) => s.match);
 
   useEffect(() => {
     const t = setInterval(() => setTextIdx((i) => (i + 1) % TEXTS.length), 2000);
-    (async () => {
+    let cancelled = false;
+
+    const tryMatch = async () => {
       try {
         const { data, error } = await supabase.functions.invoke("bd-match", { body: {} });
-        if (error || !data) throw error ?? new Error("no_match");
-        if (data.error === "complete_setup") { toast.error("Complete the questionnaire first."); nav("/blind-date/setup"); return; }
-        if (data.error === "limit_reached") { nav("/blind-date/premium"); return; }
-        setMatch(data.match, data.session_id, data.ends_at, !!data.mock);
-      } catch {
-        // Fallback to mock so demo still works
-        const m = pickMatch();
-        setMatch(m, null, new Date(Date.now() + 60_000).toISOString(), true);
+        if (cancelled) return;
+        if (error) throw error;
+        if (data?.error === "complete_setup") { toast.error("Complete the questionnaire first."); nav("/blind-date/setup"); return; }
+        if (data?.error === "not_paid" || data?.error === "no_credits") { nav("/blind-date/payment?reason=out"); return; }
+        if (data?.error === "no_candidates" || !data?.session_id) {
+          setPhase("empty");
+          return;
+        }
+        setMatch(data.match, data.session_id, data.ends_at);
+        setPhase("found");
+      } catch (e: any) {
+        if (cancelled) return;
+        toast.error(e?.message ?? "Couldn't find a match. Try again soon.");
+        setPhase("empty");
       } finally {
         clearInterval(t);
-        setFound(true);
       }
-    })();
-    return () => { clearInterval(t); };
+    };
+
+    tryMatch();
+    return () => { cancelled = true; clearInterval(t); };
   }, [setMatch, nav]);
 
   return (
     <BlindDateLayout>
       <div className="min-h-screen flex flex-col items-center justify-center px-6 relative">
         <AnimatePresence mode="wait">
-          {!found ? (
+          {phase === "searching" ? (
             <motion.div key="searching" exit={{ scale: 0.5, opacity: 0 }} className="flex flex-col items-center">
               <div className="relative h-48 w-48 mb-10">
                 {[0, 1, 2].map((i) => (
@@ -57,6 +66,13 @@ export default function BlindDateMatching() {
                   {TEXTS[textIdx]}
                 </motion.p>
               </AnimatePresence>
+            </motion.div>
+          ) : phase === "empty" ? (
+            <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+              className="bd-surface rounded-3xl p-8 border border-white/10 max-w-md w-full text-center">
+              <p className="bd-serif text-2xl mb-3">No matches right now ✨</p>
+              <p className="bd-muted mb-6">We didn't find a real candidate at this moment. New people join every day — try again shortly.</p>
+              <GlowButton full onClick={() => nav("/blind-date")}>Back to Blind Date</GlowButton>
             </motion.div>
           ) : match ? (
             <motion.div key="card" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 120, damping: 18 }}

@@ -1,14 +1,34 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Sparkles, ArrowLeft } from "lucide-react";
-import { useIsAdmin } from "@/hooks/useRole";
+import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useIsAdmin } from "@/hooks/useRole";
+import { useBdProfile } from "../hooks/useBdProfile";
 
-export function BlindDateGate({ children }: { children: ReactNode }) {
-  const { isAdmin, loading } = useIsAdmin();
+type Stage = "setup" | "payment" | "play" | "any";
 
-  if (loading) {
+/**
+ * Gates Blind Date routes by auth → onboarding → payment → credits.
+ * Admins always pass.
+ *
+ * - require="any": just auth required (e.g. payment + payment review pages)
+ * - require="setup": auth required; if no Phase A answers, redirect /blind-date/setup
+ * - require="payment": auth + Phase A answers + paid
+ * - require="play": auth + paid + chats_remaining > 0 + extended onboarding done
+ */
+export function BlindDateGate({
+  children,
+  require = "play",
+}: {
+  children: ReactNode;
+  require?: Stage;
+}) {
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: roleLoading } = useIsAdmin();
+  const { profile, loading: bdLoading } = useBdProfile();
+  const loc = useLocation();
+
+  if (authLoading || roleLoading || (user && bdLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -16,36 +36,41 @@ export function BlindDateGate({ children }: { children: ReactNode }) {
     );
   }
 
+  if (!user) {
+    const next = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
+
   if (isAdmin) return <>{children}</>;
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-gradient-to-b from-background via-background to-secondary/30">
-      <motion.div
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md"
-      >
-        <div className="mx-auto h-16 w-16 rounded-full bg-gradient-romance flex items-center justify-center mb-6 shadow-elegant">
-          <Sparkles className="h-7 w-7 text-primary-foreground" />
-        </div>
-        <span className="inline-block text-xs tracking-[0.25em] text-accent-foreground/70 mb-4">
-          ✦ BLIND DATE
-        </span>
-        <h1 className="font-display text-4xl md:text-5xl leading-tight mb-4">
-          Coming soon.
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          We're crafting something special. Blind Date launches very soon —
-          stay tuned.
-        </p>
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 rounded-full border border-border/60 px-5 py-2.5 text-sm hover:bg-secondary/60 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Unveil
-        </Link>
-      </motion.div>
-    </div>
-  );
+  if (require === "any") return <>{children}</>;
+
+  // Phase A questionnaire
+  if (!profile?.completed) {
+    if (loc.pathname !== "/blind-date/setup") return <Navigate to="/blind-date/setup" replace />;
+  }
+
+  if (require === "setup") return <>{children}</>;
+
+  // Must be paid for everything beyond setup
+  if (!profile?.paid) {
+    if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment" replace />;
+    return <>{children}</>;
+  }
+
+  if (require === "payment") return <>{children}</>;
+
+  // Detailed onboarding required after payment
+  if (!profile?.extended_completed) {
+    if (loc.pathname !== "/blind-date/onboarding") return <Navigate to="/blind-date/onboarding" replace />;
+    return <>{children}</>;
+  }
+
+  // No credits left → back to payment
+  if ((profile?.chats_remaining ?? 0) <= 0) {
+    if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment?reason=out" replace />;
+    return <>{children}</>;
+  }
+
+  return <>{children}</>;
 }
