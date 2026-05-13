@@ -1,57 +1,49 @@
-// Blind Date pricing & feature constants. Mirrors src/lib/payment.ts patterns.
-export type BlindDatePlanId = "expert" | "unlimited";
+// Blind Date pricing — credit-based plans. One chat = one mutual match.
+export type BlindDatePlanId = "starter" | "premium" | "elite";
 
 export const BD_PLANS: {
   id: BlindDatePlanId;
   name: string;
   priceLabel: string;
-  memberPriceLabel: string;
   priceInr: number;
-  memberPriceInr: number;
-  sessions: number | null; // null = unlimited
+  chats: number;
   perks: string[];
   highlight?: boolean;
 }[] = [
   {
-    id: "expert",
-    name: "Blind Date Expert",
-    priceLabel: "₹499/mo",
-    memberPriceLabel: "₹399/mo",
-    priceInr: 499,
-    memberPriceInr: 399,
-    sessions: 50,
-    perks: [
-      "50 Blind Date sessions",
-      "Priority matchmaking",
-      "Advanced compatibility matching",
-      "Compatibility insights",
-    ],
+    id: "starter",
+    name: "Starter",
+    priceLabel: "₹199",
+    priceInr: 199,
+    chats: 10,
+    perks: ["10 mutual-match chats", "Compatibility-based matching", "Real users only"],
+  },
+  {
+    id: "premium",
+    name: "Premium",
+    priceLabel: "₹299",
+    priceInr: 299,
+    chats: 30,
+    perks: ["30 mutual-match chats", "Priority matchmaking", "Advanced compatibility"],
     highlight: true,
   },
   {
-    id: "unlimited",
-    name: "Blind Date Unlimited",
-    priceLabel: "₹999/mo",
-    memberPriceLabel: "₹399/mo",
-    priceInr: 999,
-    memberPriceInr: 399,
-    sessions: null,
-    perks: [
-      "Unlimited Blind Date sessions",
-      "Priority matchmaking",
-      "Advanced compatibility matching",
-      "Compatibility insights",
-    ],
+    id: "elite",
+    name: "Elite",
+    priceLabel: "₹499",
+    priceInr: 499,
+    chats: 100,
+    perks: ["100 mutual-match chats", "Top priority queue", "Deepest compatibility insights"],
   },
 ];
 
-export const BD_MEMBER_DISCOUNT_INR = 100;
-
-export function bdPriceForUser(planId: BlindDatePlanId, isMember: boolean) {
-  const p = BD_PLANS.find((x) => x.id === planId)!;
-  return isMember ? p.memberPriceInr : p.priceInr;
+export function bdPlan(id: BlindDatePlanId) {
+  return BD_PLANS.find((p) => p.id === id)!;
 }
-export function bdPriceLabelForUser(planId: BlindDatePlanId, isMember: boolean) {
-  const p = BD_PLANS.find((x) => x.id === planId)!;
-  return isMember ? p.memberPriceLabel : p.priceLabel;
+
+// Map a `payment_submissions.plan` value (e.g. "bd_premium") to chat credits.
+export function bdChatsForSubmissionPlan(plan: string | null | undefined): number {
+  if (!plan) return 0;
+  const id = plan.startsWith("bd_") ? plan.slice(3) : plan;
+  return BD_PLANS.find((p) => p.id === id)?.chats ?? 0;
 }
