@@ -43,6 +43,7 @@ import BlindDateFullChat from "./features/blind-date/pages/FullChat";
 import BlindDatePremium from "./features/blind-date/pages/Premium";
 import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
 import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
+import BlindDateExtendedSetup from "./features/blind-date/pages/ExtendedSetup";
 import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 
 const queryClient = new QueryClient();
@@ -113,30 +114,17 @@ const App = () => (
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
             </Route>
-            <Route path="/blind-date" element={<BlindDateGate><BlindDateLanding /></BlindDateGate>} />
-            <Route path="/blind-date/setup" element={<BlindDateGate><BlindDateSetup /></BlindDateGate>} />
+            <Route path="/blind-date" element={<BlindDateLanding />} />
+            <Route path="/blind-date/setup" element={<BlindDateGate require="setup"><BlindDateSetup /></BlindDateGate>} />
+            <Route path="/blind-date/payment" element={<BlindDateGate require="payment"><BlindDatePayment /></BlindDateGate>} />
+            <Route path="/blind-date/payment/review" element={<BlindDateGate require="any"><BlindDatePaymentReview /></BlindDateGate>} />
+            <Route path="/blind-date/onboarding" element={<BlindDateGate require="payment"><BlindDateExtendedSetup /></BlindDateGate>} />
             <Route path="/blind-date/matching" element={<BlindDateGate><BlindDateMatching /></BlindDateGate>} />
             <Route path="/blind-date/chat" element={<BlindDateGate><BlindDateChat /></BlindDateGate>} />
             <Route path="/blind-date/decision" element={<BlindDateGate><BlindDateDecision /></BlindDateGate>} />
             <Route path="/blind-date/matched" element={<BlindDateGate><BlindDateMatched /></BlindDateGate>} />
             <Route path="/blind-date/chat/full" element={<BlindDateGate><BlindDateFullChat /></BlindDateGate>} />
-            <Route path="/blind-date/premium" element={<BlindDateGate><BlindDatePremium /></BlindDateGate>} />
-            <Route
-              path="/blind-date/payment"
-              element={
-                <RequireAuth requireOnboarded={false} requireActive={false}>
-                  <BlindDateGate><BlindDatePayment /></BlindDateGate>
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blind-date/payment/review"
-              element={
-                <RequireAuth requireOnboarded={false} requireActive={false}>
-                  <BlindDateGate><BlindDatePaymentReview /></BlindDateGate>
-                </RequireAuth>
-              }
-            />
+            <Route path="/blind-date/premium" element={<BlindDateGate require="any"><BlindDatePremium /></BlindDateGate>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
