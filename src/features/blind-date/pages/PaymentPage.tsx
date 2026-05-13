@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UPI_ID, WHATSAPP_URL } from "@/lib/payment";
-import { BD_PLANS, BlindDatePlanId, bdPriceForUser, bdPriceLabelForUser } from "../lib/plans";
+import { BD_PLANS, BlindDatePlanId, bdPlan } from "../lib/plans";
 import upiQr from "@/assets/upi-qr.jpeg";
 import { trackMetaEvent } from "@/lib/metaCapi";
 
@@ -16,12 +16,13 @@ export default function BlindDatePayment() {
   const { user, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
-  const initial = (params.get("plan") as BlindDatePlanId) || "expert";
-  const [plan, setPlan] = useState<BlindDatePlanId>(BD_PLANS.find((p) => p.id === initial) ? initial : "expert");
+  const initial = (params.get("plan") as BlindDatePlanId) || "premium";
+  const validInitial: BlindDatePlanId = BD_PLANS.find((p) => p.id === initial) ? initial : "premium";
+  const [plan, setPlan] = useState<BlindDatePlanId>(validInitial);
   const [phone, setPhone] = useState("");
-  const [isMember, setIsMember] = useState(false);
   const [hydrating, setHydrating] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const reason = params.get("reason");
 
   useEffect(() => { document.title = "Blind Date — Choose your plan"; }, []);
 
@@ -30,16 +31,15 @@ export default function BlindDatePayment() {
     if (!user) { setHydrating(false); return; }
     (async () => {
       const { data } = await supabase.from("profiles")
-        .select("phone, account_status").eq("id", user.id).maybeSingle();
+        .select("phone").eq("id", user.id).maybeSingle();
       if (data?.phone) setPhone(data.phone);
-      if (data?.account_status === "active") setIsMember(true);
       setHydrating(false);
     })();
   }, [user, authLoading]);
 
-  const selected = useMemo(() => BD_PLANS.find((p) => p.id === plan)!, [plan]);
-  const priceInr = bdPriceForUser(plan, isMember);
-  const priceLabel = bdPriceLabelForUser(plan, isMember);
+  const selected = useMemo(() => bdPlan(plan), [plan]);
+  const priceInr = selected.priceInr;
+  const priceLabel = selected.priceLabel;
 
   const copyUpi = async () => {
     try { await navigator.clipboard.writeText(UPI_ID); toast.success("UPI ID copied"); }
