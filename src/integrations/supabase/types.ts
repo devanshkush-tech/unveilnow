@@ -159,9 +159,13 @@ export type Database = {
       blind_date_profiles: {
         Row: {
           answers: Json
+          chats_remaining: number
           compat_vector: Json
           completed: boolean
           created_at: string
+          extended_answers: Json
+          extended_completed: boolean
+          paid: boolean
           period_start: string
           plan: string
           sessions_limit: number | null
@@ -171,9 +175,13 @@ export type Database = {
         }
         Insert: {
           answers?: Json
+          chats_remaining?: number
           compat_vector?: Json
           completed?: boolean
           created_at?: string
+          extended_answers?: Json
+          extended_completed?: boolean
+          paid?: boolean
           period_start?: string
           plan?: string
           sessions_limit?: number | null
@@ -183,9 +191,13 @@ export type Database = {
         }
         Update: {
           answers?: Json
+          chats_remaining?: number
           compat_vector?: Json
           completed?: boolean
           created_at?: string
+          extended_answers?: Json
+          extended_completed?: boolean
+          paid?: boolean
           period_start?: string
           plan?: string
           sessions_limit?: number | null
@@ -983,6 +995,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bd_consume_chat: { Args: { _user_id: string }; Returns: boolean }
       enqueue_sheet_sync: {
         Args: { _lead_id: string; _source: string; _user_id: string }
         Returns: undefined
@@ -991,7 +1004,11 @@ export type Database = {
         Args: never
         Returns: {
           answers: Json
+          chats_remaining: number
           completed: boolean
+          extended_answers: Json
+          extended_completed: boolean
+          paid: boolean
           period_start: string
           plan: string
           sessions_limit: number
@@ -1023,6 +1040,10 @@ export type Database = {
       match_limit_for_plan: { Args: { _plan: string }; Returns: number }
       refresh_match_period: { Args: { _user_id: string }; Returns: undefined }
       save_my_bd_answers: {
+        Args: { _answers: Json; _completed?: boolean }
+        Returns: undefined
+      }
+      save_my_bd_extended: {
         Args: { _answers: Json; _completed?: boolean }
         Returns: undefined
       }
