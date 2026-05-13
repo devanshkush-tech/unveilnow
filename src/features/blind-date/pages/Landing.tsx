@@ -32,7 +32,7 @@ export default function BlindDateLanding() {
           <GlowButton onClick={handleStart} className="text-base px-10 py-4">
             Start Blind Date
           </GlowButton>
-          <div className="bd-muted text-sm mt-5">{sessions} sessions remaining today</div>
+          <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
         </motion.div>
       </div>
     </BlindDateLayout>
