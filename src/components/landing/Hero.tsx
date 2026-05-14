@@ -34,7 +34,7 @@ export const Hero = () => {
             </h1>
 
             {/* Emotional hook */}
-            <p className="mt-5 text-sm font-medium text-accent-foreground animate-fade-up delay-75">
+            <p className="mt-5 text-sm font-medium text-accent-foreground animate-fade-up delay-100">
               Tired of shallow dating apps?
             </p>
 
@@ -65,7 +65,7 @@ export const Hero = () => {
             </div>
 
             {/* Seriousness positioning — elegant, premium */}
-            <p className="mt-4 text-[11px] text-muted-foreground/60 tracking-wide animate-fade-up delay-400">
+            <p className="mt-4 text-[11px] text-muted-foreground/60 tracking-wide animate-fade-up delay-300">
               Serious members only. A small entry fee keeps away timepass users.
             </p>
           </div>
