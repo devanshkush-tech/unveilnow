@@ -42,6 +42,17 @@ Deno.serve(async (req) => {
     }
     const { session_id, decision } = parsed.data;
 
+    // Validate caller still has Blind Date access (paid + credits) before continuing.
+    if (decision === "continue") {
+      const { data: bd } = await supa.from("blind_date_profiles")
+        .select("paid, chats_remaining").eq("user_id", user.id).maybeSingle();
+      if (!bd?.paid || (bd?.chats_remaining ?? 0) <= 0) {
+        return new Response(JSON.stringify({ error: "no_credits" }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     const { data: s } = await supa.from("blind_date_sessions")
       .select("*").eq("id", session_id).maybeSingle();
     if (!s || (s.user_a !== user.id && s.user_b !== user.id)) {
@@ -54,19 +65,31 @@ Deno.serve(async (req) => {
     const update: Record<string, unknown> = isA ? { decision_a: decision } : { decision_b: decision };
     const otherDecision = isA ? s.decision_b : s.decision_a;
 
-    if (decision === "continue" && otherDecision === "continue") {
-      update.status = "revealed";
-      update.revealed_at = new Date().toISOString();
-    } else if (decision === "pass" || otherDecision === "pass") {
+    if (decision === "pass" || otherDecision === "pass") {
       update.status = "decided";
     }
+    // Note: when both = 'continue', the BEFORE UPDATE trigger
+    // bd_on_mutual_continue sets status='matched' AND consumes one credit
+    // from each user atomically. Do not duplicate that logic here.
 
     await supa.from("blind_date_sessions").update(update).eq("id", session_id);
 
+    // Re-read the session to know the post-trigger status.
+    const { data: after } = await supa.from("blind_date_sessions")
+      .select("status, decision_a, decision_b, revealed_at")
+      .eq("id", session_id).maybeSingle();
+
+    const matched = after?.status === "matched" || after?.status === "revealed";
+    if (matched && !after?.revealed_at) {
+      await supa.from("blind_date_sessions")
+        .update({ revealed_at: new Date().toISOString() })
+        .eq("id", session_id);
+    }
+
     return new Response(JSON.stringify({
       ok: true,
-      revealed: update.status === "revealed",
-      both_decided: !!otherDecision,
+      revealed: matched,
+      both_decided: !!(after?.decision_a && after?.decision_b),
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e?.message ?? e) }), {
