@@ -16,6 +16,7 @@ type BdProfile = {
   extended_completed: boolean;
   updated_at: string;
   answers: Record<string, unknown>;
+  extended_answers?: Record<string, unknown>;
 };
 type BdSession = {
   id: string;
