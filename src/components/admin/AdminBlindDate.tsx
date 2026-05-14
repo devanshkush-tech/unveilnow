@@ -141,9 +141,11 @@ export default function AdminBlindDate() {
           </div>
           {selected && (
             <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6" onClick={() => setSelected(null)}>
-              <div onClick={(e) => e.stopPropagation()} className="max-w-lg w-full max-h-[80vh] overflow-auto rounded-2xl bg-card p-6">
-                <h3 className="font-display text-xl mb-4">Questionnaire responses</h3>
-                <pre className="text-xs whitespace-pre-wrap">{JSON.stringify(selected.answers, null, 2)}</pre>
+              <div onClick={(e) => e.stopPropagation()} className="max-w-2xl w-full max-h-[80vh] overflow-auto rounded-2xl bg-card p-6">
+                <h3 className="font-display text-xl mb-2">Phase A — Vibe questionnaire</h3>
+                <pre className="text-xs whitespace-pre-wrap bg-secondary/40 rounded-xl p-3">{JSON.stringify(selected.answers, null, 2)}</pre>
+                <h3 className="font-display text-xl mt-5 mb-2">Phase B — Detailed profile</h3>
+                <pre className="text-xs whitespace-pre-wrap bg-secondary/40 rounded-xl p-3">{JSON.stringify((selected as any).extended_answers ?? {}, null, 2)}</pre>
                 <Button onClick={() => setSelected(null)} className="mt-4">Close</Button>
               </div>
             </div>
