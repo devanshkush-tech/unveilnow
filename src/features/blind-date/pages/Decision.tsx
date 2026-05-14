@@ -39,7 +39,10 @@ export default function BlindDateDecision() {
     setDecision("continue");
     setState("waiting");
     const res = await send("continue");
-    setTimeout(() => nav(res?.revealed ? "/blind-date/matched" : "/blind-date/matched"), 2000);
+    setTimeout(() => {
+      if (res?.revealed || res?.both_decided) nav("/blind-date/matched");
+      else { reset(); nav("/blind-date"); }
+    }, 2000);
   };
 
   return (
