@@ -1,6 +1,8 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/landing/Hero";
+import { SocialProofStats } from "@/components/landing/SocialProofStats";
+import { HeroTestimonials } from "@/components/landing/HeroTestimonials";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { TrustFeatures } from "@/components/landing/TrustFeatures";
 import { Testimonials } from "@/components/landing/Testimonials";
@@ -41,6 +43,8 @@ const Index = () => {
       <Navbar />
       <main>
         <Hero />
+        <SocialProofStats />
+        <HeroTestimonials />
         <HowItWorks />
         <TrustFeatures />
         <Testimonials />
