@@ -2,10 +2,22 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BlindDateLayout } from "../components/BlindDateLayout";
 import { GlowButton } from "../components/GlowButton";
+import { useAuth } from "@/hooks/useAuth";
+import { useBdProfile } from "../hooks/useBdProfile";
 
 export default function BlindDateLanding() {
   const nav = useNavigate();
-  const handleStart = () => nav("/blind-date/setup");
+  const { user } = useAuth();
+  const { profile } = useBdProfile();
+
+  const handleStart = () => {
+    if (!user) { nav("/login?next=/blind-date/setup"); return; }
+    if (!profile?.completed) { nav("/blind-date/setup"); return; }
+    if (!profile?.paid) { nav("/blind-date/payment"); return; }
+    if (!profile?.extended_completed) { nav("/blind-date/onboarding"); return; }
+    if ((profile?.chats_remaining ?? 0) <= 0) { nav("/blind-date/payment?reason=out"); return; }
+    nav("/blind-date/matching");
+  };
 
   return (
     <BlindDateLayout showBack={false}>
@@ -16,7 +28,7 @@ export default function BlindDateLanding() {
             Blind date.{"\n"}Instant match.
           </h1>
           <p className="bd-muted max-w-md mx-auto mb-10 text-base">
-            Get matched by chemistry, not just attraction. One minute can change everything.
+            We focus on quality over endless swiping. Blind Date is designed for serious and genuine connections — feel the connection first, then reveal more.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
             {[
