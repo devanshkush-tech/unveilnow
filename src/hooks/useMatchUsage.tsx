@@ -7,6 +7,7 @@ export type MatchUsage = {
   used: number;
   limit: number | null; // null = unlimited
   period_start: string;
+  period_end: string | null;
 };
 
 export const useMatchUsage = () => {
@@ -24,6 +25,7 @@ export const useMatchUsage = () => {
         used: row.used ?? 0,
         limit: row.limit === null || row.limit === undefined ? null : Number(row.limit),
         period_start: row.period_start,
+        period_end: row.period_end ?? null,
       });
     }
     setLoading(false);

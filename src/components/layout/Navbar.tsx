@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Sparkles } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 
 const Logo = ({ className = "" }: { className?: string }) => (
   <Link to="/" className={`flex items-center gap-2 ${className}`}>
@@ -23,6 +25,7 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const blindMode = pathname.startsWith("/blind-date");
 
   const toggleBlind = () => {
@@ -59,12 +62,21 @@ export const Navbar = () => {
         </nav>
         <div className="hidden md:flex items-center gap-3">
           <BlindDateToggle active={blindMode} onClick={toggleBlind} />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Sign in</Link>
-          </Button>
-          <Button variant="hero" size="sm" className="rounded-full" asChild>
-            <Link to="/signup">Get started</Link>
-          </Button>
+          {user && <NotificationBell />}
+          {!user && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/login">Sign in</Link>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="hero" size="sm" className="rounded-full" asChild>
+              <Link to="/dashboard">Dashboard</Link>
+            </Button>
+          ) : (
+            <Button variant="hero" size="sm" className="rounded-full" asChild>
+              <Link to="/signup">Get started</Link>
+            </Button>
+          )}
         </div>
         <button
           className="md:hidden p-2 -mr-2 text-foreground"
@@ -77,19 +89,30 @@ export const Navbar = () => {
       {open && (
         <div className="md:hidden glass border-t border-border/40 animate-fade-in">
           <div className="container py-6 flex flex-col gap-4">
-            <BlindDateToggle active={blindMode} onClick={toggleBlind} />
+            <div className="flex items-center justify-between">
+              <BlindDateToggle active={blindMode} onClick={toggleBlind} />
+              {user && <NotificationBell />}
+            </div>
             {navLinks.map((l) => (
               <a key={l.href} href={l.href} className="text-base text-foreground py-2">
                 {l.label}
               </a>
             ))}
             <div className="flex gap-3 pt-2">
-              <Button variant="soft" className="flex-1" asChild>
-                <Link to="/login">Sign in</Link>
-              </Button>
-              <Button variant="hero" className="flex-1 rounded-full" asChild>
-                <Link to="/signup">Get started</Link>
-              </Button>
+              {user ? (
+                <Button variant="hero" className="flex-1 rounded-full" asChild>
+                  <Link to="/dashboard">Open dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="soft" className="flex-1" asChild>
+                    <Link to="/login">Sign in</Link>
+                  </Button>
+                  <Button variant="hero" className="flex-1 rounded-full" asChild>
+                    <Link to="/signup">Get started</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
