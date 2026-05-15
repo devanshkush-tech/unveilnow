@@ -2,6 +2,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Sparkles } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { useAuth } from "@/hooks/useAuth";
 
 const Logo = ({ className = "" }: { className?: string }) => (
   <Link to="/" className={`flex items-center gap-2 ${className}`}>
