@@ -68,9 +68,15 @@ export const Navbar = () => {
               <Link to="/login">Sign in</Link>
             </Button>
           )}
-          <Button variant="hero" size="sm" className="rounded-full" asChild>
-            <Link to="/signup">Get started</Link>
-          </Button>
+          {user ? (
+            <Button variant="hero" size="sm" className="rounded-full" asChild>
+              <Link to="/dashboard">Dashboard</Link>
+            </Button>
+          ) : (
+            <Button variant="hero" size="sm" className="rounded-full" asChild>
+              <Link to="/signup">Get started</Link>
+            </Button>
+          )}
         </div>
         <button
           className="md:hidden p-2 -mr-2 text-foreground"
