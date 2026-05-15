@@ -361,7 +361,34 @@ const Onboarding = () => {
         })
         .eq("id", user.id);
 
-      if (pErr) throw pErr;
+      if (pErr) {
+        console.error("[onboarding] finish failed", { step: "profiles.update", error: pErr });
+        throw pErr;
+      }
+
+      // Read back to confirm the write is visible to our session before
+      // navigating — otherwise RequireAuth on /payment may still see the
+      // pre-update value and bounce back to /onboarding.
+      let confirmed = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data: check, error: chkErr } = await supabase
+          .from("profiles")
+          .select("onboarded")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!chkErr && check?.onboarded) {
+          confirmed = true;
+          break;
+        }
+        console.warn("[onboarding] finish read-back not yet visible", { attempt, chkErr });
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      if (!confirmed) {
+        console.error("[onboarding] finish read-back never confirmed onboarded=true");
+        toast.error("Saved, but we couldn't confirm. Please refresh the page.");
+        setSaving(false);
+        return;
+      }
 
       toast.success(editMode ? "Profile updated." : "Profile created successfully!");
 
