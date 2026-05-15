@@ -62,9 +62,12 @@ export const Navbar = () => {
         </nav>
         <div className="hidden md:flex items-center gap-3">
           <BlindDateToggle active={blindMode} onClick={toggleBlind} />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Sign in</Link>
-          </Button>
+          {user && <NotificationBell />}
+          {!user && (
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/login">Sign in</Link>
+            </Button>
+          )}
           <Button variant="hero" size="sm" className="rounded-full" asChild>
             <Link to="/signup">Get started</Link>
           </Button>
