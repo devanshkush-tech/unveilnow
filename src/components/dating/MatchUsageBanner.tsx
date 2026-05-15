@@ -47,9 +47,9 @@ export const MatchUsageBanner = ({ compact = false }: { compact?: boolean }) => 
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             {reached
-              ? "You've reached your match limit. Likes are still unlimited — upgrade or renew to unlock new matches."
+              ? `You've reached your match limit. Likes are still unlimited — upgrade or wait until ${usage.period_end ? new Date(usage.period_end).toLocaleDateString() : "your next cycle"} to unlock new matches.`
               : near
-              ? "You're close to your match limit for this month."
+              ? "You're close to your match limit for this cycle."
               : "Likes are unlimited. Matches happen when interest is mutual."}
           </p>
 
