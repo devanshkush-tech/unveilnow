@@ -24,6 +24,7 @@ export const RequireAuth = ({
   const location = useLocation();
   const [checking, setChecking] = useState(true);
   const [gate, setGate] = useState<Gate | null>(null);
+  const lastGateRef = useRef<Gate | null>(null);
 
   // Refetch gate on user change AND on route change so the guard
   // never serves a stale `onboarded`/`payment_status` snapshot after
@@ -33,6 +34,7 @@ export const RequireAuth = ({
 
     if (!session?.user) {
       setGate(null);
+      lastGateRef.current = null;
       setChecking(false);
       return;
     }
@@ -40,29 +42,65 @@ export const RequireAuth = ({
     let cancelled = false;
     setChecking(true);
 
+    const fetchGate = async () => {
+      return await supabase
+        .from("profiles")
+        .select("onboarded, account_status, payment_status")
+        .eq("id", session.user.id)
+        .maybeSingle();
+    };
+
     (async () => {
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("onboarded, account_status, payment_status")
-          .eq("id", session.user.id)
-          .maybeSingle();
+        let { data, error } = await fetchGate();
+
+        // One retry on transient error / null payload (token refresh races,
+        // brief network blips). Without this, RequireAuth bounces a fresh
+        // /payment navigation back to /onboarding on a single bad fetch.
+        if (error || !data) {
+          console.warn("[RequireAuth] gate fetch failed, retrying", {
+            path: location.pathname,
+            error,
+          });
+          await sleep(400);
+          if (cancelled) return;
+          ({ data, error } = await fetchGate());
+        }
 
         if (cancelled) return;
 
-        if (error) {
-          console.error("[RequireAuth] gate fetch error", error);
+        if (error || !data) {
+          console.error("[RequireAuth] gate fetch failed after retry", {
+            path: location.pathname,
+            error,
+          });
+          // Don't blindly assume onboarded=false — keep the previous gate
+          // value if we have one so a transient failure doesn't bounce a
+          // valid user out of /payment.
+          if (lastGateRef.current) {
+            setGate(lastGateRef.current);
+          } else {
+            setGate({ onboarded: false, account_status: "locked", payment_status: "none" });
+          }
+          return;
         }
 
-        setGate({
-          onboarded: !!data?.onboarded,
-          account_status: data?.account_status ?? "locked",
-          payment_status: data?.payment_status ?? "none",
-        });
+        const next: Gate = {
+          onboarded: !!data.onboarded,
+          account_status: data.account_status ?? "locked",
+          payment_status: data.payment_status ?? "none",
+        };
+        console.info("[RequireAuth] gate", { ...next, path: location.pathname });
+        lastGateRef.current = next;
+        setGate(next);
       } catch (err) {
         if (!cancelled) {
           console.error("[RequireAuth] gate fetch threw", err);
-          setGate({ onboarded: false, account_status: "locked", payment_status: "none" });
+          if (lastGateRef.current) {
+            setGate(lastGateRef.current);
+          } else {
+            setGate({ onboarded: false, account_status: "locked", payment_status: "none" });
+          }
         }
       } finally {
         if (!cancelled) setChecking(false);
