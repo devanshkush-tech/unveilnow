@@ -419,6 +419,10 @@ const Admin = () => {
           <TabsContent value="blind-date">
             <AdminBlindDate />
           </TabsContent>
+
+          <TabsContent value="notifications">
+            <AdminNotifications />
+          </TabsContent>
         </Tabs>
       </main>
 
