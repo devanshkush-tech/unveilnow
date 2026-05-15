@@ -99,12 +99,20 @@ export const Navbar = () => {
               </a>
             ))}
             <div className="flex gap-3 pt-2">
-              <Button variant="soft" className="flex-1" asChild>
-                <Link to="/login">Sign in</Link>
-              </Button>
-              <Button variant="hero" className="flex-1 rounded-full" asChild>
-                <Link to="/signup">Get started</Link>
-              </Button>
+              {user ? (
+                <Button variant="hero" className="flex-1 rounded-full" asChild>
+                  <Link to="/dashboard">Open dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="soft" className="flex-1" asChild>
+                    <Link to="/login">Sign in</Link>
+                  </Button>
+                  <Button variant="hero" className="flex-1 rounded-full" asChild>
+                    <Link to="/signup">Get started</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
