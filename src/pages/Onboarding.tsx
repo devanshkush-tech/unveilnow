@@ -199,12 +199,20 @@ const Onboarding = () => {
       Object.assign(updates, { story });
     }
 
-    await supabase.from("profiles").update(updates).eq("id", user.id);
+    const { error: updErr } = await supabase.from("profiles").update(updates).eq("id", user.id);
+    if (updErr) {
+      console.error("[onboarding] persistStep profile update failed", { step, updErr });
+      throw updErr;
+    }
 
     if (step === 2) {
-      await supabase.from("profile_prompts").delete().eq("user_id", user.id);
+      const { error: delErr } = await supabase.from("profile_prompts").delete().eq("user_id", user.id);
+      if (delErr) {
+        console.error("[onboarding] persistStep prompts delete failed", delErr);
+        throw delErr;
+      }
       if (picked.length) {
-        await supabase.from("profile_prompts").insert(
+        const { error: insErr } = await supabase.from("profile_prompts").insert(
           picked.map((p, i) => ({
             user_id: user.id,
             question: p.question,
@@ -212,15 +220,31 @@ const Onboarding = () => {
             position: i,
           })),
         );
+        if (insErr) {
+          console.error("[onboarding] persistStep prompts insert failed", insErr);
+          throw insErr;
+        }
       }
       // Save interests too (we expose interests on prompts step block)
-      await supabase.from("profile_interests").delete().eq("user_id", user.id);
+      const { error: intDelErr } = await supabase
+        .from("profile_interests")
+        .delete()
+        .eq("user_id", user.id);
+      if (intDelErr) {
+        console.error("[onboarding] persistStep interests delete failed", intDelErr);
+        throw intDelErr;
+      }
       if (selectedInterests.length) {
-        await supabase
+        const { error: intInsErr } = await supabase
           .from("profile_interests")
           .insert(selectedInterests.map((interest) => ({ user_id: user.id, interest })));
+        if (intInsErr) {
+          console.error("[onboarding] persistStep interests insert failed", intInsErr);
+          throw intInsErr;
+        }
       }
     }
+    console.info("[onboarding] step advance", { from: step, to: nextStep, savedOk: true });
   };
 
   const toggleInterest = (i: string) => {
