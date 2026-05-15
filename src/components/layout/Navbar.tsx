@@ -89,7 +89,10 @@ export const Navbar = () => {
       {open && (
         <div className="md:hidden glass border-t border-border/40 animate-fade-in">
           <div className="container py-6 flex flex-col gap-4">
-            <BlindDateToggle active={blindMode} onClick={toggleBlind} />
+            <div className="flex items-center justify-between">
+              <BlindDateToggle active={blindMode} onClick={toggleBlind} />
+              {user && <NotificationBell />}
+            </div>
             {navLinks.map((l) => (
               <a key={l.href} href={l.href} className="text-base text-foreground py-2">
                 {l.label}
