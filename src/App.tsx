@@ -45,6 +45,8 @@ import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
 import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
 import BlindDateExtendedSetup from "./features/blind-date/pages/ExtendedSetup";
 import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
+import Notifications from "./pages/Notifications";
+import UnlockInterest from "./pages/UnlockInterest";
 
 const queryClient = new QueryClient();
 
