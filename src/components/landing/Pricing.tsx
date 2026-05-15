@@ -2,79 +2,17 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-
-type Plan = {
-  name: string;
-  price: string;
-  period: string;
-  tag: string;
-  highlighted?: boolean;
-  priceId: string;
-  features: string[];
-};
-
-export const plans: Plan[] = [
-  {
-    name: "Starter",
-    price: "₹99",
-    period: "/month",
-    tag: "Get going",
-    priceId: "starter_monthly",
-    features: [
-      "Up to 5 matches / month",
-      "Unlimited likes & requests",
-      "Standard profile visibility",
-      "Voice intros & prompts",
-    ],
-  },
-  {
-    name: "Premium",
-    price: "₹199",
-    period: "/month",
-    tag: "Most loved",
-    highlighted: true,
-    priceId: "premium_monthly",
-    features: [
-      "Up to 10 matches / month",
-      "Unlimited likes & requests",
-      "2× profile visibility",
-      "Priority matching",
-      "See who liked you",
-    ],
-  },
-  {
-    name: "Elite",
-    price: "₹299",
-    period: "/month",
-    tag: "Hand-picked",
-    priceId: "elite_monthly",
-    features: [
-      "Unlimited matches",
-      "Unlimited likes & requests",
-      "4× profile visibility",
-      "Concierge support",
-    ],
-  },
-];
-
-// Map landing-page priceIds to manual payment plan ids
-const planIdMap: Record<string, string> = {
-  starter_monthly: "starter",
-  premium_monthly: "premium",
-  elite_monthly: "elite",
-};
+import { PLANS } from "@/lib/plans";
 
 export const Pricing = ({ compact = false }: { compact?: boolean }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const handleChoose = (plan: Plan) => {
-    const planId = planIdMap[plan.priceId] ?? "premium";
+  const handleChoose = (planId: string) => {
     if (!user) {
       navigate(`/signup?plan=${planId}`);
       return;
     }
-    // Signed-in users go straight to the manual payment flow.
     navigate(`/payment?plan=${planId}`);
   };
 
@@ -92,9 +30,9 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-5 md:gap-6">
-          {plans.map((p) => (
+          {PLANS.map((p) => (
             <div
-              key={p.name}
+              key={p.id}
               className={`relative p-6 md:p-8 rounded-3xl border transition-all duration-500 flex flex-col ${
                 p.highlighted
                   ? "bg-gradient-romance text-primary-foreground border-transparent shadow-elegant md:scale-105"
@@ -103,14 +41,14 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
             >
               {p.highlighted && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-medium bg-background text-foreground border border-border shadow-soft">
-                  {p.tag}
+                  {p.badge}
                 </span>
               )}
-              <div className="text-[11px] uppercase tracking-widest opacity-70 mb-2">{p.tag}</div>
+              <div className="text-[11px] uppercase tracking-widest opacity-70 mb-2">{p.badge}</div>
               <h3 className="font-display text-2xl md:text-3xl mb-3">{p.name}</h3>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="font-display text-4xl md:text-5xl">{p.price}</span>
-                <span className={p.highlighted ? "opacity-80" : "text-muted-foreground"}>{p.period}</span>
+                <span className="font-display text-4xl md:text-5xl">{p.priceLabel}</span>
+                <span className={p.highlighted ? "opacity-80" : "text-muted-foreground"}>{p.periodLabel}</span>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
                 {p.features.map((f) => (
@@ -123,7 +61,7 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
               <Button
                 variant={p.highlighted ? "soft" : "default"}
                 className="w-full rounded-full h-11"
-                onClick={() => handleChoose(p)}
+                onClick={() => handleChoose(p.id)}
               >
                 Choose {p.name}
               </Button>
@@ -134,3 +72,6 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
     </section>
   );
 };
+
+// Re-export for any legacy importers
+export { PLANS as plans } from "@/lib/plans";

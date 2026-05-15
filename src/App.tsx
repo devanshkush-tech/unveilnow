@@ -45,6 +45,8 @@ import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
 import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
 import BlindDateExtendedSetup from "./features/blind-date/pages/ExtendedSetup";
 import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
+import Notifications from "./pages/Notifications";
+import UnlockInterest from "./pages/UnlockInterest";
 
 const queryClient = new QueryClient();
 
@@ -125,6 +127,8 @@ const App = () => (
             <Route path="/blind-date/matched" element={<BlindDateGate><BlindDateMatched /></BlindDateGate>} />
             <Route path="/blind-date/chat/full" element={<BlindDateGate><BlindDateFullChat /></BlindDateGate>} />
             <Route path="/blind-date/premium" element={<BlindDateGate require="any"><BlindDatePremium /></BlindDateGate>} />
+            <Route path="/notifications" element={<RequireAuth requireOnboarded={false} requireActive={false}><Notifications /></RequireAuth>} />
+            <Route path="/unlock-interest/:fromUserId" element={<RequireAuth requireOnboarded={false} requireActive={false}><UnlockInterest /></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>

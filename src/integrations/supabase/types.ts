@@ -303,6 +303,30 @@ export type Database = {
         }
         Relationships: []
       }
+      interest_unlocks: {
+        Row: {
+          created_at: string
+          id: string
+          payment_id: string | null
+          target_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          target_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          target_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -438,6 +462,93 @@ export type Database = {
           },
         ]
       }
+      notification_campaigns: {
+        Row: {
+          audience: Json
+          body: string
+          created_at: string
+          cta_link: string | null
+          cta_text: string | null
+          email_status: string | null
+          id: string
+          send_email: boolean
+          send_in_app: boolean
+          sent_by: string | null
+          sent_count: number
+          title: string
+          type: string
+        }
+        Insert: {
+          audience?: Json
+          body: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          email_status?: string | null
+          id?: string
+          send_email?: boolean
+          send_in_app?: boolean
+          sent_by?: string | null
+          sent_count?: number
+          title: string
+          type?: string
+        }
+        Update: {
+          audience?: Json
+          body?: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          email_status?: string | null
+          id?: string
+          send_email?: boolean
+          send_in_app?: boolean
+          sent_by?: string | null
+          sent_count?: number
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          cta_link: string | null
+          cta_text: string | null
+          data: Json
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          data?: Json
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          cta_link?: string | null
+          cta_text?: string | null
+          data?: Json
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_submissions: {
         Row: {
           admin_notes: string | null
@@ -450,6 +561,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
+          target_user_id: string | null
           updated_at: string
           upi_reference: string | null
           user_id: string
@@ -466,6 +578,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          target_user_id?: string | null
           updated_at?: string
           upi_reference?: string | null
           user_id: string
@@ -482,6 +595,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
+          target_user_id?: string | null
           updated_at?: string
           upi_reference?: string | null
           user_id?: string
@@ -607,6 +721,7 @@ export type Database = {
           phone: string | null
           plan: string
           plan_expires_at: string | null
+          plan_period_end: string | null
           plan_started_at: string | null
           profession: string | null
           selected_plan: string | null
@@ -647,6 +762,7 @@ export type Database = {
           phone?: string | null
           plan?: string
           plan_expires_at?: string | null
+          plan_period_end?: string | null
           plan_started_at?: string | null
           profession?: string | null
           selected_plan?: string | null
@@ -687,6 +803,7 @@ export type Database = {
           phone?: string | null
           plan?: string
           plan_expires_at?: string | null
+          plan_period_end?: string | null
           plan_started_at?: string | null
           profession?: string | null
           selected_plan?: string | null
@@ -1020,6 +1137,7 @@ export type Database = {
         Args: never
         Returns: {
           limit: number
+          period_end: string
           period_start: string
           plan: string
           used: number
@@ -1038,6 +1156,7 @@ export type Database = {
       }
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
       match_limit_for_plan: { Args: { _plan: string }; Returns: number }
+      plan_period_interval: { Args: { _plan: string }; Returns: string }
       refresh_match_period: { Args: { _user_id: string }; Returns: undefined }
       save_my_bd_answers: {
         Args: { _answers: Json; _completed?: boolean }

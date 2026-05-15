@@ -35,6 +35,7 @@ import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
 import AdminBlindDate from "@/components/admin/AdminBlindDate";
+import AdminNotifications from "@/components/admin/AdminNotifications";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
@@ -270,6 +271,7 @@ const Admin = () => {
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
             <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
+            <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
@@ -416,6 +418,10 @@ const Admin = () => {
 
           <TabsContent value="blind-date">
             <AdminBlindDate />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <AdminNotifications />
           </TabsContent>
         </Tabs>
       </main>
