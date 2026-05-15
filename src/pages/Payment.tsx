@@ -229,7 +229,7 @@ const Payment = () => {
               >
                 <div className="text-[11px] uppercase tracking-widest opacity-70 mb-1">{p.tag}</div>
                 <div className="font-display text-2xl mb-2">{p.name}</div>
-                <div className="font-display text-3xl mb-4">{p.price}<span className="text-sm opacity-70">/month</span></div>
+                <div className="font-display text-3xl mb-4">{p.price}<span className="text-sm opacity-70">{p.periodLabel}</span></div>
                 <ul className="space-y-2 text-sm flex-1">
                   {p.perks.map((perk) => (
                     <li key={perk} className="flex items-start gap-2">
