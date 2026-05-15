@@ -25,6 +25,7 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const blindMode = pathname.startsWith("/blind-date");
 
   const toggleBlind = () => {
