@@ -123,13 +123,14 @@ const Onboarding = () => {
         // Resume on saved step (cap at last index)
         const savedStep = Math.min(Math.max(prof.onboarding_step ?? 0, 0), TOTAL_STEPS - 1);
         setStep(savedStep);
+        if (prof.account_status === "active" && !editMode) {
+          setRedirectTo("/dashboard");
+          setHydrating(false);
+          return;
+        }
         if (prof.onboarded && !editMode) {
           const destination =
-            prof.account_status === "active"
-              ? "/dashboard"
-              : prof.payment_status === "pending"
-                ? "/payment/review"
-                : "/payment";
+            prof.payment_status === "pending" ? "/payment/review" : "/payment";
           setRedirectTo(destination);
           setHydrating(false);
           return;
@@ -198,12 +199,20 @@ const Onboarding = () => {
       Object.assign(updates, { story });
     }
 
-    await supabase.from("profiles").update(updates).eq("id", user.id);
+    const { error: updErr } = await supabase.from("profiles").update(updates).eq("id", user.id);
+    if (updErr) {
+      console.error("[onboarding] persistStep profile update failed", { step, updErr });
+      throw updErr;
+    }
 
     if (step === 2) {
-      await supabase.from("profile_prompts").delete().eq("user_id", user.id);
+      const { error: delErr } = await supabase.from("profile_prompts").delete().eq("user_id", user.id);
+      if (delErr) {
+        console.error("[onboarding] persistStep prompts delete failed", delErr);
+        throw delErr;
+      }
       if (picked.length) {
-        await supabase.from("profile_prompts").insert(
+        const { error: insErr } = await supabase.from("profile_prompts").insert(
           picked.map((p, i) => ({
             user_id: user.id,
             question: p.question,
@@ -211,15 +220,31 @@ const Onboarding = () => {
             position: i,
           })),
         );
+        if (insErr) {
+          console.error("[onboarding] persistStep prompts insert failed", insErr);
+          throw insErr;
+        }
       }
       // Save interests too (we expose interests on prompts step block)
-      await supabase.from("profile_interests").delete().eq("user_id", user.id);
+      const { error: intDelErr } = await supabase
+        .from("profile_interests")
+        .delete()
+        .eq("user_id", user.id);
+      if (intDelErr) {
+        console.error("[onboarding] persistStep interests delete failed", intDelErr);
+        throw intDelErr;
+      }
       if (selectedInterests.length) {
-        await supabase
+        const { error: intInsErr } = await supabase
           .from("profile_interests")
           .insert(selectedInterests.map((interest) => ({ user_id: user.id, interest })));
+        if (intInsErr) {
+          console.error("[onboarding] persistStep interests insert failed", intInsErr);
+          throw intInsErr;
+        }
       }
     }
+    console.info("[onboarding] step advance", { from: step, to: nextStep, savedOk: true });
   };
 
   const toggleInterest = (i: string) => {
@@ -336,7 +361,34 @@ const Onboarding = () => {
         })
         .eq("id", user.id);
 
-      if (pErr) throw pErr;
+      if (pErr) {
+        console.error("[onboarding] finish failed", { step: "profiles.update", error: pErr });
+        throw pErr;
+      }
+
+      // Read back to confirm the write is visible to our session before
+      // navigating — otherwise RequireAuth on /payment may still see the
+      // pre-update value and bounce back to /onboarding.
+      let confirmed = false;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data: check, error: chkErr } = await supabase
+          .from("profiles")
+          .select("onboarded")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (!chkErr && check?.onboarded) {
+          confirmed = true;
+          break;
+        }
+        console.warn("[onboarding] finish read-back not yet visible", { attempt, chkErr });
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      if (!confirmed) {
+        console.error("[onboarding] finish read-back never confirmed onboarded=true");
+        toast.error("Saved, but we couldn't confirm. Please refresh the page.");
+        setSaving(false);
+        return;
+      }
 
       toast.success(editMode ? "Profile updated." : "Profile created successfully!");
 

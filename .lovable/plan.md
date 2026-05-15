@@ -1,149 +1,61 @@
-## Scope
+## What the user is seeing
 
-This is a large platform-wide change touching pricing, subscription/match validation, in-app + email notifications, an admin notification panel, the ₹99 add-on flow, and seed-profile tooling. I'll split it into clear phases. Approve and I'll execute end-to-end.
+For some users, after going through the onboarding steps, the payment page never appears — they land back on `/onboarding` step 1 instead.
 
----
+## What I found
 
-## Phase 1 — Pricing update (everywhere)
+I logged in attempt for `devanshkush@gmail.com` failed with HTTP 400 (wrong credentials), so I diagnosed against the database and code instead.
 
-Replace all old prices with the new plans:
+DB state for that user: `onboarded=false`, `onboarding_step=0`, `updated_at == created_at`. Looking at the last 25 signups, several users sit at the same default — they signed up but their profile never moved from step 0, even though they "filled details." Others reach `onboarded=true, step=5, payment_status=none` and never reappear (abandoned at payment).
 
-- **Starter** — ₹149 / week — "Get going" — 5 mutual matches/week, unlimited likes, standard visibility, voice intros & prompts
-- **Premium** — ₹299 / month — "Most loved" — 10 mutual matches/month, unlimited likes, 2× visibility, priority matching, see who liked you
-- **Elite** — ₹399 / month — "Hand-picked" — unlimited mutual matches, unlimited likes, 4× visibility, concierge support
+Reading the code, there are several real failure modes that all manifest as "onboarding starts again":
 
-Centralize plan config in a single source of truth: `src/lib/plans.ts` (id, name, badge, priceLabel, priceInr, billingPeriod `week|month`, matchLimit `number|null`, features[]). Refactor all of these to read from it:
+1. `Onboarding.persistStep()` calls `supabase.from('profiles').update(...)` and `.delete()/.insert()` on prompts/interests **without checking the returned `error`**. If RLS or a transient network blip silently rejects the write, the local UI advances but nothing was saved. On the next visit the profile still says `onboarding_step=0` and the user restarts.
+2. `finish()` updates `onboarded=true` and immediately `navigate('/payment')`. `RequireAuth` then runs a fresh `SELECT onboarded` against Postgres. On a slow network or a token refresh in flight, the gate fetch can return `data=null` / error → `RequireAuth` falls back to `onboarded:false` and bounces to `/onboarding`. Onboarding then sees `onboarded=true` → bounces to `/payment` → loop / flicker that some users abandon.
+3. `RequireAuth`'s gate fetch has no retry. A single transient failure permanently mis-classifies the user for that render.
+4. The session-confirm link from email opens `/onboarding` in a new tab. If the user already had onboarding open in another tab and finished there, the second tab can re-write older state with stale form values. Today there is no "already done — go to payment" guard at the top of `next()`.
 
-- `src/components/landing/Pricing.tsx`
-- `src/lib/payment.ts` + `src/pages/Payment.tsx`
-- `src/pages/PricingPage.tsx`
-- Signup/onboarding plan picker
-- Admin plan assignment UI
-- Any other hardcoded `₹99 / ₹199 / ₹299` references (sweep with ripgrep)
+## Plan
 
-Note: Blind Date plans (₹199/₹299/₹499) stay separate — they live in `src/features/blind-date/lib/plans.ts` and are unchanged.
+### 1. Make profile writes loud, not silent (`src/pages/Onboarding.tsx`)
 
----
+- In `persistStep`, capture and check `{ error }` for every `update`/`delete`/`insert`. On error: `throw` so the existing `next()` try/catch surfaces a toast and **does not advance** the local `step` state. This stops the "filled details but nothing saved" class of bug.
+- In `finish()`, also check the error from each storage upload + photos insert (already done) and the final profile update (already done) — keep, but add structured `console.error('[onboarding] finish failed', { step: 'profiles.update', error })` so we can trace it in real users via console.
 
-## Phase 2 — Subscription & match validation
+### 2. Confirm the write before navigating (`src/pages/Onboarding.tsx`)
 
-Database migration:
+After `update({ onboarded: true })` succeeds, re-read the row with `.select('onboarded').eq('id', user.id).maybeSingle()` and only `navigate('/payment')` once it returns `onboarded=true`. Retry the read up to 3× with a 250 ms back-off. If it still reads false, surface a toast ("Saved, but couldn't confirm — please refresh") instead of bouncing the user.
 
-- Add to `profiles`: `plan_period_end timestamptz` (computed on plan assignment: +7 days for Starter, +30 days for Premium/Elite).
-- Update `match_limit_for_plan(plan)` → 5 / 10 / NULL (already correct values; keep semantics but interpret period as weekly for Starter, monthly for Premium).
-- Update `refresh_match_period(_user_id)` to roll over based on plan: 7 days for Starter, 30 days for Premium/Elite.
-- Update `get_my_match_usage()` to return `plan_period_end` and use the correct period length.
-- Update `create_match_on_mutual_like()` — already enforces caps correctly, just needs to use the per-plan refresh.
+### 3. Make `RequireAuth` resilient to a single bad fetch (`src/components/auth/RequireAuth.tsx`)
 
-Frontend:
+- On gate-fetch error or `data=null`, retry once after 400 ms before deciding.
+- If the retry also fails, do **not** set `onboarded:false` blindly — keep the previous gate value if we have one, and only fall back to a redirect if there is truly no prior data. This stops a single 401 during token refresh from triggering the `/payment → /onboarding` bounce.
+- Add `console.warn('[RequireAuth] gate fetch failed, retrying', { path, error })` so we see this happening for real users.
 
-- Likes/interests stay unlimited — no UI change.
-- Mutual match capped server-side (already enforced by trigger). When the cap is hit, show a clear "Renew/Upgrade" prompt on Discover/Matches (`src/components/dating/MatchUsageBanner.tsx` + `EmptyState`).
-- Surface plan info in dashboard: plan name, start date, expiry, days remaining, matches used / limit.
+### 4. Add a "skip ahead" guard at the top of `Onboarding` (`src/pages/Onboarding.tsx`)
 
-Admin panel:
+The hydrate effect already redirects when `prof.onboarded === true && !editMode`. Reinforce it by also redirecting when `account_status === 'active'` regardless of `onboarded`. This covers users who paid then somehow re-land on `/onboarding`.
 
-- In `AdminPayments` / user detail: show plan, plan_started_at, plan_period_end, days remaining, matches_used, limit.
-- Allow admin to change plan (writes `selected_plan`, `plan_started_at=now()`, recomputes `plan_period_end`, resets `matches_used_this_period=0`).
+### 5. Diagnostic instrumentation (temporary)
 
----
+Add `console.info('[onboarding] step advance', { from, to, savedOk })` and `console.info('[RequireAuth] gate', { onboarded, account_status, payment_status, path })` so the next time a user reports this we can pull their console via the session-replay/console tools and confirm which step lost the write. We can remove these once the report rate drops.
 
-## Phase 3 — ₹99 "Unlock Interest" add-on
+### 6. Out of scope (intentionally not changing)
 
-- New table `interest_unlocks (id, user_id, target_user_id, payment_id, created_at)` with RLS (user views own).
-- New `payment_submissions.feature` value: `unlock_interest` (column already exists). Amount ₹99.
-- New page `/unlock-interest/:fromUserId` — shows a UPI payment screen (reuses `src/pages/Payment.tsx` styling) and creates a `payment_submissions` row with `feature='unlock_interest'` and a metadata column carrying `target_user_id`. Add `payment_submissions.target_user_id uuid` (nullable) for this.
-- After admin approves, webhook/admin-data inserts an `interest_unlocks` row → user can view the profile that liked them.
-- Notification "Someone showed interest in your profile. Unlock to view who it was." links here. Only fires from a real `interest_requests` / `likes` insert (trigger).
+- The `Payment.tsx` hydration flow already handles `account_status='active' → /dashboard` and `payment_status='pending' → /payment/review`. No change.
+- The signup → email-verify → `/onboarding` redirect chain is correct. No change.
+- Database schema, triggers, and RLS policies — no migration needed; the RLS policies already allow the user to update their own row. The fix is in the client.
 
----
+## Technical details
 
-## Phase 4 — In-app notifications
+- Files touched: `src/pages/Onboarding.tsx`, `src/components/auth/RequireAuth.tsx`. No backend migration.
+- All Supabase calls already use the typed client; the change is to switch from `await supabase.from(...).update(...)` to `const { error } = await ...; if (error) throw error;`.
+- The read-back-after-write is a `maybeSingle()` with `.eq('id', user.id)` — same RLS path the rest of the page uses.
+- The `RequireAuth` retry uses an in-effect `setTimeout` cleared by the `cancelled` flag that is already in the file.
 
-Database:
+## How we will verify
 
-```sql
-create table notifications (
-  id uuid pk, user_id uuid not null,
-  type text not null, -- like|match|profile_approved|payment_success|plan_expiring|announcement|interest|unlock_interest_cta
-  title text not null, body text not null,
-  cta_text text, cta_link text,
-  read_at timestamptz, created_at timestamptz default now()
-);
--- RLS: user sees/updates own; admin manages all
-```
-
-Triggers that auto-insert notifications:
-
-- on `likes` insert → notify `liked_id`
-- on `matches` insert → notify both
-- on `interest_requests` insert → notify `receiver_id` with unlock CTA
-- on `payment_submissions.status='approved'` → notify user
-- on `profiles.account_status` → 'active' transition → notify
-- daily cron-style check (or computed on read) for `plan_expiring_soon` (≤3 days)
-
-Frontend:
-
-- `<NotificationBell />` in `Navbar` with unread count + dropdown.
-- `/notifications` page with full list, mark-as-read, CTA buttons.
-- Realtime subscription on `notifications` table for the current user.
-
----
-
-## Phase 5 — Email notifications
-
-Use Lovable Email (auth emails already work). Scaffold transactional email infra and add a `send-notification-email` edge function called from the same DB triggers / edge functions for:
-
-- Signup confirmation (already handled by Supabase auth)
-- Payment submitted / approved
-- Match received
-- Like / interest received
-- Plan expiring soon
-- Admin announcements
-
-This requires an email domain. If none is configured, I'll prompt setup before scaffolding.
-
----
-
-## Phase 6 — Admin notification panel
-
-New tab `AdminNotifications.tsx` in admin:
-
-- Compose form: title, message, type, optional CTA text/link, in-app toggle, email toggle.
-- Audience filters: single user (search), all users, by plan, by city, by gender.
-- Submit → edge function `admin-send-notification` resolves audience, bulk-inserts `notifications`, queues emails.
-- History table reading from new `notification_campaigns` table: title, audience filter (jsonb), sent count, sent_at, sent_by, email_status.
-
----
-
-## Phase 7 — Improve seed profile creation
-
-`AdminCreateProfile` already exists — extend it to support:
-
-- name, age, gender, city, bio, prompts, interests, relationship intent, voice intro upload, photo upload, visibility toggle.
-- Sets `profiles.is_admin_created=true` (column already exists) — internal only, never exposed to regular users.
-- Activate/deactivate via `account_status`.
-
-No fake notifications, no fake messages — these are normal-looking profiles flagged internally.
-
----
-
-## Phase 8 — Sweep & test
-
-- ripgrep for old amounts (`₹99|₹199` outside Blind Date) and replace.
-- Manually verify each flow per the testing checklist in the request.
-
----
-
-## Technical notes
-
-- All plan checks centralized in `src/lib/plans.ts` (frontend) + `match_limit_for_plan` / `get_my_match_usage` (DB).
-- RLS on every new table; admin-only writes for `notification_campaigns`; user-scoped writes for `interest_unlocks` is admin-only after payment approval.
-- Email setup is conditional on an email domain being configured — I'll surface the setup dialog if missing.
-- This is roughly 5–7 migrations and ~25 file edits/creates. I'll batch sensibly and verify build after each phase.
-
----
-
-## Open question
-
-**Email domain** — do you already have a sender domain configured for Unveil, or should I run the setup dialog when I reach Phase 5? (Phases 1–4, 6–8 don't depend on it and can ship first either way.)
+1. After deploy, sign up a fresh test user, complete all 6 steps, confirm landing on `/payment` with no flicker.
+2. In DevTools, throttle to "Slow 3G" and repeat — gate retry should swallow the slow fetch instead of bouncing.
+3. Open `/onboarding` in two tabs, finish in tab A, switch to tab B and click "Next" — tab B should detect `onboarded=true` on hydrate and redirect, not overwrite.
+4. Query `profiles` for new signups over the next 24 h — the share stuck at `onboarded=true, payment_status=none` should match real abandonment, and we should see no new users with `onboarding_step` going *backwards*.
