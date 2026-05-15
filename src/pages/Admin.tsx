@@ -271,6 +271,7 @@ const Admin = () => {
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
             <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
+            <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
