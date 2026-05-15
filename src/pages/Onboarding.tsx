@@ -123,13 +123,14 @@ const Onboarding = () => {
         // Resume on saved step (cap at last index)
         const savedStep = Math.min(Math.max(prof.onboarding_step ?? 0, 0), TOTAL_STEPS - 1);
         setStep(savedStep);
+        if (prof.account_status === "active" && !editMode) {
+          setRedirectTo("/dashboard");
+          setHydrating(false);
+          return;
+        }
         if (prof.onboarded && !editMode) {
           const destination =
-            prof.account_status === "active"
-              ? "/dashboard"
-              : prof.payment_status === "pending"
-                ? "/payment/review"
-                : "/payment";
+            prof.payment_status === "pending" ? "/payment/review" : "/payment";
           setRedirectTo(destination);
           setHydrating(false);
           return;
