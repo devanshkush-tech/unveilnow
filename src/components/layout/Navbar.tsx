@@ -10,14 +10,16 @@ const Logo = ({ className = "" }: { className?: string }) => (
     <div className="relative h-8 w-8 rounded-full bg-gradient-romance shadow-soft flex items-center justify-center">
       <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
     </div>
-    <span className="font-display text-xl font-medium tracking-tight">Unveil</span>
+    <span className="font-display text-xl font-medium tracking-tight">UNVEIL NOW</span>
   </Link>
 );
 
 const navLinks = [
-  { label: "How it works", href: "/#how" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Trust & Safety", href: "/trust" },
+  { label: "How It Works", href: "/#how" },
+  { label: "Why Unveil", href: "/#why" },
+  { label: "What Users Say", href: "/#stories" },
+  { label: "Plans", href: "/pricing" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 export const Navbar = () => {
@@ -74,7 +76,7 @@ export const Navbar = () => {
             </Button>
           ) : (
             <Button variant="hero" size="sm" className="rounded-full" asChild>
-              <Link to="/signup">Get started</Link>
+              <Link to="/signup">Create My Profile</Link>
             </Button>
           )}
         </div>

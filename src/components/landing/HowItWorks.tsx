@@ -1,48 +1,49 @@
-import { MessageCircleHeart, ShieldCheck, EyeOff } from "lucide-react";
+import { FileText, Search, Sparkles, EyeOff, Heart, Info } from "lucide-react";
 
 const steps = [
-  {
-    icon: EyeOff,
-    title: "Hide the photos",
-    desc: "Your profile leads with prompts, voice and values. Looks come later — when both of you choose.",
-  },
-  {
-    icon: MessageCircleHeart,
-    title: "Spark a real conversation",
-    desc: "Match on the things that actually matter. Talk first. Feel something before you swipe.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Unveil, together",
-    desc: "When you both opt in, photos reveal at once. Mutual consent, no awkward asks.",
-  },
+  { icon: FileText, title: "Create your story", desc: "Answer thoughtful prompts and share what truly matters to you." },
+  { icon: Search, title: "Discover meaningful profiles", desc: "Explore people through values, personality, intentions, and interests." },
+  { icon: Sparkles, title: "Build chemistry", desc: "Start meaningful conversations and let the chemistry meter grow naturally." },
+  { icon: EyeOff, title: "Reveal photos when ready", desc: "Photos are revealed only after the chemistry meter is filled." },
+  { icon: Heart, title: "Match and connect", desc: "If both people like each other, it becomes a match and the conversation continues." },
 ];
 
 export const HowItWorks = () => {
   return (
-    <section id="how" className="py-24 md:py-32 relative">
+    <section id="how" className="py-20 md:py-28 bg-gradient-soft border-y border-border/60">
       <div className="container max-w-6xl">
-        <div className="max-w-2xl mb-16 md:mb-20">
-          <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">How it works</p>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl leading-[1.05]">
-            Dating, the way it should have always been.
+        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
+          <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">How it works</p>
+          <h2 className="font-display text-3xl md:text-5xl leading-tight">
+            How <em className="italic text-gradient">Unveil Now</em> works
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
           {steps.map((s, i) => (
             <div
               key={s.title}
-              className="group relative p-8 rounded-3xl bg-card border border-border/60 shadow-card hover:shadow-elegant transition-all duration-500 hover:-translate-y-1"
+              className="relative p-5 rounded-3xl bg-card border border-border/60 shadow-card hover:shadow-elegant transition-all duration-500"
             >
-              <div className="absolute top-6 right-6 font-display text-5xl text-muted-foreground/20">0{i + 1}</div>
-              <div className="h-12 w-12 rounded-2xl bg-gradient-warm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+              <div className="absolute -top-3 left-5 h-7 w-7 rounded-full text-primary-foreground text-xs font-semibold flex items-center justify-center shadow-soft"
+                style={{ background: "var(--gradient-romance)" }}>
+                {i + 1}
+              </div>
+              <div className="h-11 w-11 rounded-2xl flex items-center justify-center mb-4 mt-2"
+                style={{ background: "var(--gradient-warm)" }}>
                 <s.icon className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="font-display text-2xl mb-3">{s.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{s.desc}</p>
+              <h3 className="font-display text-lg leading-snug mb-2">{s.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 mx-auto max-w-3xl rounded-2xl border border-accent/30 bg-accent/10 px-5 py-4 flex items-start gap-3 text-sm text-foreground/80">
+          <Info className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <p>
+            <span className="font-medium text-foreground">Likes are unlimited.</span> A match is created only when both people like each other. Match limits depend on the selected plan.
+          </p>
         </div>
       </div>
     </section>

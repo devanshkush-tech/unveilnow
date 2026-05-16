@@ -1,28 +1,32 @@
-import { BadgeCheck, Lock, Sparkles, Users } from "lucide-react";
+import { Lock, BadgeCheck, Users, ShieldCheck, MessageCircleHeart } from "lucide-react";
 
 const features = [
-  { icon: BadgeCheck, title: "Real members", desc: "Every profile is reviewed by humans. No fakes, no catfishing." },
-  { icon: Lock, title: "Photos stay private", desc: "Reveal only with mutual consent. You're always in control." },
-  { icon: Users, title: "Intentional only", desc: "Built for people serious about a real relationship — not a thrill." },
-  { icon: Sparkles, title: "AI moderated", desc: "Bad actors get filtered out before they ever reach your inbox." },
+  { icon: Lock, title: "Photo Privacy First", desc: "Photos stay hidden until the chemistry meter is filled." },
+  { icon: BadgeCheck, title: "Profile Review", desc: "Profiles are reviewed to keep the community authentic and safe." },
+  { icon: Users, title: "Intent-Driven Users", desc: "A small fee helps filter out casual timepass and fake intent." },
+  { icon: ShieldCheck, title: "Private by Design", desc: "Users control what they reveal and when they reveal it." },
+  { icon: MessageCircleHeart, title: "Respectful Conversations", desc: "The platform encourages thoughtful and genuine interaction." },
 ];
 
 export const TrustFeatures = () => {
   return (
-    <section className="py-24 bg-gradient-soft border-y border-border/60">
+    <section className="py-20 md:py-28">
       <div className="container max-w-6xl">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">Why Unveil</p>
-          <h2 className="font-display text-4xl md:text-5xl leading-tight">
-            A space built on <em className="italic text-gradient">trust</em>.
+        <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
+          <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">Safety & Trust</p>
+          <h2 className="font-display text-3xl md:text-5xl leading-tight">
+            A safer, more <em className="italic text-gradient">respectful</em> dating experience
           </h2>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-5">
           {features.map((f) => (
-            <div key={f.title} className="p-6 rounded-2xl bg-background border border-border/60 hover:border-accent/40 transition-colors">
-              <f.icon className="h-6 w-6 text-primary mb-4" />
-              <h3 className="font-display text-lg mb-2">{f.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+            <div key={f.title} className="p-5 rounded-2xl bg-card border border-border/60 hover:border-accent/40 hover:shadow-card transition-all">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-4"
+                style={{ background: "var(--gradient-warm)" }}>
+                <f.icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="font-display text-base mb-1.5">{f.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
