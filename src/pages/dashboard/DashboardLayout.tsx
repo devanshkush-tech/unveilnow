@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { Compass, Heart, MessageCircle, User, Settings } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const tabs = [
   { to: "/dashboard", end: true, label: "Discover", icon: Compass },
@@ -14,12 +15,15 @@ const DashboardLayout = () => {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Sidebar (desktop) */}
       <aside className="hidden md:flex md:w-64 flex-col border-r border-border/60 bg-gradient-soft p-6">
-        <Link to="/" className="flex items-center gap-2 mb-10">
-          <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center">
-            <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
-          </div>
-          <span className="font-display text-xl">Unveil</span>
-        </Link>
+        <div className="flex items-center justify-between mb-10">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center">
+              <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
+            </div>
+            <span className="font-display text-xl">Unveil</span>
+          </Link>
+          <NotificationBell />
+        </div>
         <nav className="space-y-1">
           {tabs.map((t) => (
             <NavLink
@@ -66,6 +70,7 @@ const DashboardLayout = () => {
           </div>
           <span className="font-display text-lg">Unveil</span>
         </Link>
+        <NotificationBell />
       </header>
 
       <main className="flex-1 pb-20 md:pb-0">
