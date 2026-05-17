@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Sparkles, EyeOff, ShieldCheck, Heart } from "lucide-react";
 import { HeroCard } from "./HeroCard";
+import coupleWarm from "@/assets/couple-warm.jpg";
 
 export const Hero = () => {
   return (
@@ -18,6 +19,20 @@ export const Hero = () => {
         style={{ background: "radial-gradient(circle, hsl(340 60% 80%), transparent 70%)" }} />
       <div aria-hidden className="absolute -right-10 bottom-0 w-96 h-96 rounded-full blur-3xl opacity-40"
         style={{ background: "radial-gradient(circle, hsl(14 70% 80%), transparent 70%)" }} />
+      {/* Candid couple photo as ambient background accent */}
+      <div
+        aria-hidden
+        className="absolute -z-10 left-0 bottom-0 w-[55%] h-[70%] pointer-events-none opacity-[0.18] hidden md:block"
+        style={{
+          backgroundImage: `url(${coupleWarm})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 30% 70%, black 0%, transparent 70%)",
+          maskImage:
+            "radial-gradient(ellipse at 30% 70%, black 0%, transparent 70%)",
+        }}
+      />
 
       <div className="container max-w-6xl">
         <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center">

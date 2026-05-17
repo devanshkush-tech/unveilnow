@@ -1,4 +1,5 @@
 import { X, Check } from "lucide-react";
+import coupleQuiet from "@/assets/couple-quiet.jpg";
 
 const regular = [
   "Swipe-first culture",
@@ -17,8 +18,22 @@ const unveil = [
 
 export const WhyDifferent = () => {
   return (
-    <section className="py-20 md:py-28">
-      <div className="container max-w-6xl">
+    <section className="relative py-20 md:py-28 overflow-hidden">
+      {/* Candid couple photo as ambient background accent */}
+      <div
+        aria-hidden
+        className="absolute -z-10 right-0 top-0 w-[55%] h-[80%] pointer-events-none opacity-[0.12] hidden md:block"
+        style={{
+          backgroundImage: `url(${coupleQuiet})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          WebkitMaskImage:
+            "radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)",
+          maskImage:
+            "radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)",
+        }}
+      />
+      <div className="container max-w-6xl relative">
         <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">
             Not just another dating platform
