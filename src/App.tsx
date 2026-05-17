@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index.tsx";
+import LP from "./pages/LP.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Signup from "./pages/Signup.tsx";
 import Login from "./pages/Login.tsx";
@@ -65,6 +66,7 @@ const App = () => (
             <MetaPageViewTracker />
             <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/lp" element={<LP />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
