@@ -386,27 +386,36 @@ const LP = () => {
         {/* MEMBERS SAY */}
         <section className="py-28 md:py-40 relative overflow-hidden">
           <div className="lp-aurora" style={{ opacity: 0.5 }} />
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `url(${coupleWarm})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: 0.12,
+              mixBlendMode: "luminosity",
+              maskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, black 0%, transparent 70%)",
+            }}
+          />
           <div className="container max-w-4xl text-center relative">
             <p className="lp-eyebrow mb-10">— Members say</p>
-            <p className="lp-serif lp-italic text-3xl md:text-5xl leading-tight">
+            <p className="lp-serif lp-italic text-3xl md:text-5xl leading-tight" style={{ color: "var(--lp-text)" }}>
               "It felt less like an app and more like being introduced by a friend who actually <span style={{ color: "var(--lp-violet)" }}>knows</span> the room."
             </p>
             <p className="lp-eyebrow mt-8">A · Founder, Mumbai</p>
           </div>
         </section>
 
-        {/* PRICING (reused, dark-themed wrap) */}
-        <div className="lp-pricing-mask">
-          <div style={{ filter: "invert(1) hue-rotate(180deg)" }}>
-            <Pricing />
-          </div>
+        {/* PRICING — light intermission band */}
+        <div style={{ background: "#F4F4F8", color: "#0a0a14" }}>
+          <Pricing />
         </div>
 
-        {/* FAQ (reused, dark-themed wrap) */}
-        <div className="lp-faq-mask">
-          <div style={{ filter: "invert(1) hue-rotate(180deg)" }}>
-            <FAQ />
-          </div>
+        {/* FAQ — light intermission band */}
+        <div style={{ background: "#EDEDF2", color: "#0a0a14" }}>
+          <FAQ />
         </div>
 
         <div className="lp-divider" />
