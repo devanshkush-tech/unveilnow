@@ -6,6 +6,9 @@ import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import coupleQuiet from "@/assets/couple-quiet.jpg";
+import coupleWarm from "@/assets/couple-warm.jpg";
+import coupleCafe from "@/assets/couple-cafe.jpg";
+import heroCouple from "@/assets/hero-couple.jpg";
 
 const cities = [
   "Mumbai",
