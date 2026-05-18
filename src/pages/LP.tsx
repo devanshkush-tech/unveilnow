@@ -4,21 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Pricing } from "@/components/landing/Pricing";
 import { FAQ } from "@/components/landing/FAQ";
-import { Button } from "@/components/ui/button";
-import {
-  Sparkles,
-  MapPin,
-  Wine,
-  Users,
-  ShieldCheck,
-  Heart,
-  Music2,
-  Coffee,
-  Plane,
-  Crown,
-} from "lucide-react";
 import { trackMetaEvent } from "@/lib/metaCapi";
-import coupleWarm from "@/assets/couple-warm.jpg";
 import coupleQuiet from "@/assets/couple-quiet.jpg";
 
 const cities = [
@@ -32,49 +18,60 @@ const cities = [
   "Kolkata",
 ];
 
-const circleBenefits = [
+const pillars = [
   {
-    icon: Crown,
-    title: "An invite-only circle",
-    desc: "A curated room for modern, ambitious singles who value taste, intent, and discretion.",
+    n: "01",
+    title: "Invite-only",
+    body: "Every profile is manually reviewed. The room stays small on purpose — the kind of small where you actually remember names.",
   },
   {
-    icon: MapPin,
-    title: "Made for your city",
-    desc: "Meet people who already live the life you do — in your neighborhood, not three timezones away.",
+    n: "02",
+    title: "Friends first",
+    body: "Not every spark has to be romance. Build a real circle — dinner partners, plus-ones, weekend co-conspirators. Let the rest happen on its own time.",
   },
   {
-    icon: Users,
-    title: "Friends first, then more",
-    desc: "Not every spark has to be romance. Build a real social circle of equals — dinner partners, plus-ones, real friends.",
+    n: "03",
+    title: "City-native",
+    body: "You'll meet people who already live the life you live — same neighborhood, same calendar, same late-night cafés. Not three timezones away.",
   },
   {
-    icon: ShieldCheck,
+    n: "04",
     title: "Quietly verified",
-    desc: "A small fee, manual review, and a story-first profile keep the room private, safe, and serious.",
+    body: "A small entry fee, ID-level checks, and a story-first profile. No screenshots. No screenshots of screenshots. Just discretion.",
   },
 ];
 
+const steps = [
+  { n: "I", t: "Apply", b: "Tell us your story in a few prompts. No selfies yet." },
+  { n: "II", t: "Reviewed quietly", b: "We read every profile by hand. Usually within 48 hours." },
+  { n: "III", t: "Step into the room", b: "Meet people through chemistry first. Faces come after." },
+];
+
 const lifestyle = [
-  { icon: Wine, label: "Wine & private dinners" },
-  { icon: Music2, label: "Concerts & gigs" },
-  { icon: Coffee, label: "Slow Sunday cafés" },
-  { icon: Plane, label: "Weekend escapes" },
+  "Private dinners",
+  "Concerts & gigs",
+  "Slow Sunday cafés",
+  "Weekend escapes",
+  "Gallery openings",
+  "Last-minute Goa",
 ];
 
 const LP = () => {
   useEffect(() => {
-    document.title = "Unveil Now LP | A private circle for modern singles in your city";
+    document.title = "Unveil Now · A private circle for modern singles in your city";
     const desc =
-      "A curated, invite-only circle for modern, luxurious singles. Make friends first in your city — then let real chemistry decide the rest. Story-first, privacy-first.";
+      "An invite-only social circle for modern, ambitious singles. Friends first, then everything else. Story-first, privacy-first, city-native.";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", desc);
-    else {
-      const m = document.createElement("meta");
-      m.name = "description";
-      m.content = desc;
-      document.head.appendChild(m);
-    }
+
+    // Scoped Google Fonts for this page only
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href =
+      "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@300;400;500;600&display=swap";
+    link.setAttribute("data-lp-fonts", "true");
+    document.head.appendChild(link);
+
     trackMetaEvent("ViewContent", {
       event_id: `view_lp_${Date.now()}`,
       custom_data: {
@@ -85,223 +82,320 @@ const LP = () => {
         value: 199,
       },
     });
+
+    return () => {
+      link.remove();
+    };
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="lp-theme">
+      <style>{`
+        .lp-theme {
+          --lp-bg: #07070C;
+          --lp-surface: #0F0F18;
+          --lp-border: rgba(255,255,255,0.08);
+          --lp-text: #F4F4F8;
+          --lp-muted: rgba(244,244,248,0.6);
+          --lp-indigo: #6366F1;
+          --lp-violet: #A78BFA;
+          background: var(--lp-bg);
+          color: var(--lp-text);
+          font-family: 'Work Sans', system-ui, sans-serif;
+          font-weight: 300;
+          letter-spacing: -0.005em;
+        }
+        .lp-theme nav,
+        .lp-theme footer { color: initial; }
+        .lp-serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.02em; }
+        .lp-italic { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; }
+        .lp-eyebrow {
+          font-family: 'Work Sans', sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: var(--lp-muted);
+          font-weight: 400;
+        }
+        .lp-h1 { font-family: 'Instrument Serif', serif; font-weight: 400; line-height: 0.98; letter-spacing: -0.03em; }
+        .lp-h2 { font-family: 'Instrument Serif', serif; font-weight: 400; line-height: 1.02; letter-spacing: -0.025em; }
+        .lp-body { color: var(--lp-muted); line-height: 1.65; font-weight: 300; }
+        .lp-btn-primary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+          padding: 1rem 2rem;
+          background: linear-gradient(135deg, var(--lp-indigo), var(--lp-violet));
+          color: white;
+          border-radius: 999px;
+          font-family: 'Work Sans', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          letter-spacing: 0.02em;
+          box-shadow: 0 10px 40px -10px rgba(99,102,241,0.6), 0 0 0 1px rgba(255,255,255,0.06) inset;
+          transition: transform .35s ease, box-shadow .35s ease;
+        }
+        .lp-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 60px -10px rgba(167,139,250,0.7); }
+        .lp-btn-ghost {
+          display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+          padding: 1rem 2rem;
+          background: transparent;
+          color: var(--lp-text);
+          border: 1px solid var(--lp-border);
+          border-radius: 999px;
+          font-family: 'Work Sans', sans-serif;
+          font-size: 14px; font-weight: 400;
+          transition: border-color .3s ease, background .3s ease;
+        }
+        .lp-btn-ghost:hover { border-color: var(--lp-violet); background: rgba(167,139,250,0.06); }
+        .lp-aurora {
+          position: absolute; inset: -20%;
+          background:
+            radial-gradient(600px 400px at 20% 30%, rgba(99,102,241,0.35), transparent 60%),
+            radial-gradient(700px 500px at 80% 70%, rgba(167,139,250,0.28), transparent 60%),
+            radial-gradient(500px 400px at 50% 90%, rgba(99,102,241,0.18), transparent 60%);
+          filter: blur(20px);
+          pointer-events: none;
+          animation: lp-drift 22s ease-in-out infinite alternate;
+        }
+        @keyframes lp-drift {
+          0% { transform: translate3d(0,0,0) scale(1); }
+          100% { transform: translate3d(-3%, 2%, 0) scale(1.08); }
+        }
+        .lp-grain::after {
+          content: ""; position: absolute; inset: 0; pointer-events: none;
+          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.45'/></svg>");
+          opacity: 0.06; mix-blend-mode: overlay;
+        }
+        .lp-marquee {
+          display: flex; gap: 3rem; white-space: nowrap;
+          animation: lp-marq 40s linear infinite;
+        }
+        @keyframes lp-marq {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        .lp-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--lp-border), transparent); }
+        .lp-city-word {
+          font-family: 'Instrument Serif', serif;
+          font-size: clamp(2.5rem, 8vw, 6rem);
+          line-height: 1;
+          color: rgba(244,244,248,0.4);
+          transition: color .4s ease, text-shadow .4s ease;
+          cursor: default;
+        }
+        .lp-city-word:hover { color: var(--lp-text); text-shadow: 0 0 40px rgba(167,139,250,0.6); }
+        .lp-light-wrap {
+          background: linear-gradient(180deg, var(--lp-bg) 0%, #0a0a14 100%);
+          padding: 4rem 0;
+          position: relative;
+        }
+        .lp-light-wrap > * { filter: hue-rotate(0deg); }
+        .lp-pricing-mask, .lp-faq-mask {
+          background: radial-gradient(800px 400px at 50% 0%, rgba(99,102,241,0.12), transparent 70%), var(--lp-bg);
+        }
+      `}</style>
+
       <Navbar />
+
       <main>
-        {/* HERO */}
-        <section className="relative pt-24 md:pt-32 pb-20 md:pb-28 overflow-hidden">
-          <div
-            aria-hidden
-            className="absolute inset-0 -z-10"
-            style={{
-              background:
-                "radial-gradient(900px 500px at 85% 10%, hsl(327 60% 90% / 0.85), transparent 60%), radial-gradient(700px 500px at 10% 90%, hsl(14 70% 90% / 0.8), transparent 60%), linear-gradient(180deg, hsl(36 50% 98%) 0%, hsl(18 55% 96%) 100%)",
-            }}
-          />
-          <div
-            aria-hidden
-            className="absolute -z-10 right-0 top-0 w-[55%] h-[80%] pointer-events-none opacity-[0.18] hidden md:block"
-            style={{
-              backgroundImage: `url(${coupleWarm})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              WebkitMaskImage:
-                "radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)",
-              maskImage:
-                "radial-gradient(ellipse at 70% 30%, black 0%, transparent 70%)",
-            }}
-          />
-
-          <div className="container max-w-5xl text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card/80 border border-border/60 backdrop-blur text-xs font-medium text-secondary-foreground mb-6 shadow-soft animate-fade-in">
-              <Crown className="h-3.5 w-3.5 text-primary-glow" />
-              Invite-only · For modern, luxurious singles
-            </div>
-
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem] leading-[1.04] font-medium animate-fade-up">
-              A private circle <em className="italic text-gradient">for your city.</em>
-              <br className="hidden md:block" /> Friends first. Then everything else.
-            </h1>
-
-            <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed animate-fade-up delay-100">
-              Unveil Now is a quietly curated room for modern singles who want taste, intent, and a real social life — not a swipe carousel. Meet people in your city through story, build genuine friendships, and let chemistry decide what becomes more.
-            </p>
-
-            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center animate-fade-up delay-200">
-              <Button variant="hero" size="xl" asChild>
-                <Link to="/signup">Request my invite</Link>
-              </Button>
-              <Button variant="soft" size="xl" asChild>
-                <a href="#circle">See what's inside</a>
-              </Button>
-            </div>
-
-            <p className="mt-5 text-[11px] text-muted-foreground/70 tracking-wide animate-fade-up delay-300 inline-flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3" /> Manually reviewed · Small entry fee keeps the room private
-            </p>
-
-            {/* City strip */}
-            <div className="mt-12 animate-fade-up delay-300">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-4">
-                Now opening in
-              </p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {cities.map((c) => (
-                  <span
-                    key={c}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-card border border-border/60 text-xs text-foreground/80 shadow-soft"
-                  >
-                    <MapPin className="h-3 w-3 text-primary-glow" /> {c}
-                  </span>
+        {/* Marquee */}
+        <div className="overflow-hidden border-b" style={{ borderColor: "var(--lp-border)", background: "var(--lp-surface)" }}>
+          <div className="lp-marquee py-3 lp-eyebrow">
+            {Array.from({ length: 2 }).map((_, k) => (
+              <div key={k} className="flex gap-12 pr-12">
+                {["Mumbai", "Invite-only", "Delhi NCR", "Friends first", "Bengaluru", "Quietly verified", "Pune", "Story-first", "Gurgaon", "2026 cohort", "Hyderabad"].map((w) => (
+                  <span key={w + k}>{w} <span style={{ opacity: 0.4 }}>·</span></span>
                 ))}
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* HERO */}
+        <section className="relative overflow-hidden lp-grain" style={{ minHeight: "92vh", display: "flex", alignItems: "center" }}>
+          <div className="lp-aurora" />
+          <div className="container max-w-6xl relative py-24 md:py-32">
+            <p className="lp-eyebrow mb-8 animate-fade-in">— Invite-only · 2026 cohort</p>
+            <h1 className="lp-h1 text-[3.25rem] sm:text-7xl md:text-8xl lg:text-[8.5rem] animate-fade-up">
+              A private circle
+              <br />
+              for your <span className="lp-italic">city.</span>
+            </h1>
+            <p className="lp-body mt-10 max-w-xl text-base md:text-lg animate-fade-up delay-100">
+              Unveil Now is a quietly curated room for modern, ambitious singles who'd rather meet five real ones than scroll five hundred strangers. Friends first. Chemistry next. Faces last.
+            </p>
+            <div className="mt-12 flex flex-col sm:flex-row gap-3 animate-fade-up delay-200">
+              <Link to="/signup" className="lp-btn-primary">Request my invite →</Link>
+              <a href="#room" className="lp-btn-ghost">See inside the room</a>
             </div>
+            <p className="lp-eyebrow mt-10 animate-fade-up delay-300">Manually reviewed · Small entry keeps it private</p>
           </div>
         </section>
 
-        {/* WHY THIS CIRCLE */}
-        <section id="circle" className="py-20 md:py-28">
-          <div className="container max-w-6xl">
-            <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-              <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">
-                Why this circle
-              </p>
-              <h2 className="font-display text-3xl md:text-5xl leading-tight">
-                A different kind of <em className="italic text-gradient">social life</em> in your city
-              </h2>
-              <p className="text-muted-foreground mt-4 text-sm md:text-base">
-                For people who'd rather meet 5 real ones than scroll 500 strangers.
-              </p>
-            </div>
+        <div className="lp-divider" />
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-              {circleBenefits.map((it) => (
-                <div
-                  key={it.title}
-                  className="group p-6 rounded-3xl bg-card border border-border/60 shadow-card hover:shadow-elegant hover:-translate-y-1 transition-all duration-500"
-                >
-                  <div
-                    className="h-12 w-12 rounded-2xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
-                    style={{ background: "var(--gradient-warm)" }}
-                  >
-                    <it.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-display text-xl mb-2">{it.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {it.desc}
-                  </p>
+        {/* THE ROOM */}
+        <section id="room" className="py-28 md:py-40 relative overflow-hidden">
+          <div className="container max-w-5xl">
+            <p className="lp-eyebrow mb-10">— The room</p>
+            <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-4xl">
+              A different kind of social life. <span className="lp-italic" style={{ color: "var(--lp-violet)" }}>Less feed.</span> More people.
+            </h2>
+            <div className="grid md:grid-cols-3 gap-12 mt-20">
+              {[
+                { k: "08", l: "Cities open" },
+                { k: "412", l: "Profiles reviewed this week" },
+                { k: "<48h", l: "Average response time" },
+              ].map((s) => (
+                <div key={s.l}>
+                  <div className="lp-serif text-5xl md:text-6xl" style={{ color: "var(--lp-violet)" }}>{s.k}</div>
+                  <p className="lp-eyebrow mt-3">{s.l}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* LIFESTYLE BAND */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
+        <div className="lp-divider" />
+
+        {/* PILLARS */}
+        <section className="py-28 md:py-40" style={{ background: "linear-gradient(180deg, var(--lp-bg), #09091200)" }}>
+          <div className="container max-w-5xl">
+            <p className="lp-eyebrow mb-16">— What makes the room, the room</p>
+            <div>
+              {pillars.map((p, i) => (
+                <div key={p.n}>
+                  <div className="grid md:grid-cols-[120px_1fr_2fr] gap-6 md:gap-12 py-10 md:py-14 items-baseline">
+                    <div className="lp-serif text-3xl" style={{ color: "var(--lp-violet)" }}>{p.n}</div>
+                    <h3 className="lp-h2 text-3xl md:text-4xl">{p.title}</h3>
+                    <p className="lp-body text-base md:text-lg">{p.body}</p>
+                  </div>
+                  {i < pillars.length - 1 && <div className="lp-divider" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="lp-divider" />
+
+        {/* LIFESTYLE */}
+        <section className="relative py-28 md:py-40 overflow-hidden">
           <div
             aria-hidden
-            className="absolute -z-10 left-0 top-0 w-[55%] h-full pointer-events-none opacity-[0.12] hidden md:block"
+            className="absolute inset-0 pointer-events-none"
             style={{
               backgroundImage: `url(${coupleQuiet})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              WebkitMaskImage:
-                "radial-gradient(ellipse at 30% 50%, black 0%, transparent 70%)",
-              maskImage:
-                "radial-gradient(ellipse at 30% 50%, black 0%, transparent 70%)",
+              opacity: 0.18,
+              mixBlendMode: "luminosity",
             }}
           />
-          <div className="container max-w-6xl">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">
-                  Your kind of room
-                </p>
-                <h2 className="font-display text-3xl md:text-5xl leading-tight mb-5">
-                  The people you keep <em className="italic text-gradient">wishing</em> you'd meet
-                </h2>
-                <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-7">
-                  Founders, creatives, doctors, designers, bankers, artists. People with calendars full of intent — wine bars, slow Sundays, gigs, last-minute Goa plans. Unveil Now is where they quietly find each other.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {lifestyle.map((l) => (
-                    <span
-                      key={l.label}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-card border border-border/60 text-xs text-foreground/80 shadow-soft"
-                    >
-                      <l.icon className="h-3.5 w-3.5 text-primary-glow" /> {l.label}
-                    </span>
-                  ))}
-                </div>
-                <div className="mt-8">
-                  <Button variant="hero" size="lg" asChild>
-                    <Link to="/signup">
-                      <Heart className="h-4 w-4" /> Join the circle
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div
-                  className="aspect-[4/5] rounded-[2rem] border border-border/60 shadow-elegant overflow-hidden"
-                  style={{
-                    backgroundImage: `linear-gradient(180deg, hsl(327 50% 92% / 0.4), hsl(14 80% 92% / 0.3)), url(${coupleQuiet})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                />
-                <div className="absolute -bottom-6 -left-6 hidden md:block bg-card border border-border/60 rounded-2xl p-4 shadow-card max-w-[260px]">
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
-                    The room tonight
-                  </p>
-                  <p className="text-sm font-medium">
-                    14 new founders · 9 designers · 6 doctors
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Across Mumbai, Delhi & Bengaluru
-                  </p>
-                </div>
-              </div>
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(135deg, rgba(99,102,241,0.5), rgba(167,139,250,0.3) 60%, transparent), linear-gradient(180deg, transparent, var(--lp-bg) 90%)",
+              mixBlendMode: "multiply",
+            }}
+          />
+          <div className="container max-w-5xl relative">
+            <p className="lp-eyebrow mb-10">— Your kind of nights</p>
+            <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-3xl">
+              The people you keep <span className="lp-italic">wishing</span> you'd meet.
+            </h2>
+            <p className="lp-body mt-8 max-w-xl text-base md:text-lg">
+              Founders, creatives, doctors, designers, bankers, artists. Calendars full of intent — wine bars, slow Sundays, last-minute Goa plans. Unveil Now is where they quietly find each other.
+            </p>
+            <div className="mt-12 flex flex-wrap gap-3">
+              {lifestyle.map((l) => (
+                <span key={l} className="px-5 py-2.5 rounded-full text-sm" style={{ border: "1px solid var(--lp-border)", background: "rgba(15,15,24,0.6)", backdropFilter: "blur(8px)" }}>
+                  {l}
+                </span>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* PRICING (reused) */}
-        <Pricing />
+        <div className="lp-divider" />
 
-        {/* FAQ (reused) */}
-        <FAQ />
+        {/* CITIES */}
+        <section className="py-28 md:py-36">
+          <div className="container max-w-6xl">
+            <p className="lp-eyebrow mb-12 text-center">— Now opening in</p>
+            <div className="flex flex-wrap justify-center gap-x-12 gap-y-4">
+              {cities.map((c) => (
+                <span key={c} className="lp-city-word">{c}</span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="lp-divider" />
+
+        {/* HOW IT WORKS */}
+        <section className="py-28 md:py-40">
+          <div className="container max-w-5xl">
+            <p className="lp-eyebrow mb-16">— How it works</p>
+            <div className="grid md:grid-cols-3 gap-12 md:gap-8">
+              {steps.map((s) => (
+                <div key={s.n}>
+                  <div className="lp-serif lp-italic text-4xl mb-6" style={{ color: "var(--lp-violet)" }}>{s.n}</div>
+                  <h3 className="lp-h2 text-2xl md:text-3xl mb-3">{s.t}</h3>
+                  <p className="lp-body text-sm md:text-base">{s.b}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="lp-divider" />
+
+        {/* MEMBERS SAY */}
+        <section className="py-28 md:py-40 relative overflow-hidden">
+          <div className="lp-aurora" style={{ opacity: 0.5 }} />
+          <div className="container max-w-4xl text-center relative">
+            <p className="lp-eyebrow mb-10">— Members say</p>
+            <p className="lp-serif lp-italic text-3xl md:text-5xl leading-tight">
+              "It felt less like an app and more like being introduced by a friend who actually <span style={{ color: "var(--lp-violet)" }}>knows</span> the room."
+            </p>
+            <p className="lp-eyebrow mt-8">A · Founder, Mumbai</p>
+          </div>
+        </section>
+
+        {/* PRICING (reused, dark-themed wrap) */}
+        <div className="lp-pricing-mask">
+          <div style={{ filter: "invert(1) hue-rotate(180deg)" }}>
+            <Pricing />
+          </div>
+        </div>
+
+        {/* FAQ (reused, dark-themed wrap) */}
+        <div className="lp-faq-mask">
+          <div style={{ filter: "invert(1) hue-rotate(180deg)" }}>
+            <FAQ />
+          </div>
+        </div>
+
+        <div className="lp-divider" />
 
         {/* FINAL CTA */}
-        <section className="py-20 md:py-28">
-          <div className="container max-w-4xl">
-            <div
-              className="relative overflow-hidden rounded-[2rem] p-10 md:p-16 text-center text-primary-foreground shadow-elegant"
-              style={{ background: "var(--gradient-romance)" }}
-            >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-[11px] uppercase tracking-widest mb-6">
-                <Crown className="h-3 w-3" /> Invite-only
-              </div>
-              <h2 className="font-display text-3xl md:text-5xl leading-tight mb-4">
-                Your city is more interesting than your feed.
-              </h2>
-              <p className="text-primary-foreground/90 text-sm md:text-base max-w-xl mx-auto mb-8">
-                Step into a quietly curated circle. Make friends first. Let the rest happen the way it's supposed to.
-              </p>
-              <Button variant="secondary" size="xl" asChild>
-                <Link to="/signup">Request my invite</Link>
-              </Button>
-              <p className="mt-4 text-[11px] text-primary-foreground/70">
-                Manually reviewed · Privacy-first · Story-first
-              </p>
+        <section className="py-28 md:py-40 relative overflow-hidden">
+          <div className="lp-aurora" />
+          <div className="container max-w-4xl text-center relative">
+            <p className="lp-eyebrow mb-8">— One last thing</p>
+            <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl">
+              The city is <span className="lp-italic">quieter</span> than your feed.
+              <br />Step in.
+            </h2>
+            <div className="mt-12">
+              <Link to="/signup" className="lp-btn-primary">Request my invite →</Link>
             </div>
+            <p className="lp-eyebrow mt-8">Manually reviewed · Privacy-first · Story-first</p>
           </div>
         </section>
       </main>
+
       <Footer />
     </div>
   );
