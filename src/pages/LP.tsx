@@ -216,21 +216,50 @@ const LP = () => {
         {/* HERO */}
         <section className="relative overflow-hidden lp-grain" style={{ minHeight: "92vh", display: "flex", alignItems: "center" }}>
           <div className="lp-aurora" />
-          <div className="container max-w-6xl relative py-24 md:py-32">
-            <p className="lp-eyebrow mb-8 animate-fade-in">— Invite-only · 2026 cohort</p>
-            <h1 className="lp-h1 text-[3.25rem] sm:text-7xl md:text-8xl lg:text-[8.5rem] animate-fade-up">
-              A private circle
-              <br />
-              for your <span className="lp-italic">city.</span>
-            </h1>
-            <p className="lp-body mt-10 max-w-xl text-base md:text-lg animate-fade-up delay-100">
-              Unveil Now is a quietly curated room for modern, ambitious singles who'd rather meet five real ones than scroll five hundred strangers. Friends first. Chemistry next. Faces last.
-            </p>
-            <div className="mt-12 flex flex-col sm:flex-row gap-3 animate-fade-up delay-200">
-              <Link to="/signup" className="lp-btn-primary">Request my invite →</Link>
-              <a href="#room" className="lp-btn-ghost">See inside the room</a>
+          <div className="container max-w-7xl relative py-24 md:py-32">
+            <div className="grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-center">
+              <div>
+                <p className="lp-eyebrow mb-8 animate-fade-in">— Invite-only · 2026 cohort</p>
+                <h1 className="lp-h1 text-[3.25rem] sm:text-7xl md:text-8xl lg:text-[7.5rem] animate-fade-up">
+                  A private circle
+                  <br />
+                  for your <span className="lp-italic" style={{ color: "var(--lp-violet)" }}>city.</span>
+                </h1>
+                <p className="lp-body mt-10 max-w-xl text-base md:text-lg animate-fade-up delay-100">
+                  Unveil Now is a quietly curated room for modern, ambitious singles who'd rather meet five real ones than scroll five hundred strangers. Friends first. Chemistry next. Faces last.
+                </p>
+                <div className="mt-12 flex flex-col sm:flex-row gap-3 animate-fade-up delay-200">
+                  <Link to="/signup" className="lp-btn-primary">Request my invite →</Link>
+                  <a href="#room" className="lp-btn-ghost">See inside the room</a>
+                </div>
+                <p className="lp-eyebrow mt-10 animate-fade-up delay-300">Manually reviewed · Small entry keeps it private</p>
+              </div>
+
+              {/* Hero image collage */}
+              <div className="relative hidden lg:block animate-fade-up delay-200">
+                <div
+                  className="aspect-[4/5] rounded-[2rem] overflow-hidden relative"
+                  style={{
+                    border: "1px solid var(--lp-border)",
+                    boxShadow: "0 30px 80px -20px rgba(99,102,241,0.4)",
+                  }}
+                >
+                  <img src={heroCouple} alt="" className="w-full h-full object-cover" style={{ filter: "saturate(0.85) contrast(1.05) brightness(0.85)" }} />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(7,7,12,0.85)), linear-gradient(135deg, rgba(99,102,241,0.25), rgba(167,139,250,0.15))", mixBlendMode: "multiply" }} />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <p className="lp-eyebrow mb-2" style={{ color: "rgba(255,255,255,0.7)" }}>— Tonight in the room</p>
+                    <p className="lp-serif text-2xl" style={{ color: "white" }}>14 founders · 9 designers · 6 doctors</p>
+                  </div>
+                </div>
+                <div
+                  className="absolute -top-6 -left-10 w-32 h-40 rounded-2xl overflow-hidden hidden xl:block"
+                  style={{ border: "1px solid var(--lp-border)", boxShadow: "0 20px 50px -10px rgba(0,0,0,0.6)" }}
+                >
+                  <img src={coupleCafe} alt="" className="w-full h-full object-cover" style={{ filter: "saturate(0.7) brightness(0.8)" }} />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(167,139,250,0.3), transparent)", mixBlendMode: "overlay" }} />
+                </div>
+              </div>
             </div>
-            <p className="lp-eyebrow mt-10 animate-fade-up delay-300">Manually reviewed · Small entry keeps it private</p>
           </div>
         </section>
 
