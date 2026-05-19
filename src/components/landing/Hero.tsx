@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, EyeOff, ShieldCheck, Heart } from "lucide-react";
 import { HeroCard } from "./HeroCard";
 import coupleWarm from "@/assets/couple-warm.jpg";
+import heroRooftop from "@/assets/lp-hero-rooftop.jpg";
 
 export const Hero = () => {
   return (
@@ -81,12 +82,46 @@ export const Hero = () => {
             </p>
           </div>
 
-          {/* Right: card */}
-          <div className="animate-fade-up delay-200">
+          {/* Right: card + rooftop image */}
+          <div className="animate-fade-up delay-200 relative">
+            <div
+              className="relative mb-6 aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border border-border/40 hero-float"
+            >
+              <img
+                src={heroRooftop}
+                alt="A couple at a Mumbai rooftop bar at night"
+                loading="eager"
+                className="w-full h-full object-cover hero-kenburns"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(180deg, transparent 45%, rgba(20,10,20,0.55) 100%), linear-gradient(135deg, hsl(327 60% 70% / 0.18), transparent 60%)",
+                }}
+              />
+              <div className="absolute bottom-5 left-5 right-5 text-white">
+                <p className="text-[10px] tracking-[0.28em] uppercase opacity-80 mb-1">— Tonight in Mumbai</p>
+                <p className="font-display text-xl leading-tight">One conversation. Hours later, still talking.</p>
+              </div>
+            </div>
             <HeroCard />
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes hero-kenburns {
+          0% { transform: scale(1.05) translate3d(0,0,0); }
+          100% { transform: scale(1.18) translate3d(-2%, -2%, 0); }
+        }
+        .hero-kenburns { animation: hero-kenburns 18s ease-in-out infinite alternate; }
+        @keyframes hero-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+        .hero-float { animation: hero-float 7s ease-in-out infinite; }
+      `}</style>
     </section>
   );
 };

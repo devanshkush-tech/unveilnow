@@ -8,7 +8,7 @@ import { trackMetaEvent } from "@/lib/metaCapi";
 import coupleQuiet from "@/assets/couple-quiet.jpg";
 import coupleWarm from "@/assets/couple-warm.jpg";
 import coupleCafe from "@/assets/couple-cafe.jpg";
-import heroCouple from "@/assets/hero-couple.jpg";
+import heroCouple from "@/assets/lp-hero-rooftop.jpg";
 import lpRooftop from "@/assets/lp-rooftop.jpg";
 import lpWinebar from "@/assets/lp-winebar.jpg";
 import lpStreet from "@/assets/lp-street.jpg";
@@ -179,6 +179,22 @@ const LP = () => {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
         }
+        @keyframes lp-kenburns {
+          0% { transform: scale(1.05) translate3d(0,0,0); }
+          100% { transform: scale(1.18) translate3d(-2%, -2%, 0); }
+        }
+        .lp-kenburns { animation: lp-kenburns 18s ease-in-out infinite alternate; }
+        @keyframes lp-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+        .lp-float { animation: lp-float 6s ease-in-out infinite; }
+        @keyframes lp-shimmer {
+          0% { opacity: 0.4; }
+          50% { opacity: 0.9; }
+          100% { opacity: 0.4; }
+        }
+        .lp-shimmer { animation: lp-shimmer 4s ease-in-out infinite; }
         .lp-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--lp-border), transparent); }
         .lp-city-word {
           font-family: 'Instrument Serif', serif;
@@ -241,14 +257,14 @@ const LP = () => {
               {/* Hero image collage */}
               <div className="relative hidden lg:block animate-fade-up delay-200">
                 <div
-                  className="aspect-[4/5] rounded-[2rem] overflow-hidden relative"
+                  className="aspect-[4/5] rounded-[2rem] overflow-hidden relative lp-float"
                   style={{
                     border: "1px solid var(--lp-border)",
                     boxShadow: "0 30px 80px -20px rgba(99,102,241,0.4)",
                   }}
                 >
-                  <img src={heroCouple} alt="" className="w-full h-full object-cover" style={{ filter: "saturate(0.85) contrast(1.05) brightness(0.85)" }} />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(7,7,12,0.85)), linear-gradient(135deg, rgba(99,102,241,0.25), rgba(167,139,250,0.15))", mixBlendMode: "multiply" }} />
+                  <img src={heroCouple} alt="A couple on a Mumbai rooftop at night" className="w-full h-full object-cover lp-kenburns" style={{ filter: "saturate(0.95) contrast(1.08) brightness(0.92)" }} />
+                  <div className="absolute inset-0 lp-shimmer" style={{ background: "linear-gradient(180deg, transparent 40%, rgba(7,7,12,0.85)), linear-gradient(135deg, rgba(99,102,241,0.28), rgba(167,139,250,0.18))", mixBlendMode: "multiply" }} />
                   <div className="absolute bottom-6 left-6 right-6">
                     <p className="lp-eyebrow mb-2" style={{ color: "rgba(255,255,255,0.7)" }}>— Tonight in the room</p>
                     <p className="lp-serif text-2xl" style={{ color: "white" }}>14 founders · 9 designers · 6 doctors</p>
