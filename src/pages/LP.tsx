@@ -9,6 +9,9 @@ import coupleQuiet from "@/assets/couple-quiet.jpg";
 import coupleWarm from "@/assets/couple-warm.jpg";
 import coupleCafe from "@/assets/couple-cafe.jpg";
 import heroCouple from "@/assets/hero-couple.jpg";
+import lpRooftop from "@/assets/lp-rooftop.jpg";
+import lpWinebar from "@/assets/lp-winebar.jpg";
+import lpStreet from "@/assets/lp-street.jpg";
 
 const cities = [
   "Mumbai",
@@ -267,22 +270,39 @@ const LP = () => {
 
         {/* THE ROOM */}
         <section id="room" className="py-28 md:py-40 relative overflow-hidden">
-          <div className="container max-w-5xl">
-            <p className="lp-eyebrow mb-10">— The room</p>
-            <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-4xl">
-              A different kind of social life. <span className="lp-italic" style={{ color: "var(--lp-violet)" }}>Less feed.</span> More people.
-            </h2>
-            <div className="grid md:grid-cols-3 gap-12 mt-20">
-              {[
-                { k: "08", l: "Cities open" },
-                { k: "412", l: "Profiles reviewed this week" },
-                { k: "<48h", l: "Average response time" },
-              ].map((s) => (
-                <div key={s.l}>
-                  <div className="lp-serif text-5xl md:text-6xl" style={{ color: "var(--lp-violet)" }}>{s.k}</div>
-                  <p className="lp-eyebrow mt-3">{s.l}</p>
+          <div className="container max-w-6xl">
+            <div className="grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-20 items-center">
+              <div>
+                <p className="lp-eyebrow mb-10">— The room</p>
+                <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl">
+                  A different kind of social life. <span className="lp-italic" style={{ color: "var(--lp-violet)" }}>Less feed.</span> More people.
+                </h2>
+                <div className="grid grid-cols-3 gap-6 md:gap-10 mt-14">
+                  {[
+                    { k: "08", l: "Cities open" },
+                    { k: "412", l: "Profiles this week" },
+                    { k: "<48h", l: "Response time" },
+                  ].map((s) => (
+                    <div key={s.l}>
+                      <div className="lp-serif text-4xl md:text-5xl" style={{ color: "var(--lp-violet)" }}>{s.k}</div>
+                      <p className="lp-eyebrow mt-3">{s.l}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="relative">
+                <div
+                  className="aspect-[4/5] rounded-[2rem] overflow-hidden relative"
+                  style={{ border: "1px solid var(--lp-border)", boxShadow: "0 30px 80px -20px rgba(167,139,250,0.35)" }}
+                >
+                  <img src={lpRooftop} alt="Friends at a rooftop dinner" loading="lazy" width={1280} height={1600} className="w-full h-full object-cover" style={{ filter: "saturate(0.9) contrast(1.05) brightness(0.9)" }} />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 50%, rgba(7,7,12,0.7)), linear-gradient(135deg, rgba(99,102,241,0.18), transparent)", mixBlendMode: "multiply" }} />
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <p className="lp-eyebrow mb-1" style={{ color: "rgba(255,255,255,0.75)" }}>— Last Saturday · Bandra</p>
+                    <p className="lp-serif text-xl" style={{ color: "white" }}>Six strangers. One long table. No phones.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -331,20 +351,48 @@ const LP = () => {
               mixBlendMode: "multiply",
             }}
           />
-          <div className="container max-w-5xl relative">
-            <p className="lp-eyebrow mb-10">— Your kind of nights</p>
-            <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-3xl">
-              The people you keep <span className="lp-italic">wishing</span> you'd meet.
-            </h2>
-            <p className="lp-body mt-8 max-w-xl text-base md:text-lg">
-              Founders, creatives, doctors, designers, bankers, artists. Calendars full of intent — wine bars, slow Sundays, last-minute Goa plans. Unveil Now is where they quietly find each other.
-            </p>
-            <div className="mt-12 flex flex-wrap gap-3">
-              {lifestyle.map((l) => (
-                <span key={l} className="px-5 py-2.5 rounded-full text-sm" style={{ border: "1px solid var(--lp-border)", background: "rgba(15,15,24,0.6)", backdropFilter: "blur(8px)" }}>
-                  {l}
-                </span>
-              ))}
+          <div className="container max-w-6xl relative">
+            <div className="grid lg:grid-cols-[1.2fr_1fr] gap-12 lg:gap-16 items-end">
+              <div>
+                <p className="lp-eyebrow mb-10">— Your kind of nights</p>
+                <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-3xl">
+                  The people you keep <span className="lp-italic">wishing</span> you'd meet.
+                </h2>
+                <p className="lp-body mt-8 max-w-xl text-base md:text-lg">
+                  Founders, creatives, doctors, designers, bankers, artists. Calendars full of intent — wine bars, slow Sundays, last-minute Goa plans. Unveil Now is where they quietly find each other.
+                </p>
+                <div className="mt-12 flex flex-wrap gap-3">
+                  {lifestyle.map((l) => (
+                    <span key={l} className="px-5 py-2.5 rounded-full text-sm" style={{ border: "1px solid var(--lp-border)", background: "rgba(15,15,24,0.6)", backdropFilter: "blur(8px)" }}>
+                      {l}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div
+                className="aspect-square rounded-[2rem] overflow-hidden relative"
+                style={{ border: "1px solid var(--lp-border)", boxShadow: "0 30px 80px -20px rgba(99,102,241,0.4)" }}
+              >
+                <img src={lpWinebar} alt="Friends at a wine bar" loading="lazy" width={1280} height={1280} className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 55%, rgba(7,7,12,0.75))" }} />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="lp-serif lp-italic text-2xl" style={{ color: "white" }}>"One drink." Three hours later, still talking.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FULL-WIDTH STREET BAND */}
+        <section className="relative h-[55vh] min-h-[420px] overflow-hidden">
+          <img src={lpStreet} alt="Friends walking through the city at golden hour" loading="lazy" width={1600} height={1100} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(7,7,12,0.55) 0%, rgba(7,7,12,0.3) 50%, rgba(7,7,12,0.9) 100%), linear-gradient(135deg, rgba(99,102,241,0.25), transparent 60%)" }} />
+          <div className="absolute inset-0 flex items-center">
+            <div className="container max-w-5xl">
+              <p className="lp-eyebrow mb-6" style={{ color: "rgba(255,255,255,0.7)" }}>— Your city, just smaller</p>
+              <h2 className="lp-h2 text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ color: "white" }}>
+                The same streets. <span className="lp-italic" style={{ color: "var(--lp-violet)" }}>Different</span> people.
+              </h2>
             </div>
           </div>
         </section>
