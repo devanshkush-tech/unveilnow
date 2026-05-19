@@ -9,6 +9,9 @@ import coupleQuiet from "@/assets/couple-quiet.jpg";
 import coupleWarm from "@/assets/couple-warm.jpg";
 import coupleCafe from "@/assets/couple-cafe.jpg";
 import heroCouple from "@/assets/hero-couple.jpg";
+import lpRooftop from "@/assets/lp-rooftop.jpg";
+import lpWinebar from "@/assets/lp-winebar.jpg";
+import lpStreet from "@/assets/lp-street.jpg";
 
 const cities = [
   "Mumbai",
