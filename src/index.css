@@ -210,3 +210,41 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
 }
+
+/* Global scroll reveal — applied via <ScrollReveal /> */
+.sr-init {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s var(--ease-silk), transform 0.9s var(--ease-silk);
+  will-change: opacity, transform;
+}
+.sr-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger direct children of revealed sections for a cascading feel */
+.sr-in > * {
+  animation: sr-child-rise 0.8s var(--ease-silk) both;
+}
+.sr-in > *:nth-child(1) { animation-delay: 60ms; }
+.sr-in > *:nth-child(2) { animation-delay: 140ms; }
+.sr-in > *:nth-child(3) { animation-delay: 220ms; }
+.sr-in > *:nth-child(4) { animation-delay: 300ms; }
+.sr-in > *:nth-child(5) { animation-delay: 380ms; }
+.sr-in > *:nth-child(6) { animation-delay: 460ms; }
+@keyframes sr-child-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sr-init, .sr-in, .sr-in > * { opacity: 1 !important; transform: none !important; animation: none !important; }
+}
+
+/* Subtle hover lift for any card-like element */
+.hover-lift {
+  transition: transform 0.4s var(--ease-silk), box-shadow 0.4s var(--ease-silk);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-elegant);
+}
