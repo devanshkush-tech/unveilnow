@@ -16,9 +16,9 @@ export const Hero = () => {
         }}
       />
       {/* Decorative leaves */}
-      <div aria-hidden className="absolute -left-10 top-40 w-72 h-72 rounded-full blur-3xl opacity-40"
+      <div aria-hidden className="ambient-orb absolute -left-10 top-40 w-72 h-72 rounded-full blur-3xl opacity-40"
         style={{ background: "radial-gradient(circle, hsl(340 60% 80%), transparent 70%)" }} />
-      <div aria-hidden className="absolute -right-10 bottom-0 w-96 h-96 rounded-full blur-3xl opacity-40"
+      <div aria-hidden className="ambient-orb-slow absolute -right-10 bottom-0 w-96 h-96 rounded-full blur-3xl opacity-40"
         style={{ background: "radial-gradient(circle, hsl(14 70% 80%), transparent 70%)" }} />
       {/* Candid couple photo as ambient background accent */}
       <div
