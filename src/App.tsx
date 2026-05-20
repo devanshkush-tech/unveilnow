@@ -48,6 +48,7 @@ import BlindDateExtendedSetup from "./features/blind-date/pages/ExtendedSetup";
 import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 import Notifications from "./pages/Notifications";
 import UnlockInterest from "./pages/UnlockInterest";
+import { ScrollReveal } from "./components/ScrollReveal";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
           <AuthProvider>
             <PaymentTestModeBanner />
             <MetaPageViewTracker />
+            <ScrollReveal />
             <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/lp" element={<LP />} />
