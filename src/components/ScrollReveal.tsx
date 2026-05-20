@@ -64,6 +64,7 @@ export const ScrollReveal = () => {
     return () => {
       io.disconnect();
       mo.disconnect();
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
