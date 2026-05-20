@@ -1,14 +1,33 @@
 import { useEffect } from "react";
 
 /**
- * Global scroll-reveal: fades + lifts every <section> and any element
- * with [data-reveal] as it enters the viewport. Respects reduced motion.
+ * Global motion layer:
+ *  - Fades + lifts every <section> and [data-reveal] element into view
+ *  - Publishes window scroll position to --scroll-y for [data-parallax] elements
+ *  - Respects prefers-reduced-motion
  */
 export const ScrollReveal = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
+
+    // --- Scroll-driven parallax variable ---
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+        raf = 0;
+      });
+    };
+    if (!prefersReduced) {
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
+
+    if (prefersReduced) {
+      return () => window.removeEventListener("scroll", onScroll);
+    }
 
     const selector = "section, [data-reveal]";
     const seen = new WeakSet<Element>();
@@ -45,6 +64,7 @@ export const ScrollReveal = () => {
     return () => {
       io.disconnect();
       mo.disconnect();
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
