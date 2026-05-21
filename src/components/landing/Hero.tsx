@@ -8,7 +8,14 @@ import heroRooftop from "@/assets/lp-hero-rooftop.jpg";
 
 
 export const Hero = () => {
-  return (
+  const [slide, setSlide] = useState(0);
+  const slides = 2;
+  useEffect(() => {
+    const id = setInterval(() => setSlide((s) => (s + 1) % slides), 5500);
+    return () => clearInterval(id);
+  }, []);
+  const go = (i: number) => setSlide((i + slides) % slides);
+
     <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
       {/* Warm plum-to-peach gradient backdrop */}
       <div aria-hidden className="absolute inset-0 -z-10"
