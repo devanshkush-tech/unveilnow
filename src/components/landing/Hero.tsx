@@ -1,13 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Sparkles, EyeOff, ShieldCheck, Heart } from "lucide-react";
+import { Sparkles, EyeOff, ShieldCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { HeroCard } from "./HeroCard";
 import coupleWarm from "@/assets/couple-warm.jpg";
 import heroRooftop from "@/assets/lp-hero-rooftop.jpg";
 
+
 export const Hero = () => {
+  const [slide, setSlide] = useState(0);
+  const slides = 2;
+  useEffect(() => {
+    const id = setInterval(() => setSlide((s) => (s + 1) % slides), 5500);
+    return () => clearInterval(id);
+  }, []);
+  const go = (i: number) => setSlide((i + slides) % slides);
   return (
     <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
+
       {/* Warm plum-to-peach gradient backdrop */}
       <div aria-hidden className="absolute inset-0 -z-10"
         style={{
@@ -82,32 +92,72 @@ export const Hero = () => {
             </p>
           </div>
 
-          {/* Right: card + rooftop image */}
+          {/* Right: slider (image + profile card share the same slot) */}
           <div className="animate-fade-up delay-200 relative">
-            <div
-              className="relative mb-6 aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border border-border/40 hero-float"
-            >
-              <img
-                src={heroRooftop}
-                alt="A couple at a Mumbai rooftop bar at night"
-                loading="eager"
-                className="w-full h-full object-cover hero-kenburns"
-              />
+            <div className="relative aspect-[4/5] w-full">
+              {/* Slide 1: rooftop image */}
               <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, transparent 45%, rgba(20,10,20,0.55) 100%), linear-gradient(135deg, hsl(327 60% 70% / 0.18), transparent 60%)",
-                }}
-              />
-              <div className="absolute bottom-5 left-5 right-5 text-white">
-                <p className="text-[10px] tracking-[0.28em] uppercase opacity-80 mb-1">— Tonight in Mumbai</p>
-                <p className="font-display text-xl leading-tight">One conversation. Hours later, still talking.</p>
+                className={`absolute inset-0 transition-opacity duration-700 ease-out ${slide === 0 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"}`}
+              >
+                <div className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-2xl border border-border/40 hero-float">
+                  <img
+                    src={heroRooftop}
+                    alt="A couple at a Mumbai rooftop bar at night"
+                    loading="eager"
+                    className="w-full h-full object-cover hero-kenburns"
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, transparent 45%, rgba(20,10,20,0.55) 100%), linear-gradient(135deg, hsl(327 60% 70% / 0.18), transparent 60%)",
+                    }}
+                  />
+                  <div className="absolute bottom-5 left-5 right-5 text-white">
+                    <p className="text-[10px] tracking-[0.28em] uppercase opacity-80 mb-1">— Tonight in Mumbai</p>
+                    <p className="font-display text-xl leading-tight">One conversation. Hours later, still talking.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slide 2: profile card */}
+              <div
+                className={`absolute inset-0 overflow-y-auto no-scrollbar transition-opacity duration-700 ease-out ${slide === 1 ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"}`}
+              >
+                <HeroCard />
               </div>
             </div>
-            <HeroCard />
+
+            {/* Controls */}
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <button
+                aria-label="Previous"
+                onClick={() => go(slide - 1)}
+                className="h-8 w-8 rounded-full bg-card border border-border/60 flex items-center justify-center shadow-soft hover:bg-accent/10 transition"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center gap-2">
+                {Array.from({ length: slides }).map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Go to slide ${i + 1}`}
+                    onClick={() => go(i)}
+                    className={`h-2 rounded-full transition-all ${slide === i ? "w-6 bg-primary" : "w-2 bg-border"}`}
+                  />
+                ))}
+              </div>
+              <button
+                aria-label="Next"
+                onClick={() => go(slide + 1)}
+                className="h-8 w-8 rounded-full bg-card border border-border/60 flex items-center justify-center shadow-soft hover:bg-accent/10 transition"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
       <style>{`
