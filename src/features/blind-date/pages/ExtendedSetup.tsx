@@ -5,6 +5,7 @@ import { BlindDateLayout } from "../components/BlindDateLayout";
 import { GlowButton } from "../components/GlowButton";
 import { BD_EXTENDED_QUESTIONS } from "../lib/extendedQuestions";
 import { supabase } from "@/integrations/supabase/client";
+import { useBdProfile } from "../hooks/useBdProfile";
 import { toast } from "sonner";
 
 export default function BlindDateExtendedSetup() {
@@ -12,6 +13,7 @@ export default function BlindDateExtendedSetup() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [saving, setSaving] = useState(false);
+  const { refresh } = useBdProfile();
 
   useEffect(() => {
     (async () => {
