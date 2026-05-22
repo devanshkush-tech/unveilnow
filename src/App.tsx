@@ -122,9 +122,10 @@ const App = () => (
             </Route>
             <Route path="/blind-date" element={<BlindDateLanding />} />
             <Route path="/blind-date/setup" element={<BlindDateGate require="setup"><BlindDateSetup /></BlindDateGate>} />
-            <Route path="/blind-date/payment" element={<BlindDateGate require="payment"><BlindDatePayment /></BlindDateGate>} />
+            <Route path="/blind-date/payment" element={<BlindDateGate require="onboarding"><BlindDatePayment /></BlindDateGate>} />
             <Route path="/blind-date/payment/review" element={<BlindDateGate require="any"><BlindDatePaymentReview /></BlindDateGate>} />
-            <Route path="/blind-date/onboarding" element={<BlindDateGate require="payment"><BlindDateExtendedSetup /></BlindDateGate>} />
+            <Route path="/blind-date/onboarding" element={<BlindDateGate require="setup"><BlindDateExtendedSetup /></BlindDateGate>} />
+
             <Route path="/blind-date/matching" element={<BlindDateGate><BlindDateMatching /></BlindDateGate>} />
             <Route path="/blind-date/chat" element={<BlindDateGate><BlindDateChat /></BlindDateGate>} />
             <Route path="/blind-date/decision" element={<BlindDateGate><BlindDateDecision /></BlindDateGate>} />

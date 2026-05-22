@@ -13,8 +13,8 @@ export default function BlindDateLanding() {
   const handleStart = () => {
     if (!user) { nav("/login?next=/blind-date/setup"); return; }
     if (!profile?.completed) { nav("/blind-date/setup"); return; }
-    if (!profile?.paid) { nav("/blind-date/payment"); return; }
     if (!profile?.extended_completed) { nav("/blind-date/onboarding"); return; }
+    if (!profile?.paid) { nav("/blind-date/payment"); return; }
     if ((profile?.chats_remaining ?? 0) <= 0) { nav("/blind-date/payment?reason=out"); return; }
     nav("/blind-date/matching");
   };

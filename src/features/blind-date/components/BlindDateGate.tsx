@@ -5,16 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useRole";
 import { useBdProfile } from "../hooks/useBdProfile";
 
-type Stage = "setup" | "payment" | "play" | "any";
+type Stage = "setup" | "onboarding" | "payment" | "play" | "any";
 
 /**
- * Gates Blind Date routes by auth → onboarding → payment → credits.
+ * Gates Blind Date routes. New order: auth → Phase A → extended onboarding → payment → credits.
  * Admins always pass.
- *
- * - require="any": just auth required (e.g. payment + payment review pages)
- * - require="setup": auth required; if no Phase A answers, redirect /blind-date/setup
- * - require="payment": auth + Phase A answers + paid
- * - require="play": auth + paid + chats_remaining > 0 + extended onboarding done
  */
 export function BlindDateGate({
   children,
@@ -42,31 +37,29 @@ export function BlindDateGate({
   }
 
   if (isAdmin) return <>{children}</>;
-
   if (require === "any") return <>{children}</>;
 
   // Phase A questionnaire
   if (!profile?.completed) {
     if (loc.pathname !== "/blind-date/setup") return <Navigate to="/blind-date/setup" replace />;
-  }
-
-  if (require === "setup") return <>{children}</>;
-
-  // Must be paid for everything beyond setup
-  if (!profile?.paid) {
-    if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment" replace />;
     return <>{children}</>;
   }
+  if (require === "setup") return <>{children}</>;
 
-  if (require === "payment") return <>{children}</>;
-
-  // Detailed onboarding required after payment
+  // Extended onboarding BEFORE payment
   if (!profile?.extended_completed) {
     if (loc.pathname !== "/blind-date/onboarding") return <Navigate to="/blind-date/onboarding" replace />;
     return <>{children}</>;
   }
+  if (require === "onboarding") return <>{children}</>;
 
-  // No credits left → back to payment
+  // Payment after all questions
+  if (!profile?.paid) {
+    if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment" replace />;
+    return <>{children}</>;
+  }
+  if (require === "payment") return <>{children}</>;
+
   if ((profile?.chats_remaining ?? 0) <= 0) {
     if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment?reason=out" replace />;
     return <>{children}</>;
