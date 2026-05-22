@@ -49,7 +49,7 @@ export default function BlindDateSetup() {
       });
       if (error) throw error;
       await refresh();
-      setTimeout(() => nav("/blind-date/payment"), 1200);
+      setTimeout(() => nav("/blind-date/onboarding"), 1200);
     } catch (e: any) {
       toast.error(e.message ?? "Couldn't save your answers.");
       setCalculating(false);
