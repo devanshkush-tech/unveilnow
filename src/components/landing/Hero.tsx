@@ -59,7 +59,7 @@ export const Hero = () => {
               <br className="hidden md:block" /> You Judge Me.
             </h1>
 
-            <p className="mt-6 text-base md:text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-up delay-100">
+            <p className="mt-6 text-base md:text-lg text-foreground/75 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-up delay-100">
               A story-first dating platform where real connection starts before appearance. Share your personality, values, and intentions first — and reveal photos only after the chemistry meter is filled.
             </p>
 
