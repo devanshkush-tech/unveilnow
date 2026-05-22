@@ -46,8 +46,8 @@ export default function BlindDateExtendedSetup() {
       const { error } = await supabase.rpc("save_my_bd_extended", { _answers: answers as never, _completed: true });
       if (error) throw error;
       await refresh();
-      toast.success("Profile complete! Finding matches…");
-      setTimeout(() => nav("/blind-date/matching"), 800);
+      toast.success("Profile complete! One last step…");
+      setTimeout(() => nav("/blind-date/payment"), 800);
     } catch (e: any) {
       toast.error(e.message ?? "Couldn't save.");
       setSaving(false);
