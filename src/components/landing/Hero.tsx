@@ -87,7 +87,7 @@ export const Hero = () => {
               ))}
             </div>
 
-            <p className="mt-5 text-[11px] text-muted-foreground/60 tracking-wide animate-fade-up delay-300 inline-flex items-center gap-1.5 justify-center lg:justify-start">
+            <p className="mt-5 text-[11px] text-foreground/60 tracking-wide animate-fade-up delay-300 inline-flex items-center gap-1.5 justify-center lg:justify-start">
               <Sparkles className="h-3 w-3" /> Serious members only. A small entry fee keeps away timepass users.
             </p>
           </div>
