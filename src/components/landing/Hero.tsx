@@ -30,18 +30,18 @@ export const Hero = () => {
         style={{ background: "radial-gradient(circle, hsl(340 60% 80%), transparent 70%)" }} />
       <div aria-hidden className="ambient-orb-slow absolute -right-10 bottom-0 w-96 h-96 rounded-full blur-3xl opacity-40"
         style={{ background: "radial-gradient(circle, hsl(14 70% 80%), transparent 70%)" }} />
-      {/* Candid couple photo as ambient background accent */}
+      {/* Candid couple photo as ambient background accent (very subtle) */}
       <div
         aria-hidden
-        className="absolute -z-10 left-0 bottom-0 w-[55%] h-[70%] pointer-events-none opacity-[0.18] hidden md:block"
+        className="absolute -z-10 left-0 bottom-0 w-[45%] h-[55%] pointer-events-none opacity-[0.07] hidden lg:block"
         style={{
           backgroundImage: `url(${coupleWarm})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           WebkitMaskImage:
-            "radial-gradient(ellipse at 30% 70%, black 0%, transparent 70%)",
+            "radial-gradient(ellipse at 30% 80%, black 0%, transparent 65%)",
           maskImage:
-            "radial-gradient(ellipse at 30% 70%, black 0%, transparent 70%)",
+            "radial-gradient(ellipse at 30% 80%, black 0%, transparent 65%)",
         }}
       />
 
