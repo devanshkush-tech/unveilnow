@@ -5,6 +5,7 @@ import { BlindDateLayout } from "../components/BlindDateLayout";
 import { GlowButton } from "../components/GlowButton";
 import { BD_QUESTIONS } from "../lib/questions";
 import { useBlindDateStore } from "../store";
+import { useBdProfile } from "../hooks/useBdProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -15,6 +16,7 @@ export default function BlindDateSetup() {
   const answers = useBlindDateStore((s) => s.answers);
   const setAnswer = useBlindDateStore((s) => s.setAnswer);
   const setAnswers = useBlindDateStore((s) => s.setAnswers);
+  const { refresh } = useBdProfile();
 
   // Hydrate from server if returning user
   useEffect(() => {
