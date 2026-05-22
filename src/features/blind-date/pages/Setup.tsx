@@ -48,6 +48,7 @@ export default function BlindDateSetup() {
         _answers: answers as never, _completed: true,
       });
       if (error) throw error;
+      await refresh();
       setTimeout(() => nav("/blind-date/payment"), 1200);
     } catch (e: any) {
       toast.error(e.message ?? "Couldn't save your answers.");
