@@ -1326,6 +1326,12 @@ export type Database = {
       }
     }
     Functions: {
+      admin_resolve_audience: {
+        Args: { _type: string; _value: string }
+        Returns: {
+          id: string
+        }[]
+      }
       bd_consume_chat: { Args: { _user_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
