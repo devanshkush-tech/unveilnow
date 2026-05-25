@@ -442,10 +442,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "likes_liked_id_fkey"
+            columns: ["liked_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "likes_liker_id_fkey"
             columns: ["liker_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_liker_id_fkey"
+            columns: ["liker_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -484,10 +498,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "matches_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "matches_user_b_fkey"
             columns: ["user_b"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -545,6 +573,13 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -711,6 +746,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "profile_interests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profile_photos: {
@@ -741,6 +783,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_photos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -776,6 +825,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_prompts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1220,7 +1276,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          account_status: string | null
+          age: number | null
+          city: string | null
+          created_at: string | null
+          first_name: string | null
+          gender: string | null
+          id: string | null
+          intent: string | null
+          looking_for: string | null
+          onboarded: boolean | null
+          profession: string | null
+          story: string | null
+          voice_intro_path: string | null
+        }
+        Insert: {
+          account_status?: string | null
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string | null
+          intent?: string | null
+          looking_for?: string | null
+          onboarded?: boolean | null
+          profession?: string | null
+          story?: string | null
+          voice_intro_path?: string | null
+        }
+        Update: {
+          account_status?: string | null
+          age?: number | null
+          city?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          gender?: string | null
+          id?: string | null
+          intent?: string | null
+          looking_for?: string | null
+          onboarded?: boolean | null
+          profession?: string | null
+          story?: string | null
+          voice_intro_path?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bd_consume_chat: { Args: { _user_id: string }; Returns: boolean }
