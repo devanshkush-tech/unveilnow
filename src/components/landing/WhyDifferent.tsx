@@ -22,7 +22,7 @@ export const WhyDifferent = () => {
       {/* Candid couple photo as ambient background accent */}
       <div
         aria-hidden
-        className="absolute -z-10 right-0 top-0 w-[55%] h-[80%] pointer-events-none opacity-[0.12] hidden md:block"
+        className="absolute -z-10 right-0 top-0 w-[55%] h-[80%] pointer-events-none opacity-[0.06] hidden lg:block"
         style={{
           backgroundImage: `url(${coupleQuiet})`,
           backgroundSize: "cover",
@@ -35,13 +35,13 @@ export const WhyDifferent = () => {
       />
       <div className="container max-w-6xl relative">
         <div className="text-center max-w-2xl mx-auto mb-12 md:mb-16">
-          <p className="text-xs uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-3">
+          <p className="text-xs uppercase tracking-[0.18em] text-foreground/70 font-medium mb-3">
             Not just another dating platform
           </p>
           <h2 className="font-display text-3xl md:text-5xl leading-tight">
             Why <em className="italic text-gradient">Unveil Now</em> is different
           </h2>
-          <p className="text-muted-foreground mt-4 text-sm md:text-base">
+          <p className="text-foreground/75 mt-4 text-sm md:text-base">
             Most dating platforms start with photos. Unveil Now starts with stories, values, and real compatibility. We help users connect with who someone is — before deciding based on how they look.
           </p>
         </div>
