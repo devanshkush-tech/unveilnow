@@ -94,8 +94,8 @@ const Onboarding = () => {
     }
     let cancelled = false;
     (async () => {
-      const [{ data: prof }, { data: lib }, { data: prompts }, { data: ints }, { data: pics }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      const [{ data: profRows }, { data: lib }, { data: prompts }, { data: ints }, { data: pics }] = await Promise.all([
+        supabase.rpc("get_my_profile"),
         supabase.from("prompts_library").select("id, text, category").eq("active", true).order("position"),
         supabase
           .from("profile_prompts")
@@ -105,6 +105,7 @@ const Onboarding = () => {
         supabase.from("profile_interests").select("interest").eq("user_id", user.id),
         supabase.from("profile_photos").select("id, storage_path, position").eq("user_id", user.id).order("position"),
       ]);
+      const prof = Array.isArray(profRows) ? profRows[0] : null;
       if (cancelled) return;
 
       if (prof) {
