@@ -17,11 +17,8 @@ const PaymentReview = () => {
 
   const refresh = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("payment_status, account_status, selected_plan")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: rows } = await supabase.rpc("get_my_profile");
+    const data = Array.isArray(rows) ? rows[0] ?? null : null;
     if (!data) return;
     setPlan(data.selected_plan);
     if (data.account_status === "active") {

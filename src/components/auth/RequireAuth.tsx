@@ -43,11 +43,9 @@ export const RequireAuth = ({
     setChecking(true);
 
     const fetchGate = async () => {
-      return await supabase
-        .from("profiles")
-        .select("onboarded, account_status, payment_status")
-        .eq("id", session.user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_my_profile");
+      const row = Array.isArray(data) ? data[0] ?? null : null;
+      return { data: row, error };
     };
 
     (async () => {

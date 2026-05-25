@@ -30,8 +30,8 @@ export default function BlindDatePayment() {
     if (authLoading) return;
     if (!user) { setHydrating(false); return; }
     (async () => {
-      const { data } = await supabase.from("profiles")
-        .select("phone").eq("id", user.id).maybeSingle();
+      const { data: rows } = await supabase.rpc("get_my_profile");
+      const data = Array.isArray(rows) ? rows[0] ?? null : null;
       if (data?.phone) setPhone(data.phone);
       setHydrating(false);
     })();

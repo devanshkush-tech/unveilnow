@@ -54,11 +54,8 @@ const Payment = () => {
 
     (async () => {
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("id, selected_plan, payment_status, account_status, phone")
-          .eq("id", user.id)
-          .maybeSingle();
+        const { data: rows, error } = await supabase.rpc("get_my_profile");
+        const data = Array.isArray(rows) ? rows[0] ?? null : null;
 
         if (cancelled) return;
 
