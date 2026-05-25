@@ -47,13 +47,11 @@ const AdminNotifications = () => {
     if (!title.trim() || !body.trim()) { toast.error("Title and message are required."); return; }
     setSubmitting(true);
     try {
-      // Resolve audience to user_ids
-      let q = supabase.from("profiles").select("id");
-      if (audienceType === "plan" && audienceValue) q = q.eq("selected_plan", audienceValue);
-      else if (audienceType === "city" && audienceValue) q = q.ilike("city", `%${audienceValue}%`);
-      else if (audienceType === "gender" && audienceValue) q = q.eq("gender", audienceValue);
-      else if (audienceType === "user" && audienceValue) q = q.eq("id", audienceValue);
-      const { data: rows, error } = await q;
+      // Resolve audience to user_ids via admin-only RPC
+      const { data: rows, error } = await supabase.rpc("admin_resolve_audience", {
+        _type: audienceType,
+        _value: audienceValue || null,
+      });
       if (error) throw error;
       const userIds = (rows ?? []).map((r: { id: string }) => r.id);
       if (userIds.length === 0) { toast.error("No users matched the audience."); setSubmitting(false); return; }
