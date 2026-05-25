@@ -1365,6 +1365,56 @@ export type Database = {
           used: number
         }[]
       }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          account_status: string
+          age: number | null
+          age_max: number | null
+          age_min: number | null
+          banned: boolean
+          city: string | null
+          created_at: string
+          device: string | null
+          distance_km: number | null
+          first_name: string | null
+          gender: string | null
+          grandfathered: boolean
+          id: string
+          intent: string | null
+          interested_in: string | null
+          is_admin_created: boolean
+          last_active_at: string | null
+          looking_for: string | null
+          match_period_start: string
+          matches_used_this_period: number
+          onboarded: boolean
+          onboarding_step: number
+          payment_status: string
+          phone: string | null
+          plan: string
+          plan_expires_at: string | null
+          plan_period_end: string | null
+          plan_started_at: string | null
+          profession: string | null
+          selected_plan: string | null
+          story: string | null
+          suspended: boolean
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          voice_intro_path: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
