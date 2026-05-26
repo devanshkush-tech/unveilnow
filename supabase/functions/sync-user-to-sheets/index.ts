@@ -115,6 +115,28 @@ async function postWithRetry(url: string, body: unknown, attempts = 3): Promise<
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // Only accept calls bearing the internal shared secret (set by our DB
+  // trigger) or the service-role key. Reject anonymous / user-token callers.
+  const internalSecret = req.headers.get("x-internal-secret") ?? "";
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  let allowed = bearer === SERVICE_KEY;
+  if (!allowed && internalSecret) {
+    const { data } = await admin
+      .from("internal_secrets")
+      .select("value")
+      .eq("name", "sheet_sync_token")
+      .maybeSingle();
+    allowed = !!data?.value && data.value === internalSecret;
+  }
+  if (!allowed) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { user_id, lead_id, log_id } = await req.json().catch(() => ({}));
     if (!user_id && !lead_id) {
