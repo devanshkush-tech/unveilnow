@@ -192,7 +192,7 @@ const Signup = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: sentTo,
-        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+        options: { emailRedirectTo: `${window.location.origin}${nextPath}` },
       });
       if (error) toast.error(error.message);
       else toast.success("Verification email re-sent.");
