@@ -42,9 +42,10 @@ const Signup = () => {
     const goNext = () => {
       if (done) return;
       done = true;
-      toast.success("Email verified — let's set up your profile.");
-      navigate("/onboarding", { replace: true });
+      toast.success("Email verified — let's continue.");
+      navigate(nextPath, { replace: true });
     };
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
         goNext();
