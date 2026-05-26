@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,11 @@ const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code an
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = useMemo(() => {
+    const n = searchParams.get("next");
+    return n && n.startsWith("/") ? n : "/onboarding";
+  }, [searchParams]);
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -25,6 +30,8 @@ const Signup = () => {
   const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+
+
 
   // Auto-advance the moment Supabase confirms the email — works whether the
   // confirmation link opens this tab or another tab on the same browser
@@ -35,9 +42,10 @@ const Signup = () => {
     const goNext = () => {
       if (done) return;
       done = true;
-      toast.success("Email verified — let's set up your profile.");
-      navigate("/onboarding", { replace: true });
+      toast.success("Email verified — let's continue.");
+      navigate(nextPath, { replace: true });
     };
+
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
         goNext();
@@ -123,7 +131,7 @@ const Signup = () => {
         email: trimmedEmail,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/onboarding`,
+          emailRedirectTo: `${window.location.origin}${nextPath}`,
           data: { first_name: firstName, phone: trimmedPhone, ...utm },
         },
       });
@@ -157,12 +165,13 @@ const Signup = () => {
         email: trimmedEmail,
         custom_data: { content_name: "Signup", status: "submitted" },
       });
-      // If session is returned, email confirmation is disabled — go straight to onboarding
+      // If session is returned, email confirmation is disabled — go straight to the next destination
       if (data.session) {
-        toast.success("Welcome to Unveil. Let's set up your profile.");
-        navigate("/onboarding");
+        toast.success("Welcome to Unveil.");
+        navigate(nextPath);
         return;
       }
+
       setSentTo(trimmedEmail);
     } finally {
       setLoading(false);
@@ -171,7 +180,7 @@ const Signup = () => {
 
   const onGoogle = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/onboarding`,
+      redirect_uri: `${window.location.origin}${nextPath}`,
     });
     if (result.error) toast.error("Could not sign in with Google.");
   };
@@ -183,7 +192,7 @@ const Signup = () => {
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: sentTo,
-        options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+        options: { emailRedirectTo: `${window.location.origin}${nextPath}` },
       });
       if (error) toast.error(error.message);
       else toast.success("Verification email re-sent.");

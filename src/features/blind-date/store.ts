@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export type Match = {
   name: string;
@@ -24,18 +25,28 @@ type State = {
   reset: () => void;
 };
 
-export const useBlindDateStore = create<State>((set) => ({
-  answers: {},
-  extendedAnswers: {},
-  match: null,
-  sessionId: null,
-  endsAt: null,
-  userDecision: "pending",
-  setAnswer: (id, value) => set((s) => ({ answers: { ...s.answers, [id]: value } })),
-  setAnswers: (a) => set({ answers: a }),
-  setExtendedAnswer: (id, value) => set((s) => ({ extendedAnswers: { ...s.extendedAnswers, [id]: value } })),
-  setExtendedAnswers: (a) => set({ extendedAnswers: a }),
-  setMatch: (m, sessionId, endsAt) => set({ match: m, sessionId, endsAt }),
-  setDecision: (d) => set({ userDecision: d }),
-  reset: () => set({ answers: {}, extendedAnswers: {}, match: null, sessionId: null, endsAt: null, userDecision: "pending" }),
-}));
+export const useBlindDateStore = create<State>()(
+  persist(
+    (set) => ({
+      answers: {},
+      extendedAnswers: {},
+      match: null,
+      sessionId: null,
+      endsAt: null,
+      userDecision: "pending",
+      setAnswer: (id, value) => set((s) => ({ answers: { ...s.answers, [id]: value } })),
+      setAnswers: (a) => set({ answers: a }),
+      setExtendedAnswer: (id, value) => set((s) => ({ extendedAnswers: { ...s.extendedAnswers, [id]: value } })),
+      setExtendedAnswers: (a) => set({ extendedAnswers: a }),
+      setMatch: (m, sessionId, endsAt) => set({ match: m, sessionId, endsAt }),
+      setDecision: (d) => set({ userDecision: d }),
+      reset: () => set({ answers: {}, extendedAnswers: {}, match: null, sessionId: null, endsAt: null, userDecision: "pending" }),
+    }),
+    {
+      name: "bd-store",
+      storage: createJSONStorage(() => localStorage),
+      // Only persist the questionnaire answers across signup redirects/email verification.
+      partialize: (s) => ({ answers: s.answers, extendedAnswers: s.extendedAnswers }) as any,
+    }
+  )
+);
