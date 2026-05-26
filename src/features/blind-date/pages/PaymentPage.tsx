@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { UPI_ID, WHATSAPP_URL } from "@/lib/payment";
 import { BD_PLANS, BlindDatePlanId, bdPlan } from "../lib/plans";
+import { useBlindDateStore } from "../store";
+import { useBdProfile } from "../hooks/useBdProfile";
 import upiQr from "@/assets/upi-qr.jpeg";
 import { trackMetaEvent } from "@/lib/metaCapi";
 
@@ -23,6 +25,8 @@ export default function BlindDatePayment() {
   const [hydrating, setHydrating] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const reason = params.get("reason");
+  const localAnswers = useBlindDateStore((s) => s.answers);
+  const { refresh: refreshBd } = useBdProfile();
 
   useEffect(() => { document.title = "Blind Date — Choose your plan"; }, []);
 
@@ -30,12 +34,42 @@ export default function BlindDatePayment() {
     if (authLoading) return;
     if (!user) { setHydrating(false); return; }
     (async () => {
-      const { data: rows } = await supabase.rpc("get_my_profile");
-      const data = Array.isArray(rows) ? rows[0] ?? null : null;
-      if (data?.phone) setPhone(data.phone);
+      // Pull profile (phone) + bd profile (paid / completed) in parallel.
+      const [profileRes, bdRes, subRes] = await Promise.all([
+        supabase.rpc("get_my_profile"),
+        supabase.rpc("get_my_bd_profile"),
+        supabase
+          .from("payment_submissions")
+          .select("status")
+          .eq("user_id", user.id)
+          .eq("feature", "blind_date")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      const profile = Array.isArray(profileRes.data) ? profileRes.data[0] ?? null : null;
+      if (profile?.phone) setPhone(profile.phone);
+
+      const bd = bdRes.data?.[0];
+      // If user already has a pending or approved submission, skip the form.
+      const sub = subRes.data as { status?: string } | null;
+      if (bd?.paid) { nav("/blind-date/onboarding", { replace: true }); return; }
+      if (sub?.status === "pending") { nav("/blind-date/payment/review", { replace: true }); return; }
+
+      // Sync questionnaire answers captured before signup, if any.
+      if (!bd?.completed && Object.keys(localAnswers ?? {}).length > 0) {
+        await supabase.rpc("save_my_bd_answers", { _answers: localAnswers as never, _completed: true });
+        await refreshBd();
+      } else if (!bd?.completed) {
+        // No answers anywhere — send them to setup.
+        nav("/blind-date/setup", { replace: true });
+        return;
+      }
       setHydrating(false);
     })();
-  }, [user, authLoading]);
+  }, [user, authLoading, nav, localAnswers, refreshBd]);
+
+
 
   const selected = useMemo(() => bdPlan(plan), [plan]);
   const priceInr = selected.priceInr;
