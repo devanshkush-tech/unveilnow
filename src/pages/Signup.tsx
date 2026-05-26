@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,11 @@ const PHONE_REGEX = /^\+[1-9]\d{7,14}$/; // E.164: + followed by country code an
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = useMemo(() => {
+    const n = searchParams.get("next");
+    return n && n.startsWith("/") ? n : "/onboarding";
+  }, [searchParams]);
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -25,6 +30,8 @@ const Signup = () => {
   const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+
+
 
   // Auto-advance the moment Supabase confirms the email — works whether the
   // confirmation link opens this tab or another tab on the same browser
