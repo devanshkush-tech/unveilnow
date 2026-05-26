@@ -6,11 +6,13 @@ import { GlowButton } from "../components/GlowButton";
 import { BD_QUESTIONS } from "../lib/questions";
 import { useBlindDateStore } from "../store";
 import { useBdProfile } from "../hooks/useBdProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export default function BlindDateSetup() {
   const nav = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [calculating, setCalculating] = useState(false);
   const answers = useBlindDateStore((s) => s.answers);
@@ -18,15 +20,15 @@ export default function BlindDateSetup() {
   const setAnswers = useBlindDateStore((s) => s.setAnswers);
   const { refresh } = useBdProfile();
 
-  // Hydrate from server if returning user
+  // Hydrate from server only for returning logged-in users with existing saved answers.
   useEffect(() => {
+    if (!user) return;
     (async () => {
       const { data } = await supabase.rpc("get_my_bd_profile");
-      if (data && data.length && data[0].answers) {
-        setAnswers(data[0].answers as Record<string, unknown>);
-      }
+      const saved = data?.[0]?.answers as Record<string, unknown> | undefined;
+      if (saved && Object.keys(saved).length) setAnswers(saved);
     })();
-  }, [setAnswers]);
+  }, [user, setAnswers]);
 
   const total = BD_QUESTIONS.length;
   const q = BD_QUESTIONS[step];
@@ -44,12 +46,17 @@ export default function BlindDateSetup() {
     if (step + 1 < total) { setStep(step + 1); return; }
     setCalculating(true);
     try {
+      // Anonymous: answers stay in localStorage (persisted by store) — collect signup then payment.
+      if (!user) {
+        setTimeout(() => nav("/signup?next=/blind-date/payment"), 1000);
+        return;
+      }
       const { error } = await supabase.rpc("save_my_bd_answers", {
         _answers: answers as never, _completed: true,
       });
       if (error) throw error;
       await refresh();
-      setTimeout(() => nav("/blind-date/onboarding"), 1200);
+      setTimeout(() => nav("/blind-date/payment"), 1000);
     } catch (e: any) {
       toast.error(e.message ?? "Couldn't save your answers.");
       setCalculating(false);
