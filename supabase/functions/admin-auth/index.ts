@@ -99,6 +99,6 @@ Deno.serve(async (req) => {
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-auth error', e);
-    return json({ error: String(e) }, 500);
+    return json({ error: 'Internal server error' }, 500);
   }
 });
