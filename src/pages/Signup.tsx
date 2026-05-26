@@ -131,7 +131,7 @@ const Signup = () => {
         email: trimmedEmail,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/onboarding`,
+          emailRedirectTo: `${window.location.origin}${nextPath}`,
           data: { first_name: firstName, phone: trimmedPhone, ...utm },
         },
       });
@@ -165,12 +165,13 @@ const Signup = () => {
         email: trimmedEmail,
         custom_data: { content_name: "Signup", status: "submitted" },
       });
-      // If session is returned, email confirmation is disabled — go straight to onboarding
+      // If session is returned, email confirmation is disabled — go straight to the next destination
       if (data.session) {
-        toast.success("Welcome to Unveil. Let's set up your profile.");
-        navigate("/onboarding");
+        toast.success("Welcome to Unveil.");
+        navigate(nextPath);
         return;
       }
+
       setSentTo(trimmedEmail);
     } finally {
       setLoading(false);
@@ -179,7 +180,7 @@ const Signup = () => {
 
   const onGoogle = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/onboarding`,
+      redirect_uri: `${window.location.origin}${nextPath}`,
     });
     if (result.error) toast.error("Could not sign in with Google.");
   };
