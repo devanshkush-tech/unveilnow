@@ -42,19 +42,23 @@ export default function BlindDateLanding() {
               </span>
             ))}
           </div>
-          <GlowButton onClick={handleStart} className="text-base px-10 py-4">
-            Start Blind Date
-          </GlowButton>
-          <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
-          {!user && (
-            <div className="text-sm mt-6 bd-muted">
-              Already a Blind Date member?{" "}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <GlowButton onClick={handleStart} className="text-base px-10 py-4">
+              Start Blind Date
+            </GlowButton>
+            {!user && (
               <button
                 onClick={() => nav("/login?next=/blind-date")}
-                className="underline underline-offset-4 bd-accent hover:opacity-80 transition-opacity"
+                className="text-base px-10 py-4 rounded-full border border-white/15 bd-surface hover:bg-white/5 transition-colors"
               >
                 Sign in
               </button>
+            )}
+          </div>
+          <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
+          {!user && (
+            <div className="text-sm mt-4 bd-muted">
+              Already a Blind Date member? Sign in to continue your journey.
             </div>
           )}
         </motion.div>
