@@ -46,6 +46,17 @@ export default function BlindDateLanding() {
             Start Blind Date
           </GlowButton>
           <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
+          {!user && (
+            <div className="text-sm mt-6 bd-muted">
+              Already a Blind Date member?{" "}
+              <button
+                onClick={() => nav("/login?next=/blind-date")}
+                className="underline underline-offset-4 bd-accent hover:opacity-80 transition-opacity"
+              >
+                Sign in
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     </BlindDateLayout>

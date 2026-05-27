@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { lovable } from "@/integrations/lovable";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const next = params.get("next");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ const Login = () => {
         return;
       }
       toast.success("Welcome back.");
-      navigate("/dashboard");
+      navigate(next || "/dashboard");
     } finally {
       setLoading(false);
     }
@@ -33,7 +35,7 @@ const Login = () => {
 
   const onGoogle = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/dashboard`,
+      redirect_uri: `${window.location.origin}${next || "/dashboard"}`,
     });
     if (result.error) toast.error("Could not sign in with Google.");
   };
