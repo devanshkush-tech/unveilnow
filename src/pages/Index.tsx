@@ -41,6 +41,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PromoPopup />
       <Navbar />
       <main>
         <Hero />
