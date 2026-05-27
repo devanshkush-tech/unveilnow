@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { PromoPopup } from "@/components/PromoPopup";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/landing/Hero";
 import { WhyChoose } from "@/components/landing/WhyChoose";
@@ -40,6 +41,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PromoPopup />
       <Navbar />
       <main>
         <Hero />
