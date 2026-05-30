@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2, Clock, MessageCircle, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,25 +15,37 @@ const PaymentReview = () => {
 
   useEffect(() => { document.title = "Payment under review · Unveil"; }, []);
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     if (!user) return;
-    const { data: rows } = await supabase.rpc("get_my_profile");
+    const [{ data: rows }, { data: latestPayment }] = await Promise.all([
+      supabase.rpc("get_my_profile"),
+      supabase
+        .from("payment_submissions")
+        .select("plan, status")
+        .eq("user_id", user.id)
+        .eq("feature", "core")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
     const data = Array.isArray(rows) ? rows[0] ?? null : null;
-    if (!data) return;
-    setPlan(data.selected_plan);
-    if (data.account_status === "active") {
+
+    setPlan((data?.selected_plan ?? latestPayment?.plan ?? null) as string | null);
+
+    if (data?.account_status === "active" || latestPayment?.status === "approved") {
       navigate("/dashboard", { replace: true });
       return;
     }
-    if (data.payment_status === "rejected") {
+
+    if (data?.payment_status === "rejected" || latestPayment?.status === "rejected") {
       setStatus("rejected");
-    } else if (data.payment_status === "none") {
+    } else if (data?.payment_status === "none" && !latestPayment) {
       navigate("/payment", { replace: true });
     } else {
       setStatus("pending");
     }
     setHydrating(false);
-  };
+  }, [navigate, user]);
 
   useEffect(() => {
     if (loading) return;
@@ -47,11 +59,15 @@ const PaymentReview = () => {
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
         () => refresh()
       )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "payment_submissions", filter: `user_id=eq.${user.id}` },
+        () => refresh()
+      )
       .subscribe();
-    const t = setInterval(refresh, 20000); // poll fallback
+    const t = setInterval(refresh, 5000); // poll fallback
     return () => { supabase.removeChannel(channel); clearInterval(t); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading]);
+  }, [user, loading, navigate, refresh]);
 
   if (loading || hydrating) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
