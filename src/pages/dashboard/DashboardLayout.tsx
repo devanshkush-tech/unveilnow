@@ -1,6 +1,7 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { Compass, Heart, MessageCircle, User, Settings } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BlindDateToggle } from "@/components/BlindDateToggle";
 
 const tabs = [
   { to: "/dashboard", end: true, label: "Discover", icon: Compass },
