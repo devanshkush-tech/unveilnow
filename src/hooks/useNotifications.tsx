@@ -17,31 +17,50 @@ export type Notification = {
 
 export const useNotifications = () => {
   const { user } = useAuth();
+  const userId = user?.id;
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!user) { setItems([]); setLoading(false); return; }
+    if (!userId) { setItems([]); setLoading(false); return; }
     const { data } = await supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(50);
     setItems((data ?? []) as Notification[]);
     setLoading(false);
-  }, [user]);
+  }, [userId]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase
-      .channel(`notifications:${user.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => refresh())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [user, refresh]);
+    if (!userId) return;
+    const instanceId = typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2);
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let closed = false;
+
+    try {
+      channel = supabase
+        .channel(`notifications:${userId}:${instanceId}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => {
+          if (!closed) void refresh();
+        });
+      channel.subscribe((status) => {
+        if (status === "CHANNEL_ERROR") console.warn("[notifications] Realtime channel error; manual refresh still works.");
+      });
+    } catch (error) {
+      console.warn("[notifications] Realtime subscription skipped; manual refresh still works.", error);
+    }
+
+    return () => {
+      closed = true;
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }, [userId, refresh]);
 
   const markRead = async (id: string) => {
     await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id);
@@ -49,8 +68,8 @@ export const useNotifications = () => {
   };
 
   const markAllRead = async () => {
-    if (!user) return;
-    await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", user.id).is("read_at", null);
+    if (!userId) return;
+    await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("user_id", userId).is("read_at", null);
     refresh();
   };
 
