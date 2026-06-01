@@ -1,6 +1,7 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { Compass, Heart, MessageCircle, User, Settings } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BlindDateToggle } from "@/components/BlindDateToggle";
 
 const tabs = [
   { to: "/dashboard", end: true, label: "Discover", icon: Compass },
@@ -22,7 +23,10 @@ const DashboardLayout = () => {
             </div>
             <span className="font-display text-xl">Unveil</span>
           </Link>
-          <NotificationBell />
+          <div className="flex items-center gap-2">
+            <BlindDateToggle />
+            <NotificationBell />
+          </div>
         </div>
         <nav className="space-y-1">
           {tabs.map((t) => (
@@ -70,7 +74,10 @@ const DashboardLayout = () => {
           </div>
           <span className="font-display text-lg">Unveil</span>
         </Link>
-        <NotificationBell />
+        <div className="flex items-center gap-2">
+          <BlindDateToggle />
+          <NotificationBell />
+        </div>
       </header>
 
       <main className="flex-1 pb-20 md:pb-0">
