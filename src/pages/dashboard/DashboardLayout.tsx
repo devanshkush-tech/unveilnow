@@ -27,6 +27,7 @@ const DashboardLayout = () => {
             <BlindDateToggle />
             <NotificationBell />
           </div>
+        </div>
         <nav className="space-y-1">
           {tabs.map((t) => (
             <NavLink
