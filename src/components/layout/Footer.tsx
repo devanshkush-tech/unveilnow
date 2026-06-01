@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Mail } from "lucide-react";
+import { Instagram } from "lucide-react";
 
 export const Footer = () => {
   return (
@@ -20,14 +20,6 @@ export const Footer = () => {
               <a href="https://instagram.com/unveilnow" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
                 className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors">
                 <Instagram className="h-4 w-4" />
-              </a>
-              <a href="https://facebook.com/unveilnow" target="_blank" rel="noopener noreferrer" aria-label="Facebook"
-                className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors">
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a href="mailto:hello@unveilnow.in" aria-label="Email"
-                className="h-9 w-9 rounded-full bg-secondary flex items-center justify-center hover:bg-accent/30 transition-colors">
-                <Mail className="h-4 w-4" />
               </a>
             </div>
           </div>
