@@ -23,8 +23,10 @@ const DashboardLayout = () => {
             </div>
             <span className="font-display text-xl">Unveil</span>
           </Link>
-          <NotificationBell />
-        </div>
+          <div className="flex items-center gap-2">
+            <BlindDateToggle />
+            <NotificationBell />
+          </div>
         <nav className="space-y-1">
           {tabs.map((t) => (
             <NavLink
