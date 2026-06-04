@@ -442,15 +442,14 @@ const Admin = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="blind-date">
-            <AdminBlindDate />
-          </TabsContent>
-
           <TabsContent value="notifications">
             <AdminNotifications />
           </TabsContent>
         </Tabs>
+          </>
+        )}
       </main>
+
 
       {/* User detail drawer */}
       <Sheet open={!!detailId} onOpenChange={(v) => { if (!v) { setDetailId(null); setDetail(null); } }}>
