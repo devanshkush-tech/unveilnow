@@ -818,6 +818,241 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    // ───────────────────────── BLIND DATE ─────────────────────────
+    if (action === 'bd_metrics') {
+      const [
+        { count: totalUsers },
+        { count: paidUsers },
+        { count: trialUsers },
+        { data: pays },
+        { data: profilesAgg },
+        { count: pendingPayments },
+        { data: cityRows },
+      ] = await Promise.all([
+        admin.from('blind_date_profiles').select('*', { count: 'exact', head: true }),
+        admin.from('blind_date_profiles').select('*', { count: 'exact', head: true }).eq('paid', true),
+        admin.from('blind_date_profiles').select('*', { count: 'exact', head: true }).eq('is_trial', true),
+        admin.from('payment_submissions').select('amount_label,plan,status').eq('feature', 'blind_date').eq('status', 'approved'),
+        admin.from('blind_date_profiles').select('sessions_used'),
+        admin.from('payment_submissions').select('*', { count: 'exact', head: true }).eq('feature', 'blind_date').eq('status', 'pending'),
+        admin.from('blind_date_profiles').select('user_id, profiles:user_id(city)'),
+      ]);
+      const revenue = (pays ?? []).reduce((s: number, p: any) => {
+        const n = Number(String(p.amount_label ?? '').replace(/[^\d.]/g, '')) || 0;
+        return s + n;
+      }, 0);
+      const matchesUsed = (profilesAgg ?? []).reduce((s: number, r: any) => s + (r.sessions_used ?? 0), 0);
+      const cityMap: Record<string, number> = {};
+      for (const r of cityRows ?? []) {
+        const c = (r as any).profiles?.city ?? 'Unknown';
+        cityMap[c] = (cityMap[c] ?? 0) + 1;
+      }
+      const cities = Object.entries(cityMap).map(([city, count]) => ({ city, count })).sort((a, b) => b.count - a.count);
+      return json({
+        totalUsers: totalUsers ?? 0,
+        paidUsers: paidUsers ?? 0,
+        trialUsers: trialUsers ?? 0,
+        revenue,
+        matchesUsed,
+        pendingPayments: pendingPayments ?? 0,
+        cities,
+      });
+    }
+
+    if (action === 'bd_list_users') {
+      const { data: bd } = await admin.from('blind_date_profiles').select('*').order('updated_at', { ascending: false }).limit(500);
+      const ids = (bd ?? []).map((b: any) => b.user_id);
+      const { data: profs } = await admin.from('profiles').select('id, first_name, phone, gender, age, city').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']);
+      const { data: usersList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const emailMap = new Map((usersList?.users ?? []).map((u: any) => [u.id, u.email]));
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const users = (bd ?? []).map((b: any) => {
+        const p: any = profMap.get(b.user_id) ?? {};
+        return {
+          user_id: b.user_id,
+          name: p.first_name ?? '',
+          email: emailMap.get(b.user_id) ?? '',
+          phone: p.phone ?? '',
+          gender: p.gender ?? '',
+          age: p.age ?? null,
+          city: p.city ?? '',
+          plan: b.plan,
+          paid: b.paid,
+          is_trial: b.is_trial,
+          trial_expires_at: b.trial_expires_at,
+          chats_remaining: b.chats_remaining,
+          sessions_used: b.sessions_used,
+          notes: b.notes,
+          completed: b.completed,
+          extended_completed: b.extended_completed,
+        };
+      });
+      return json({ users });
+    }
+
+    if (action === 'bd_assign_package') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { user_id, plan, chats, paid } = body;
+      const { error } = await admin.from('blind_date_profiles')
+        .upsert({ user_id, plan, chats_remaining: chats, paid: !!paid, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_mark_paid') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { user_id, chats } = body;
+      const { error } = await admin.from('blind_date_profiles')
+        .upsert({ user_id, paid: true, chats_remaining: chats ?? 10, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_delete_user') {
+      const body = await req.clone().json().catch(() => ({}));
+      await admin.from('blind_date_profiles').delete().eq('user_id', body.user_id);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_refund_match') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { user_ids } = body as { user_ids: string[] };
+      for (const uid of user_ids ?? []) {
+        const { data } = await admin.from('blind_date_profiles').select('chats_remaining').eq('user_id', uid).maybeSingle();
+        const cur = (data?.chats_remaining ?? 0) + 1;
+        await admin.from('blind_date_profiles').update({ chats_remaining: cur, updated_at: new Date().toISOString() }).eq('user_id', uid);
+      }
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_create_dummy') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { name, phone, email, gender, age, city, trial_days, trial_chats, notes } = body;
+      const rndPass = crypto.randomUUID() + 'Aa1!';
+      const { data: created, error: cErr } = await admin.auth.admin.createUser({
+        email, password: rndPass, email_confirm: true,
+        user_metadata: { first_name: name, phone },
+      });
+      if (cErr || !created.user) return json({ error: cErr?.message ?? 'Failed' }, 500);
+      const uid = created.user.id;
+      await admin.from('profiles').update({
+        first_name: name, phone, gender, age, city,
+        onboarded: true, account_status: 'active', is_admin_created: true,
+      }).eq('id', uid);
+      const expires = trial_days ? new Date(Date.now() + Number(trial_days) * 86400000).toISOString() : null;
+      await admin.from('blind_date_profiles').upsert({
+        user_id: uid,
+        plan: 'trial',
+        chats_remaining: Number(trial_chats) || 0,
+        paid: false,
+        is_trial: true,
+        trial_expires_at: expires,
+        notes: notes ?? null,
+        completed: true,
+      }, { onConflict: 'user_id' });
+      return json({ ok: true, user_id: uid });
+    }
+
+    if (action === 'bd_list_sessions') {
+      const { data } = await admin.from('blind_date_sessions').select('*').order('started_at', { ascending: false }).limit(200);
+      return json({ sessions: data ?? [] });
+    }
+
+    if (action === 'bd_create_session') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { user_a, user_b } = body;
+      const { error } = await admin.from('blind_date_sessions').insert({
+        user_a, user_b, ends_at: new Date(Date.now() + 60_000).toISOString(),
+      });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_update_session') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { id, status } = body;
+      const { error } = await admin.from('blind_date_sessions').update({ status }).eq('id', id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_questions_list') {
+      const { data } = await admin.from('blind_date_questions').select('*').order('position', { ascending: true });
+      return json({ questions: data ?? [] });
+    }
+
+    if (action === 'bd_questions_upsert') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { id, key, prompt, type, options, position, active } = body;
+      const payload: any = { key, prompt, type, options: options ?? [], position: position ?? 0, active: active ?? true };
+      if (id) payload.id = id;
+      const { error } = await admin.from('blind_date_questions').upsert(payload, { onConflict: 'id' });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_questions_delete') {
+      const body = await req.clone().json().catch(() => ({}));
+      await admin.from('blind_date_questions').delete().eq('id', body.id);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_packages_get') {
+      const { data } = await admin.from('app_settings').select('value').eq('key', 'blind_date_packages').maybeSingle();
+      return json({ packages: (data?.value as any) ?? [] });
+    }
+
+    if (action === 'bd_packages_set') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { error } = await admin.from('app_settings').upsert({ key: 'blind_date_packages', value: body.packages, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'bd_list_payments') {
+      const body = await req.clone().json().catch(() => ({}));
+      let q = admin.from('payment_submissions').select('*').eq('feature', 'blind_date').order('created_at', { ascending: false }).limit(200);
+      if (body.status) q = q.eq('status', body.status);
+      const { data } = await q;
+      const ids = Array.from(new Set((data ?? []).map((d: any) => d.user_id)));
+      const { data: profs } = await admin.from('profiles').select('id, first_name, phone').in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000']);
+      const { data: usersList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      const emailMap = new Map((usersList?.users ?? []).map((u: any) => [u.id, u.email]));
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const payments = (data ?? []).map((p: any) => ({
+        ...p,
+        name: (profMap.get(p.user_id) as any)?.first_name ?? '',
+        email: emailMap.get(p.user_id) ?? '',
+      }));
+      return json({ payments });
+    }
+
+    if (action === 'bd_notify') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { audience, title, message, cta_text, cta_link } = body;
+      let q = admin.from('blind_date_profiles').select('user_id, profiles:user_id(city)');
+      if (audience?.type === 'trial') q = q.eq('is_trial', true);
+      else if (audience?.type === 'paid') q = q.eq('paid', true);
+      const { data: bd } = await q;
+      let userIds: string[] = (bd ?? []).map((b: any) => b.user_id);
+      if (audience?.type === 'city' && audience.value) {
+        userIds = (bd ?? []).filter((b: any) => (b.profiles?.city ?? '').toLowerCase().includes(String(audience.value).toLowerCase())).map((b: any) => b.user_id);
+      }
+      if (audience?.type === 'payment_pending') {
+        const { data: pend } = await admin.from('payment_submissions').select('user_id').eq('feature', 'blind_date').eq('status', 'pending');
+        userIds = Array.from(new Set((pend ?? []).map((p: any) => p.user_id)));
+      }
+      const rows = userIds.map((uid) => ({
+        user_id: uid, type: 'announcement', title, body: message,
+        cta_text: cta_text || null, cta_link: cta_link || null, data: {},
+      }));
+      if (rows.length) {
+        const { error } = await admin.from('notifications').insert(rows);
+        if (error) return json({ error: error.message }, 500);
+      }
+      return json({ ok: true, sent: rows.length });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);
