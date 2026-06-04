@@ -165,11 +165,14 @@ export type Database = {
           created_at: string
           extended_answers: Json
           extended_completed: boolean
+          is_trial: boolean
+          notes: string | null
           paid: boolean
           period_start: string
           plan: string
           sessions_limit: number | null
           sessions_used: number
+          trial_expires_at: string | null
           updated_at: string
           user_id: string
         }
@@ -181,11 +184,14 @@ export type Database = {
           created_at?: string
           extended_answers?: Json
           extended_completed?: boolean
+          is_trial?: boolean
+          notes?: string | null
           paid?: boolean
           period_start?: string
           plan?: string
           sessions_limit?: number | null
           sessions_used?: number
+          trial_expires_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -197,13 +203,52 @@ export type Database = {
           created_at?: string
           extended_answers?: Json
           extended_completed?: boolean
+          is_trial?: boolean
+          notes?: string | null
           paid?: boolean
           period_start?: string
           plan?: string
           sessions_limit?: number | null
           sessions_used?: number
+          trial_expires_at?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      blind_date_questions: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          key: string
+          options: Json
+          position: number
+          prompt: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          key: string
+          options?: Json
+          position?: number
+          prompt: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          key?: string
+          options?: Json
+          position?: number
+          prompt?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
