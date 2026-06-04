@@ -94,6 +94,12 @@ const Admin = () => {
   // Impersonate
   const [impersonateId, setImpersonateId] = useState<string | null>(null);
 
+  // Admin console mode
+  const [adminMode, setAdminMode] = useState<"main" | "blind-date">(
+    (typeof localStorage !== "undefined" && (localStorage.getItem("adminMode") as any)) || "main"
+  );
+  const switchMode = (m: "main" | "blind-date") => { setAdminMode(m); localStorage.setItem("adminMode", m); };
+
   useEffect(() => {
     setAdmin(adminAuth.getAdmin());
     (async () => {
