@@ -254,6 +254,26 @@ const Admin = () => {
       </header>
 
       <main className="container py-8 md:py-10 space-y-8">
+        {/* Mode toggle */}
+        <div className="inline-flex p-1 rounded-full bg-secondary border border-border/60">
+          <button
+            onClick={() => switchMode("main")}
+            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "main" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
+          >
+            Main App Admin
+          </button>
+          <button
+            onClick={() => switchMode("blind-date")}
+            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "blind-date" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
+          >
+            ✦ Blind Date Admin
+          </button>
+        </div>
+
+        {adminMode === "blind-date" ? (
+          <BlindDateAdminConsole />
+        ) : (
+          <>
         {/* Metrics */}
         <section>
           <h1 className="font-display text-2xl md:text-3xl mb-5">Dashboard</h1>
@@ -276,9 +296,9 @@ const Admin = () => {
             <TabsTrigger value="tickets" className="rounded-full px-5">Tickets / Customer Support</TabsTrigger>
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
-            <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
             <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="users" className="space-y-4">
             <div className="rounded-3xl bg-card border border-border/60 shadow-soft p-4 md:p-5 space-y-4">
