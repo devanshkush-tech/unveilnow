@@ -14,12 +14,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useBdProfile } from "../hooks/useBdProfile";
 import { WHATSAPP_URL } from "@/lib/payment";
+import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 
 type Sub = { plan: string; amount_label: string | null; status: string; created_at: string };
 
 export default function BlindDatePaymentReview() {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isFree, loading: freeLoading } = useIsFreeAccess();
+  if (!freeLoading && isFree) return <Navigate to="/blind-date/onboarding" replace />;
   const { profile, refresh: refreshBd } = useBdProfile();
   const [latest, setLatest] = useState<Sub | null>(null);
   const [hydrating, setHydrating] = useState(true);

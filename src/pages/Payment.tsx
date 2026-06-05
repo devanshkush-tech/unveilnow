@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PAYMENT_PLANS, PaymentPlanId, UPI_ID, WHATSAPP_URL } from "@/lib/payment";
+import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import upiQr from "@/assets/upi-qr.jpeg";
 
@@ -25,6 +26,11 @@ const Payment = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const revisit = searchParams.get("revisit") === "1";
+  const { isFree, loading: freeLoading } = useIsFreeAccess();
+
+  if (!freeLoading && isFree) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hydrating, setHydrating] = useState(true);

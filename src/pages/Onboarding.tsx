@@ -131,7 +131,11 @@ const Onboarding = () => {
         }
         if (prof.onboarded && !editMode) {
           const destination =
-            prof.payment_status === "pending" ? "/payment/review" : "/payment";
+            prof.gender === "Woman"
+              ? "/dashboard"
+              : prof.payment_status === "pending"
+                ? "/payment/review"
+                : "/payment";
           setRedirectTo(destination);
           setHydrating(false);
           return;
@@ -395,7 +399,9 @@ const Onboarding = () => {
 
       // Navigate immediately. RequireAuth refetches the profile gate on
       // route change so /payment will see onboarded=true on first paint.
-      navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
+      const postOnboardDest =
+        editMode ? "/dashboard/profile" : gender === "Woman" ? "/dashboard" : "/payment";
+      navigate(postOnboardDest, { replace: true });
     } catch (err) {
       console.error(err);
 

@@ -1,58 +1,56 @@
-# Admin split: Main App ↔ Blind Date
+# Free access for women
 
-Add a top-level toggle in `/admindashboard` to switch between two consoles. Keep the existing main admin intact and move all Blind Date features into a new dedicated console with its own sub-navigation.
+Whenever a user's `profiles.gender = 'Woman'`, the app treats them as a fully paid, active member on both the main app and Blind Date. They never see `/payment`, `/payment/review`, `/pricing` CTAs, the Blind Date payment page, or any "upgrade" UI.
 
-## 1. Mode toggle (Admin shell)
+## 1. Database — auto-activate female accounts (migration)
 
-In `src/pages/Admin.tsx`:
-- Add a segmented toggle in the header: **Main App Admin** | **Blind Date Admin** (state persisted in `localStorage`).
-- When **Main App** is active → render existing tabs MINUS the current `✦ Blind Date` tab (remove it from `TabsList` + content).
-- When **Blind Date** is active → render new `<BlindDateAdminConsole />` (no main-app tabs visible).
+Create a trigger on `public.profiles` (INSERT and UPDATE of `gender`) that, when `gender = 'Woman'`, sets:
 
-## 2. Blind Date Admin Console
+- `account_status = 'active'`
+- `payment_status = 'approved'`
+- `selected_plan = 'elite'`, `plan = 'elite'`
+- `plan_started_at = now()`, `plan_period_end = now() + interval '100 years'`, `plan_expires_at = same`
+- `matches_used_this_period = 0`, `match_period_start = now()`
 
-New file `src/components/admin/blind-date/BlindDateAdminConsole.tsx` with its own `Tabs`:
-`Dashboard · Users · Dummy Accounts · Questions · Packages · Payments · Matches · Notifications`.
+And mirrors to `blind_date_profiles` (upsert by `user_id`): `paid = true`, `plan = 'elite'`, `chats_remaining = 9999`.
 
-### 2a. Dashboard
-Stats cards: total BD users, paid users, trial users, revenue (sum of approved `payment_submissions` where `feature='blind_date'`), matches used (sum `sessions_used`), pending payments, and a city-wise users table (joining `blind_date_profiles` → `profiles.city`).
+This guarantees backend gates (RequireAuth's profile gate, `BlindDateGate`) pass without any payment record. Run a one-time backfill in the same migration for all existing rows where `gender = 'Woman'`.
 
-### 2b. Users
-Table of BD users (join `blind_date_profiles` + `profiles` + `auth.users` email via existing admin edge function). Columns: name, phone, email, gender, age, city, package, payment status, trial status, matches used, matches remaining. Row actions: View, Edit, Approve (mark paid), Delete, Assign package.
+## 2. Onboarding finish — skip `/payment`
 
-### 2c. Dummy Accounts
-Form to create a fake account (name, phone, email, gender, age, city, trial duration days, trial match credits, expiry date, notes). Stored as a real `auth` user via the admin edge function so it's indistinguishable from real users; flagged internally via `profiles.is_admin_created=true` (already exists) plus a new `blind_date_profiles.notes` column. No "dummy" label is shown anywhere user-facing.
+In `src/pages/Onboarding.tsx` (line ~398), after marking `onboarded = true`, branch on `gender`:
 
-### 2d. Questions
-CRUD + reorder for a new `blind_date_questions` table (id, key, prompt, type, options jsonb, position, active). Admin-only RLS. Replaces the current hardcoded `questions.ts` list at runtime when present (fallback to hardcoded).
+- `gender === 'Woman'` → `navigate('/dashboard')` (trigger has already activated them).
+- otherwise → existing `navigate('/payment')`.
 
-### 2e. Packages
-Backed by `app_settings` key `blind_date_packages` (jsonb array). Defaults seeded: ₹199/10, ₹299/30, ₹499/100. Admin can edit price, matches, enable/disable, and assign manually to a user (writes `blind_date_profiles.plan + chats_remaining + paid`).
+Also at the hydrate redirect (line ~132): if `prof.gender === 'Woman'` skip the `/payment` redirect and send to `/dashboard`.
 
-### 2f. Payments
-Reuses existing `payment_submissions` filtered to `feature='blind_date'` with approve/reject + notes (already supported). Adds a "Mark user paid" quick action.
+## 3. RequireAuth — no change needed
 
-### 2g. Matches
-Lists `blind_date_sessions`. Create manual match (already exists in current AdminBlindDate — moved here). Approve/Reject (sets status). Refund: increment both users' `chats_remaining` by 1.
+Because the trigger sets `account_status='active'` + `payment_status='approved'`, the existing gate in `src/components/auth/RequireAuth.tsx` passes automatically. No code change.
 
-### 2h. Notifications
-Reuses `AdminNotifications` audience resolver, extended with BD audiences: trial users, paid users, city-wise, payment pending. Writes to existing `notifications` table.
+## 4. Hide payment/upgrade UI for women
 
-## 3. Database changes (one migration)
+Add a small helper `useIsFreeAccess()` (reads `profiles.gender` via existing `useAuth`/profile fetch, returns `true` for `Woman`). Use it to:
 
-- `blind_date_questions` table + admin RLS + GRANTs.
-- `blind_date_profiles`: add `notes text`, `trial_expires_at timestamptz`, `is_trial boolean default false`.
-- Seed `app_settings` row `blind_date_packages` if missing.
+- **`src/pages/Payment.tsx` and `src/pages/PaymentReview.tsx`**: if free-access, redirect to `/dashboard` immediately.
+- **`src/components/landing/Pricing.tsx`** + **`src/pages/PricingPage.tsx`**: if free-access, replace the plan grid CTA with a single "You have full free access" card linking to `/dashboard`. Public (logged-out) view stays unchanged so marketing pricing still shows.
+- **Dashboard upgrade prompts** — `src/components/dating/MatchUsageBanner.tsx` and any "Upgrade" CTA: hide for free-access.
+- **Blind Date**: `src/features/blind-date/pages/PaymentPage.tsx` and `PaymentReview.tsx` redirect free-access users to `/blind-date/onboarding` (or matching). `BlindDateGate` already passes because trigger set `paid=true`.
+- **Premium / "out of chats"** screens (`src/features/blind-date/pages/Premium.tsx`): hide upgrade CTAs for free-access.
 
-## 4. Edge function additions
+## 5. Floating signup CTA / promo popups
 
-Extend `supabase/functions/admin-data/index.ts` with actions: `bd_metrics`, `bd_list_users`, `bd_create_dummy`, `bd_assign_package`, `bd_delete_user`, `bd_refund_match`, `bd_mark_paid`. All gated by existing admin session check.
-
-## Out of scope / preserved
-- Existing main-app admin tabs (Users, Payments, Payment history, Tickets, Chemistry, Moderation, Notifications) unchanged.
-- BD user-facing flows (`/blind-date/*`) untouched aside from picking up question/package overrides from DB when present.
+`FloatingSignupCTA`, `PromoPopup`, and any "Upgrade now" notification: gated by `useIsFreeAccess()`.
 
 ## Technical notes
-- All new components in `src/components/admin/blind-date/*`.
-- New types added to `src/integrations/supabase/types.ts` after migration runs.
-- Existing `src/components/admin/AdminBlindDate.tsx` deleted after its features are migrated.
+
+- The trigger is the source of truth — every frontend hide is defense-in-depth so users never see a dead-end payment screen.
+- `gender` is set on Onboarding step 0; the trigger fires on that update, so by the time the user reaches the finish step they're already active.
+- Admin "Mark paid" flows and Stripe/manual payment paths are untouched — they just become no-ops for women since they're already active.
+- No changes to pricing copy on the public landing page (marketing remains accurate; the free-for-women policy is enforced after signup).
+
+## Out of scope
+
+- Refunding women who previously paid (one-off, can do separately on request).
+- Showing a "Free for women" badge on the marketing pricing page (can add if you want).

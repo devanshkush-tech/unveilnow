@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Loader2, Clock, MessageCircle, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { WHATSAPP_URL, planLabel, planPrice } from "@/lib/payment";
+import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 
 const PaymentReview = () => {
   const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { isFree, loading: freeLoading } = useIsFreeAccess();
+  if (!freeLoading && isFree) return <Navigate to="/dashboard" replace />;
   const [status, setStatus] = useState<string>("pending");
   const [plan, setPlan] = useState<string | null>(null);
   const [hydrating, setHydrating] = useState(true);
