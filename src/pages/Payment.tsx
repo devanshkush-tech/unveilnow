@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PAYMENT_PLANS, PaymentPlanId, UPI_ID, WHATSAPP_URL } from "@/lib/payment";
+import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import upiQr from "@/assets/upi-qr.jpeg";
 
