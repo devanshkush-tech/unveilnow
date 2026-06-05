@@ -3,14 +3,20 @@ import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { PLANS } from "@/lib/plans";
+import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 
 export const Pricing = ({ compact = false }: { compact?: boolean }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { isFree } = useIsFreeAccess();
 
   const handleChoose = (planId: string) => {
     if (!user) {
       navigate(`/signup?plan=${planId}`);
+      return;
+    }
+    if (isFree) {
+      navigate("/dashboard");
       return;
     }
     navigate(`/payment?plan=${planId}`);
