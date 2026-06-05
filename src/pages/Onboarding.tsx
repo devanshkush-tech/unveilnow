@@ -399,7 +399,9 @@ const Onboarding = () => {
 
       // Navigate immediately. RequireAuth refetches the profile gate on
       // route change so /payment will see onboarded=true on first paint.
-      navigate(editMode ? "/dashboard/profile" : "/payment", { replace: true });
+      const postOnboardDest =
+        editMode ? "/dashboard/profile" : gender === "Woman" ? "/dashboard" : "/payment";
+      navigate(postOnboardDest, { replace: true });
     } catch (err) {
       console.error(err);
 
