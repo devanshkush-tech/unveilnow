@@ -131,7 +131,11 @@ const Onboarding = () => {
         }
         if (prof.onboarded && !editMode) {
           const destination =
-            prof.payment_status === "pending" ? "/payment/review" : "/payment";
+            prof.gender === "Woman"
+              ? "/dashboard"
+              : prof.payment_status === "pending"
+                ? "/payment/review"
+                : "/payment";
           setRedirectTo(destination);
           setHydrating(false);
           return;
