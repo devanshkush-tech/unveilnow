@@ -33,6 +33,11 @@ export const Pricing = ({ compact = false }: { compact?: boolean }) => {
           <p className="text-muted-foreground mt-4 text-sm md:text-base">
             Cancel anytime. No hidden fees. Made for serious daters in India.
           </p>
+          {isFree && (
+            <p className="mt-4 inline-block rounded-full bg-accent/15 text-accent-foreground px-4 py-2 text-sm font-medium">
+              ✨ Unveil is free for women — you have full access.
+            </p>
+          )}
         </div>
 
         <div className="grid md:grid-cols-3 gap-5 md:gap-6">
