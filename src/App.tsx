@@ -49,6 +49,8 @@ import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 import Notifications from "./pages/Notifications";
 import UnlockInterest from "./pages/UnlockInterest";
 import { ScrollReveal } from "./components/ScrollReveal";
+import Blog from "./pages/Blog.tsx";
+import BlogPost from "./pages/BlogPost.tsx";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +84,8 @@ const App = () => (
               }
             />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/trust" element={<Trust />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
