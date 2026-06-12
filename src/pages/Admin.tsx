@@ -447,6 +447,9 @@ const Admin = () => {
           <TabsContent value="notifications">
             <AdminNotifications />
           </TabsContent>
+          <TabsContent value="blog">
+            <AdminBlog />
+          </TabsContent>
         </Tabs>
           </>
         )}
