@@ -1053,6 +1053,76 @@ Deno.serve(async (req) => {
       return json({ ok: true, sent: rows.length });
     }
 
+    // ───────── BLOG ─────────
+    if (action === 'blog_list_all') {
+      const { data, error } = await admin
+        .from('blog_posts')
+        .select('id, slug, title, excerpt, cover_image_url, status, published_at, tags, author_name, updated_at, created_at')
+        .order('updated_at', { ascending: false });
+      if (error) return json({ error: error.message }, 500);
+      return json({ posts: data ?? [] });
+    }
+
+    if (action === 'blog_get') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { data, error } = await admin.from('blog_posts').select('*').eq('id', body.id).maybeSingle();
+      if (error) return json({ error: error.message }, 500);
+      return json({ post: data });
+    }
+
+    if (action === 'blog_upsert') {
+      const body = await req.clone().json().catch(() => ({}));
+      const p = body.post ?? {};
+      if (!p.title || !p.slug) return json({ error: 'title and slug are required' }, 400);
+      const row: Record<string, unknown> = {
+        slug: String(p.slug).toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, ''),
+        title: p.title,
+        excerpt: p.excerpt ?? null,
+        cover_image_url: p.cover_image_url ?? null,
+        content_html: p.content_html ?? '',
+        seo_title: p.seo_title ?? null,
+        seo_description: p.seo_description ?? null,
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        author_name: p.author_name ?? null,
+        status: p.status === 'published' ? 'published' : 'draft',
+      };
+      if (row.status === 'published') row.published_at = p.published_at ?? new Date().toISOString();
+      let res;
+      if (p.id) {
+        res = await admin.from('blog_posts').update(row).eq('id', p.id).select('*').single();
+      } else {
+        res = await admin.from('blog_posts').insert(row).select('*').single();
+      }
+      if (res.error) return json({ error: res.error.message }, 500);
+      return json({ post: res.data });
+    }
+
+    if (action === 'blog_delete') {
+      const body = await req.clone().json().catch(() => ({}));
+      const { error } = await admin.from('blog_posts').delete().eq('id', body.id);
+      if (error) return json({ error: error.message }, 500);
+      return json({ ok: true });
+    }
+
+    if (action === 'blog_upload_media') {
+      // body: { filename, content_type, data_base64 }
+      const body = await req.clone().json().catch(() => ({}));
+      const { filename, content_type, data_base64 } = body ?? {};
+      if (!filename || !data_base64) return json({ error: 'filename and data_base64 required' }, 400);
+      const bytes = Uint8Array.from(atob(data_base64), (c) => c.charCodeAt(0));
+      const safe = String(filename).toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+      const path = `${new Date().getFullYear()}/${crypto.randomUUID()}-${safe}`;
+      const up = await admin.storage.from('blog-media').upload(path, bytes, {
+        contentType: content_type || 'application/octet-stream',
+        upsert: false,
+      });
+      if (up.error) return json({ error: up.error.message }, 500);
+      // 10-year signed URL
+      const signed = await admin.storage.from('blog-media').createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signed.error) return json({ error: signed.error.message }, 500);
+      return json({ url: signed.data.signedUrl, path });
+    }
+
     return json({ error: 'Unknown action' }, 400);
   } catch (e) {
     console.error('admin-data error', e);
