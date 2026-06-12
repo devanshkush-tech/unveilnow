@@ -36,6 +36,7 @@ import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import BlindDateAdminConsole from "@/components/admin/blind-date/BlindDateAdminConsole";
+import AdminBlog from "@/components/admin/blog/AdminBlog";
 
 type Metrics = {
   totalUsers: number; signupsToday: number; active7d: number;
@@ -297,6 +298,7 @@ const Admin = () => {
             <TabsTrigger value="chemistry" className="rounded-full px-5">Chemistry tuning</TabsTrigger>
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
             <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
+            <TabsTrigger value="blog" className="rounded-full px-5">Blog</TabsTrigger>
           </TabsList>
 
 
