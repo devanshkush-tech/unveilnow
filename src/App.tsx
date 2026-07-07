@@ -65,7 +65,7 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
           <AuthProvider>
-            <PaymentTestModeBanner />
+            
             <MetaPageViewTracker />
             <ScrollReveal />
             <Routes>
