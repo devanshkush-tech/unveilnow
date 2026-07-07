@@ -330,6 +330,12 @@ const Signup = () => {
           </label>
         </div>
 
+        {formError && (
+          <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {formError}
+          </div>
+        )}
+
         <Button type="submit" variant="hero" className="w-full h-12 rounded-full" size="lg" disabled={loading}>
           {loading ? "Creating account…" : "Continue"}
         </Button>
