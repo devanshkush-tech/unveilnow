@@ -35,6 +35,15 @@ export default function BlindDateSetup() {
   const value = answers[q.id];
   const progress = (step / total) * 100;
 
+  // Seed scale questions with the midpoint so Next isn't blocked before the
+  // user drags — the slider already displays that value visually.
+  useEffect(() => {
+    if (q.type === "scale" && typeof value !== "number") {
+      setAnswer(q.id, Math.round((q.min + q.max) / 2));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   const canNext = useMemo(() => {
     if (q.type === "single") return typeof value === "string";
     if (q.type === "multi") return Array.isArray(value) && (value as string[]).length > 0;
