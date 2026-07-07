@@ -30,6 +30,7 @@ const Signup = () => {
   const [phone, setPhone] = useState("+91");
   const [password, setPassword] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
 
 
@@ -98,7 +99,9 @@ const Signup = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!accepted) {
+      setFormError("Please accept the community guidelines.");
       toast.error("Please accept the community guidelines.");
       return;
     }
@@ -122,7 +125,9 @@ const Signup = () => {
     }).catch(() => {});
 
     if (!PHONE_REGEX.test(trimmedPhone)) {
-      toast.error("Enter a valid phone number with country code (e.g. +911234567890).");
+      const msg = "Enter a valid phone number with country code (e.g. +911234567890).";
+      setFormError(msg);
+      toast.error(msg);
       return;
     }
     setLoading(true);
@@ -142,7 +147,11 @@ const Signup = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: trimmedEmail, phone: trimmedPhone, last_error: error.message, ...utm }),
         }).catch(() => {});
-        toast.error(error.message);
+        const friendly = /weak|pwned|compromis/i.test(error.message)
+          ? "This password has been seen in a data breach. Please choose a stronger, unique password (mix of letters, numbers & symbols)."
+          : error.message;
+        setFormError(friendly);
+        toast.error(friendly, { duration: 8000 });
         return;
       }
       // Phone & UTMs are persisted by the handle_new_user trigger from raw_user_meta_data.
@@ -320,6 +329,12 @@ const Signup = () => {
             <Link to="/privacy" className="text-foreground underline underline-offset-2">privacy policy</Link>.
           </label>
         </div>
+
+        {formError && (
+          <div role="alert" className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {formError}
+          </div>
+        )}
 
         <Button type="submit" variant="hero" className="w-full h-12 rounded-full" size="lg" disabled={loading}>
           {loading ? "Creating account…" : "Continue"}
