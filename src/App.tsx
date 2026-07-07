@@ -30,7 +30,7 @@ import Matches from "./pages/dashboard/Matches.tsx";
 import Chats from "./pages/dashboard/Chats.tsx";
 import Profile from "./pages/dashboard/Profile.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
-import { PaymentTestModeBanner } from "./components/PaymentTestModeBanner";
+
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { MetaPageViewTracker } from "./components/MetaPageViewTracker";
 import { captureUtmFromUrl } from "./lib/utm";
@@ -65,7 +65,7 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
           <AuthProvider>
-            <PaymentTestModeBanner />
+            
             <MetaPageViewTracker />
             <ScrollReveal />
             <Routes>
