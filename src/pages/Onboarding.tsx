@@ -204,9 +204,25 @@ const Onboarding = () => {
       Object.assign(updates, { story });
     }
 
-    const { error: updErr } = await supabase.from("profiles").update(updates).eq("id", user.id);
+    const profilePayload = {
+      id: user.id,
+      first_name: firstName,
+      age: age ? Number(age) : null,
+      gender,
+      city,
+      profession,
+      looking_for: lookingFor,
+      age_min: Number(ageMin) || 24,
+      age_max: Number(ageMax) || 40,
+      distance_km: Number(distanceKm) || 50,
+      intent,
+      story,
+      ...updates,
+    };
+
+    const { error: updErr } = await supabase.from("profiles").upsert(profilePayload, { onConflict: "id" });
     if (updErr) {
-      console.error("[onboarding] persistStep profile update failed", { step, updErr });
+      console.error("[onboarding] persistStep profile upsert failed", { step, updErr });
       throw updErr;
     }
 
@@ -360,11 +376,11 @@ const Onboarding = () => {
       // Mark onboarding complete
       const { error: pErr } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: user.id,
           onboarded: true,
           onboarding_step: TOTAL_STEPS - 1,
-        })
-        .eq("id", user.id);
+        }, { onConflict: "id" });
 
       if (pErr) {
         console.error("[onboarding] finish failed", { step: "profiles.update", error: pErr });
