@@ -59,24 +59,40 @@ Deno.serve(async (req) => {
       if (data) existing = data;
     }
 
+    // Helper: update an existing row, tolerating unique-constraint conflicts
+    // (email/phone may already belong to a different row).
+    const tryUpdate = async (rowId: string, includeEmail: boolean, includePhone: boolean) => {
+      const patchNow: Record<string, unknown> = { ...patch };
+      if (includeEmail && email) patchNow.email = email;
+      if (includePhone && phone) patchNow.phone = phone;
+      const { data: cur } = await admin.from('signup_leads').select('attempts').eq('id', rowId).maybeSingle();
+      patchNow.attempts = (cur?.attempts ?? 1) + 1;
+      const { error: upErr } = await admin.from('signup_leads').update(patchNow).eq('id', rowId);
+      return upErr;
+    };
+
+    const updateWithRetries = async (rowId: string) => {
+      // Try full patch → drop email → drop phone → drop both. Always succeeds
+      // on the last attempt since it only touches non-unique columns.
+      for (const [incEmail, incPhone] of [[true, true], [false, true], [true, false], [false, false]] as const) {
+        const err = await tryUpdate(rowId, incEmail, incPhone);
+        if (!err) return null;
+        if ((err as any).code !== '23505' && !/duplicate key/i.test(err.message)) return err;
+      }
+      return null;
+    };
+
     if (existing) {
-      // Update + bump attempts. Keep email/phone if newly provided.
-      const updatePatch: Record<string, unknown> = { ...patch };
-      if (email) updatePatch.email = email;
-      if (phone) updatePatch.phone = phone;
-      // Increment attempts atomically via RPC-less approach: read then write.
-      const { data: cur } = await admin.from('signup_leads').select('attempts').eq('id', existing.id).maybeSingle();
-      updatePatch.attempts = (cur?.attempts ?? 1) + 1;
-      const { error } = await admin.from('signup_leads').update(updatePatch).eq('id', existing.id);
-      if (error) return json({ error: error.message }, 500);
+      const err = await updateWithRetries(existing.id);
+      if (err) return json({ error: err.message }, 500);
       return json({ ok: true, id: existing.id, mode: 'updated' });
     }
 
     const insertRow: Record<string, unknown> = { email, phone, ...patch };
     const { data, error } = await admin.from('signup_leads').insert(insertRow).select('id').single();
     if (error) {
-      // Race: another concurrent capture-lead call inserted first. Fall back to update.
       if ((error as any).code === '23505' || /duplicate key/i.test(error.message)) {
+        // Concurrent insert won the race, or email/phone already belongs to a row. Look it up and update.
         let found: { id: string } | null = null;
         if (email) {
           const { data: d } = await admin.from('signup_leads').select('id').ilike('email', email).maybeSingle();
@@ -87,15 +103,12 @@ Deno.serve(async (req) => {
           if (d) found = d;
         }
         if (found) {
-          const updatePatch: Record<string, unknown> = { ...patch };
-          if (email) updatePatch.email = email;
-          if (phone) updatePatch.phone = phone;
-          const { data: cur } = await admin.from('signup_leads').select('attempts').eq('id', found.id).maybeSingle();
-          updatePatch.attempts = (cur?.attempts ?? 1) + 1;
-          const { error: upErr } = await admin.from('signup_leads').update(updatePatch).eq('id', found.id);
-          if (upErr) return json({ error: upErr.message }, 500);
+          const err2 = await updateWithRetries(found.id);
+          if (err2) return json({ error: err2.message }, 500);
           return json({ ok: true, id: found.id, mode: 'updated_after_race' });
         }
+        // Couldn't find it — swallow: capture-lead is best-effort analytics.
+        return json({ ok: true, mode: 'ignored_conflict' });
       }
       return json({ error: error.message }, 500);
     }
