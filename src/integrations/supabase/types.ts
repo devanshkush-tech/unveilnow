@@ -1440,12 +1440,17 @@ export type Database = {
       }
     }
     Functions: {
+      admin_grant_bd_chats: {
+        Args: { _chats: number; _user_id: string }
+        Returns: undefined
+      }
       admin_resolve_audience: {
         Args: { _type: string; _value: string }
         Returns: {
           id: string
         }[]
       }
+      bd_chats_for_core_plan: { Args: { _plan: string }; Returns: number }
       bd_consume_chat: { Args: { _user_id: string }; Returns: boolean }
       delete_email: {
         Args: { message_id: number; queue_name: string }
