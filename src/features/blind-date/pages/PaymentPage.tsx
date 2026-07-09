@@ -17,7 +17,6 @@ import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 
 export default function BlindDatePayment() {
   const { isFree, loading: freeLoading } = useIsFreeAccess();
-  if (!freeLoading && isFree) return <Navigate to="/blind-date/onboarding" replace />;
   const { user, loading: authLoading } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
