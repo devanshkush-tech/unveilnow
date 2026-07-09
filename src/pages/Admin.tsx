@@ -278,6 +278,7 @@ const Admin = () => {
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
             <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
             <TabsTrigger value="blog" className="rounded-full px-5">Blog</TabsTrigger>
+            <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
           </TabsList>
 
 
@@ -428,6 +429,9 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="blog">
             <AdminBlog />
+          </TabsContent>
+          <TabsContent value="blind-date">
+            <BlindDateAdminConsole />
           </TabsContent>
         </Tabs>
           </>
