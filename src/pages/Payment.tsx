@@ -181,7 +181,11 @@ const Payment = () => {
     }
   };
 
-  if (authLoading || hydrating) {
+  if (!freeLoading && isFree) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (authLoading || freeLoading || hydrating) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   }
 
