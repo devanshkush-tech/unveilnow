@@ -41,9 +41,7 @@ import BlindDateChat from "./features/blind-date/pages/Chat";
 import BlindDateDecision from "./features/blind-date/pages/Decision";
 import BlindDateMatched from "./features/blind-date/pages/Matched";
 import BlindDateFullChat from "./features/blind-date/pages/FullChat";
-import BlindDatePremium from "./features/blind-date/pages/Premium";
-import BlindDatePayment from "./features/blind-date/pages/PaymentPage";
-import BlindDatePaymentReview from "./features/blind-date/pages/PaymentReview";
+
 import BlindDateExtendedSetup from "./features/blind-date/pages/ExtendedSetup";
 import { BlindDateGate } from "./features/blind-date/components/BlindDateGate";
 import Notifications from "./pages/Notifications";
@@ -126,17 +124,17 @@ const App = () => (
             </Route>
             <Route path="/blind-date" element={<BlindDateLanding />} />
             <Route path="/blind-date/setup" element={<BlindDateGate require="setup"><BlindDateSetup /></BlindDateGate>} />
-            <Route path="/blind-date/payment" element={<BlindDateGate require="any"><BlindDatePayment /></BlindDateGate>} />
-            <Route path="/blind-date/payment/review" element={<BlindDateGate require="any"><BlindDatePaymentReview /></BlindDateGate>} />
-            <Route path="/blind-date/onboarding" element={<BlindDateGate require="payment"><BlindDateExtendedSetup /></BlindDateGate>} />
-
+            {/* Legacy BD payment paths now route through unified payment */}
+            <Route path="/blind-date/payment" element={<Navigate to="/payment" replace />} />
+            <Route path="/blind-date/payment/review" element={<Navigate to="/payment/review" replace />} />
+            <Route path="/blind-date/onboarding" element={<BlindDateGate require="onboarding"><BlindDateExtendedSetup /></BlindDateGate>} />
 
             <Route path="/blind-date/matching" element={<BlindDateGate><BlindDateMatching /></BlindDateGate>} />
             <Route path="/blind-date/chat" element={<BlindDateGate><BlindDateChat /></BlindDateGate>} />
             <Route path="/blind-date/decision" element={<BlindDateGate><BlindDateDecision /></BlindDateGate>} />
             <Route path="/blind-date/matched" element={<BlindDateGate><BlindDateMatched /></BlindDateGate>} />
             <Route path="/blind-date/chat/full" element={<BlindDateGate><BlindDateFullChat /></BlindDateGate>} />
-            <Route path="/blind-date/premium" element={<BlindDateGate require="any"><BlindDatePremium /></BlindDateGate>} />
+            <Route path="/blind-date/premium" element={<Navigate to="/pricing" replace />} />
             <Route path="/notifications" element={<RequireAuth requireOnboarded={false} requireActive={false}><Notifications /></RequireAuth>} />
             <Route path="/unlock-interest/:fromUserId" element={<RequireAuth requireOnboarded={false} requireActive={false}><UnlockInterest /></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -95,11 +95,8 @@ const Admin = () => {
   // Impersonate
   const [impersonateId, setImpersonateId] = useState<string | null>(null);
 
-  // Admin console mode
-  const [adminMode, setAdminMode] = useState<"main" | "blind-date">(
-    (typeof localStorage !== "undefined" && (localStorage.getItem("adminMode") as any)) || "main"
-  );
-  const switchMode = (m: "main" | "blind-date") => { setAdminMode(m); localStorage.setItem("adminMode", m); };
+  // Unified admin console — Blind Date lives as tabs alongside main tools.
+
 
   useEffect(() => {
     setAdmin(adminAuth.getAdmin());
@@ -255,26 +252,8 @@ const Admin = () => {
       </header>
 
       <main className="container py-8 md:py-10 space-y-8">
-        {/* Mode toggle */}
-        <div className="inline-flex p-1 rounded-full bg-secondary border border-border/60">
-          <button
-            onClick={() => switchMode("main")}
-            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "main" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
-          >
-            Main App Admin
-          </button>
-          <button
-            onClick={() => switchMode("blind-date")}
-            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "blind-date" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
-          >
-            ✦ Blind Date Admin
-          </button>
-        </div>
+        <>
 
-        {adminMode === "blind-date" ? (
-          <BlindDateAdminConsole />
-        ) : (
-          <>
         {/* Metrics */}
         <section>
           <h1 className="font-display text-2xl md:text-3xl mb-5">Dashboard</h1>
@@ -299,6 +278,7 @@ const Admin = () => {
             <TabsTrigger value="moderation" className="rounded-full px-5">Moderation</TabsTrigger>
             <TabsTrigger value="notifications" className="rounded-full px-5">Notifications</TabsTrigger>
             <TabsTrigger value="blog" className="rounded-full px-5">Blog</TabsTrigger>
+            <TabsTrigger value="blind-date" className="rounded-full px-5">✦ Blind Date</TabsTrigger>
           </TabsList>
 
 
@@ -450,9 +430,11 @@ const Admin = () => {
           <TabsContent value="blog">
             <AdminBlog />
           </TabsContent>
+          <TabsContent value="blind-date">
+            <BlindDateAdminConsole />
+          </TabsContent>
         </Tabs>
           </>
-        )}
       </main>
 
 

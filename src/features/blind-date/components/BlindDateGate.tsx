@@ -5,12 +5,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useRole";
 import { useBdProfile } from "../hooks/useBdProfile";
 
-type Stage = "setup" | "onboarding" | "payment" | "play" | "any";
+type Stage = "setup" | "onboarding" | "play" | "any";
 
 /**
- * Gates Blind Date routes.
- * New flow: Questions (no auth) → Signup → Payment → Admin approval → Extended onboarding → Matching.
- * Admins always pass.
+ * Gates Blind Date routes under the unified access model:
+ * Signup + core payment now unlocks Blind Date automatically (chat credits
+ * are seeded by the sync_core_payment_approval trigger). The gate just
+ * routes users through the core signup / payment path if they haven't got
+ * chats yet.
  */
 export function BlindDateGate({
   children,
@@ -24,7 +26,7 @@ export function BlindDateGate({
   const { profile, loading: bdLoading } = useBdProfile();
   const loc = useLocation();
 
-  // Setup is public — anyone can answer questions before signing up.
+  // Public phase-A questionnaire — no auth required.
   if (require === "setup") {
     if (authLoading) {
       return (
@@ -52,30 +54,12 @@ export function BlindDateGate({
   if (isAdmin) return <>{children}</>;
   if (require === "any") return <>{children}</>;
 
-  // Must have completed the Phase A questionnaire first.
-  if (!profile?.completed) {
-    if (loc.pathname !== "/blind-date/setup") return <Navigate to="/blind-date/setup" replace />;
-    return <>{children}</>;
-  }
-
-  // Payment comes BEFORE extended onboarding — gated by admin approval.
-  if (!profile?.paid) {
-    if (loc.pathname !== "/blind-date/payment" && loc.pathname !== "/blind-date/payment/review")
-      return <Navigate to="/blind-date/payment" replace />;
-    return <>{children}</>;
-  }
-  if (require === "payment") return <>{children}</>;
-
-  // After approval, finish the extended onboarding before matching.
-  if (!profile?.extended_completed) {
-    if (loc.pathname !== "/blind-date/onboarding") return <Navigate to="/blind-date/onboarding" replace />;
-    return <>{children}</>;
-  }
+  // Optional Phase-B extended questionnaire — allow entry but don't force it.
   if (require === "onboarding") return <>{children}</>;
 
-  if ((profile?.chats_remaining ?? 0) <= 0) {
-    if (loc.pathname !== "/blind-date/payment") return <Navigate to="/blind-date/payment?reason=out" replace />;
-    return <>{children}</>;
+  // Must have core access (payment approved → chats credited). If not, send to unified payment.
+  if (!profile?.paid || (profile?.chats_remaining ?? 0) <= 0) {
+    return <Navigate to="/payment" replace />;
   }
 
   return <>{children}</>;

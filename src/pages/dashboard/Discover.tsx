@@ -8,6 +8,7 @@ import { VoicePlayer } from "@/components/dating/VoicePlayer";
 import { EmptyState } from "@/components/dating/EmptyState";
 import { ProfileCardSkeleton } from "@/components/dating/CardSkeleton";
 import { MatchUsageBanner } from "@/components/dating/MatchUsageBanner";
+import { BlindDateEntryCard } from "@/components/dashboard/BlindDateEntryCard";
 import coupleCafe from "@/assets/couple-cafe.jpg";
 import {
   Sheet,
@@ -141,6 +142,7 @@ const Discover = () => {
   if (visible.length === 0 || !current) {
     return (
       <div className="container max-w-2xl py-16">
+        <BlindDateEntryCard />
         <EmptyState
           image={coupleCafe}
           imageAlt="A young Indian couple sharing coffee"
@@ -165,6 +167,7 @@ const Discover = () => {
         <span className="text-xs text-muted-foreground shrink-0">{visible.length} to read</span>
       </div>
 
+      <BlindDateEntryCard />
       <div className="mb-6"><MatchUsageBanner /></div>
 
       <article
