@@ -431,7 +431,6 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
           </>
-        )}
       </main>
 
 
