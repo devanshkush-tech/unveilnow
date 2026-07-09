@@ -252,26 +252,8 @@ const Admin = () => {
       </header>
 
       <main className="container py-8 md:py-10 space-y-8">
-        {/* Mode toggle */}
-        <div className="inline-flex p-1 rounded-full bg-secondary border border-border/60">
-          <button
-            onClick={() => switchMode("main")}
-            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "main" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
-          >
-            Main App Admin
-          </button>
-          <button
-            onClick={() => switchMode("blind-date")}
-            className={`px-4 py-1.5 text-sm rounded-full transition-colors ${adminMode === "blind-date" ? "bg-background shadow-soft text-foreground" : "text-muted-foreground"}`}
-          >
-            ✦ Blind Date Admin
-          </button>
-        </div>
+        <>
 
-        {adminMode === "blind-date" ? (
-          <BlindDateAdminConsole />
-        ) : (
-          <>
         {/* Metrics */}
         <section>
           <h1 className="font-display text-2xl md:text-3xl mb-5">Dashboard</h1>
