@@ -142,6 +142,7 @@ const Discover = () => {
   if (visible.length === 0 || !current) {
     return (
       <div className="container max-w-2xl py-16">
+        <BlindDateEntryCard />
         <EmptyState
           image={coupleCafe}
           imageAlt="A young Indian couple sharing coffee"
