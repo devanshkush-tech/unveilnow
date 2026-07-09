@@ -95,11 +95,8 @@ const Admin = () => {
   // Impersonate
   const [impersonateId, setImpersonateId] = useState<string | null>(null);
 
-  // Admin console mode
-  const [adminMode, setAdminMode] = useState<"main" | "blind-date">(
-    (typeof localStorage !== "undefined" && (localStorage.getItem("adminMode") as any)) || "main"
-  );
-  const switchMode = (m: "main" | "blind-date") => { setAdminMode(m); localStorage.setItem("adminMode", m); };
+  // Unified admin console — Blind Date lives as tabs alongside main tools.
+
 
   useEffect(() => {
     setAdmin(adminAuth.getAdmin());
