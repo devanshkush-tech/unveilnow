@@ -114,7 +114,8 @@ export default function BlindDatePayment() {
     } finally { setSubmitting(false); }
   };
 
-  if (authLoading || hydrating) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (!freeLoading && isFree) return <Navigate to="/blind-date/onboarding" replace />;
+  if (authLoading || freeLoading || hydrating) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   if (!user) return <Navigate to="/signup?next=/blind-date/payment" replace />;
 
   return (
