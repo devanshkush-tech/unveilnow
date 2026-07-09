@@ -11,12 +11,9 @@ export default function BlindDateLanding() {
   const { profile } = useBdProfile();
 
   const handleStart = () => {
-    // Anyone can begin — questionnaire is public, signup happens after answers are captured.
-    if (!user) { nav("/blind-date/setup"); return; }
-    if (!profile?.completed) { nav("/blind-date/setup"); return; }
-    if (!profile?.paid) { nav("/blind-date/payment"); return; }
-    if (!profile?.extended_completed) { nav("/blind-date/onboarding"); return; }
-    if ((profile?.chats_remaining ?? 0) <= 0) { nav("/blind-date/payment?reason=out"); return; }
+    // Unified flow: signup → main payment → BD chats are auto-credited.
+    if (!user) { nav("/signup?next=/blind-date"); return; }
+    if (!profile?.paid || (profile?.chats_remaining ?? 0) <= 0) { nav("/payment"); return; }
     nav("/blind-date/matching");
   };
 
@@ -55,7 +52,7 @@ export default function BlindDateLanding() {
               </button>
             )}
           </div>
-          <div className="bd-muted text-sm mt-5">Quality over endless swiping. Real people only.</div>
+          <div className="bd-muted text-sm mt-5">One membership unlocks Unveil and Blind Date. Real people only.</div>
           {!user && (
             <div className="text-sm mt-4 bd-muted">
               Already a Blind Date member? Sign in to continue your journey.
