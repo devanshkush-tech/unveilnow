@@ -34,6 +34,7 @@ export const PLANS: Plan[] = [
       "Unlimited likes & requests",
       "Standard profile visibility",
       "Voice intros & prompts",
+      "✦ 10 Blind Date chats included",
     ],
   },
   {
@@ -53,6 +54,7 @@ export const PLANS: Plan[] = [
       "2× profile visibility",
       "Priority matching",
       "See who liked you",
+      "✦ 30 Blind Date chats included",
     ],
   },
   {
@@ -70,6 +72,7 @@ export const PLANS: Plan[] = [
       "Unlimited likes & requests",
       "4× profile visibility",
       "Concierge support",
+      "✦ Unlimited Blind Date chats",
     ],
   },
 ];
