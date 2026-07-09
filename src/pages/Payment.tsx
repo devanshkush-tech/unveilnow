@@ -28,9 +28,7 @@ const Payment = () => {
   const revisit = searchParams.get("revisit") === "1";
   const { isFree, loading: freeLoading } = useIsFreeAccess();
 
-  if (!freeLoading && isFree) {
-    return <Navigate to="/dashboard" replace />;
-  }
+
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [hydrating, setHydrating] = useState(true);
