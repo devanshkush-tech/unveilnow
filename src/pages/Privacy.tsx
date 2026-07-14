@@ -1,5 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
+
 
 const Section = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
   <section className="mt-10">
