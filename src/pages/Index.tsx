@@ -33,8 +33,14 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Unveil Now | Story-First Dating Platform in India"
+        description="Story-first dating in India. Build real chemistry through prompts, values, and conversation before photos are revealed."
+        path="/"
+      />
       <PromoPopup />
       <Navbar />
+
       <main>
         <Hero />
         <WhyChoose />
