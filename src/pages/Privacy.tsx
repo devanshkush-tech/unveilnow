@@ -31,8 +31,14 @@ const Bullets = ({ items }: { items: string[] }) => (
 
 const Privacy = () => (
   <div className="min-h-screen bg-background">
+    <SEO
+      title="Privacy Policy | Unveil Now"
+      description="How Unveil Now collects, protects, and uses your data. Photos stay private by default and reveal only with mutual consent."
+      path="/privacy"
+    />
     <Navbar />
     <main className="pt-28 md:pt-32 pb-20">
+
       <section className="container max-w-3xl text-center">
         <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">Legal</p>
         <h1 className="font-display text-5xl md:text-6xl leading-tight">
