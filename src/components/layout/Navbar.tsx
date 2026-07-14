@@ -27,13 +27,8 @@ export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const blindMode = pathname.startsWith("/blind-date");
 
-  const toggleBlind = () => {
-    navigate(blindMode ? "/" : "/blind-date");
-  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
