@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { BlindDateLayout } from "../components/BlindDateLayout";
 import { GlowButton } from "../components/GlowButton";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,7 +16,12 @@ export default function BlindDateLanding() {
   const handleStart = () => {
     // Unified flow: signup → main payment → BD chats are auto-credited.
     if (!user) { nav("/signup?next=/blind-date"); return; }
-    if (!profile?.paid || (profile?.chats_remaining ?? 0) <= 0) { nav("/payment"); return; }
+    if (!profile?.paid) { nav("/payment"); return; }
+    if ((profile?.chats_remaining ?? 0) <= 0) {
+      toast.error("You've used all your Blind Date chats. Upgrade your plan to get more.");
+      nav("/pricing");
+      return;
+    }
     nav("/blind-date/matching");
   };
 

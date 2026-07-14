@@ -7,10 +7,12 @@ export function BlindDateEntryCard() {
   const { profile, loading } = useBdProfile();
   if (loading || !profile?.paid) return null;
   const remaining = profile.chats_remaining ?? 0;
+  const outOfChats = remaining <= 0;
+  const to = outOfChats ? "/pricing" : "/blind-date/matching";
 
   return (
     <Link
-      to="/blind-date/matching"
+      to={to}
       className="group block mb-6 rounded-3xl border border-white/10 overflow-hidden shadow-card"
       style={{
         background:
@@ -26,18 +28,19 @@ export function BlindDateEntryCard() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-[10px] uppercase tracking-widest text-purple-300/90 mb-0.5">
-            ✦ Blind Date included in your plan
+            ✦ Blind Date {outOfChats ? "— chats used up" : "included in your plan"}
           </div>
           <div className="font-display text-lg md:text-xl truncate">
-            Skip the swiping — get instantly matched
+            {outOfChats ? "Upgrade to get more Blind Date chats" : "Skip the swiping — get instantly matched"}
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {remaining >= 9999 ? "Unlimited" : `${remaining} chats`} remaining ·
-            60-second chat · continue if you both choose
+            {outOfChats
+              ? "You've used all your Blind Date chats. Tap to see upgrade options."
+              : `${remaining >= 9999 ? "Unlimited" : `${remaining} chats`} remaining · 60-second chat · continue if you both choose`}
           </div>
         </div>
         <div className="hidden sm:flex items-center gap-1 text-sm text-purple-300 group-hover:translate-x-0.5 transition-transform">
-          Enter <ArrowRight className="h-4 w-4" />
+          {outOfChats ? "Upgrade" : "Enter"} <ArrowRight className="h-4 w-4" />
         </div>
       </div>
     </Link>
