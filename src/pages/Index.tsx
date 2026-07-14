@@ -8,7 +8,8 @@ import { WhyDifferent } from "@/components/landing/WhyDifferent";
 import { VideoTestimonials } from "@/components/landing/VideoTestimonials";
 import { Pricing } from "@/components/landing/Pricing";
 import { TrustFeatures } from "@/components/landing/TrustFeatures";
-import { FAQ } from "@/components/landing/FAQ";
+import { FAQ, faqs } from "@/components/landing/FAQ";
+import { Helmet } from "react-helmet-async";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { FloatingSignupCTA } from "@/components/landing/FloatingSignupCTA";
 import { SEO } from "@/components/SEO";
@@ -38,6 +39,19 @@ const Index = () => {
         description="Story-first dating in India. Build real chemistry through prompts, values, and conversation before photos are revealed."
         path="/"
       />
+      <Helmet>
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          })}
+        </script>
+      </Helmet>
       <PromoPopup />
       <Navbar />
 
