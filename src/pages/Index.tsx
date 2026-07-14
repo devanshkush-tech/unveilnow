@@ -11,11 +11,13 @@ import { TrustFeatures } from "@/components/landing/TrustFeatures";
 import { FAQ } from "@/components/landing/FAQ";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { FloatingSignupCTA } from "@/components/landing/FloatingSignupCTA";
+import { SEO } from "@/components/SEO";
 import { useEffect } from "react";
 import { trackMetaEvent } from "@/lib/metaCapi";
 
 const Index = () => {
   useEffect(() => {
+
     document.title = "Unveil Now | Story-First Dating Platform in India";
     const desc = "Unveil Now is a story-first dating platform where real connection starts before photos. Build chemistry through prompts, values, and meaningful conversations before revealing images.";
     const meta = document.querySelector('meta[name="description"]');
