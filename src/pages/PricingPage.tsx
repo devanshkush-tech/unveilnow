@@ -11,7 +11,10 @@ const PricingPage = () => (
       path="/pricing"
     />
     <Navbar />
-    <div className="pt-28 md:pt-32"><Pricing /></div>
+    <div className="pt-28 md:pt-32">
+      <h1 className="sr-only">Unveil Now Pricing — Membership Plans for Serious Daters</h1>
+      <Pricing />
+    </div>
     <Footer />
   </div>
 );
