@@ -1,0 +1,20 @@
+# Unveil Now
+
+> Story-first dating platform in India where real connection starts before photos. Members build chemistry through prompts, values, and conversation, and reveal images only once the chemistry meter fills.
+
+Unveil Now is a premium, verified dating platform for serious singles in India. Instead of swiping on photos, members read each other's stories, voice intros, and prompts first. Photos unlock only after mutual interest and enough chemistry. Women get free access; men pay a small entry fee to keep the community intentional.
+
+## Pages
+
+- [Home](/): What Unveil Now is and how story-first dating works.
+- [Pricing](/pricing): Membership plans, blind date credits, and the free-for-women policy.
+- [Blog](/blog): Stories, dating advice, and relationship insights for modern Indian singles.
+- [Trust & Safety](/trust): Verification, privacy, and how we keep the community safe.
+- [Blind Date](/blind-date): Anonymous timed chats that reveal identity only after mutual decision.
+- [Contact](/contact): Get in touch with the Unveil Now team.
+
+## Optional
+
+- [Privacy Policy](/privacy): How we handle member data.
+- [Terms](/terms): Terms of service.
+- [Refund Policy](/refund-policy): Refund and cancellation policy.
