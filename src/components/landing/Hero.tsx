@@ -104,6 +104,10 @@ export const Hero = () => {
                     src={heroRooftop}
                     alt="A couple at a Mumbai rooftop bar at night"
                     loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    width={800}
+                    height={1000}
                     className="w-full h-full object-cover hero-kenburns"
                   />
                   <div
