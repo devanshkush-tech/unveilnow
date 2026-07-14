@@ -4,6 +4,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,8 +108,14 @@ const RefundPolicy = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Refund & Cancellation Policy | Unveil Now"
+        description="Unveil Now refund and cancellation policy: eligibility, request window, and how to submit a refund request."
+        path="/refund-policy"
+      />
       <Navbar />
       <main className="pt-28 md:pt-32 pb-20">
+
         <section className="container max-w-3xl text-center animate-fade-up">
           <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">Policies</p>
           <h1 className="font-display text-5xl md:text-6xl leading-tight">

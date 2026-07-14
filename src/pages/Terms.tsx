@@ -1,5 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
+
 
 const Section = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
   <section className="mt-10">
@@ -20,8 +22,14 @@ const Bullets = ({ items }: { items: string[] }) => (
 
 const Terms = () => (
   <div className="min-h-screen bg-background">
+    <SEO
+      title="Terms & Conditions | Unveil Now"
+      description="Read the Unveil Now terms and conditions covering membership, conduct, and use of the story-first dating platform."
+      path="/terms"
+    />
     <Navbar />
     <main className="pt-28 md:pt-32 pb-20">
+
       <section className="container max-w-3xl text-center">
         <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">Legal</p>
         <h1 className="font-display text-5xl md:text-6xl leading-tight">

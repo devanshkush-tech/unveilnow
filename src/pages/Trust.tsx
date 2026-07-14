@@ -1,6 +1,8 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { ShieldCheck, BadgeCheck, Eye, Flag, Bot, Lock } from "lucide-react";
+
 
 const items = [
   { icon: BadgeCheck, title: "Face verification", desc: "Every member completes a liveness check before they can message." },
@@ -13,8 +15,14 @@ const items = [
 
 const Trust = () => (
   <div className="min-h-screen bg-background">
+    <SEO
+      title="Trust & Safety | Unveil Now"
+      description="Face verification, private photos, AI moderation, and 24-hour human report review. How Unveil Now keeps its community safe."
+      path="/trust"
+    />
     <Navbar />
     <main className="pt-28 md:pt-32 pb-20">
+
       <section className="container max-w-3xl text-center">
         <p className="text-sm uppercase tracking-[0.18em] text-accent-foreground/70 font-medium mb-4">Trust & Safety</p>
         <h1 className="font-display text-5xl md:text-6xl leading-tight">
