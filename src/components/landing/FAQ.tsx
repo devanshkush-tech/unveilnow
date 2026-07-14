@@ -5,7 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const faqs = [
+export const faqs = [
   {
     q: "How is Unveil Now different from regular dating apps?",
     a: "Unveil Now focuses on stories, prompts, values, and chemistry before photos. You connect with the person first, not just their appearance.",
