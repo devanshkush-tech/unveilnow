@@ -29,7 +29,8 @@ export default function BlindDateMatching() {
         if (cancelled) return;
         if (error) throw error;
         if (data?.error === "complete_setup") { toast.error("Complete the questionnaire first."); nav("/blind-date/setup"); return; }
-        if (data?.error === "not_paid" || data?.error === "no_credits") { nav("/blind-date/payment?reason=out"); return; }
+        if (data?.error === "not_paid") { nav("/payment"); return; }
+        if (data?.error === "no_credits") { toast.error("You've used all your Blind Date chats. Upgrade your plan to get more."); nav("/pricing"); return; }
         if (data?.error === "no_candidates" || !data?.session_id) {
           setPhase("empty");
           return;

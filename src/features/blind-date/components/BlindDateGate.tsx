@@ -1,6 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsAdmin } from "@/hooks/useRole";
 import { useBdProfile } from "../hooks/useBdProfile";
@@ -57,10 +58,24 @@ export function BlindDateGate({
   // Optional Phase-B extended questionnaire — allow entry but don't force it.
   if (require === "onboarding") return <>{children}</>;
 
-  // Must have core access (payment approved → chats credited). If not, send to unified payment.
-  if (!profile?.paid || (profile?.chats_remaining ?? 0) <= 0) {
+  // Must have core access (payment approved → chats credited). If not paid, send to unified payment.
+  if (!profile?.paid) {
     return <Navigate to="/payment" replace />;
+  }
+  // Paid but out of chats — send to pricing with a message instead of bouncing through /payment → /dashboard.
+  if ((profile?.chats_remaining ?? 0) <= 0) {
+    return <OutOfChatsRedirect />;
   }
 
   return <>{children}</>;
+}
+
+function OutOfChatsRedirect() {
+  const shown = useRef(false);
+  useEffect(() => {
+    if (shown.current) return;
+    shown.current = true;
+    toast.error("You've used all your Blind Date chats. Upgrade your plan to get more.");
+  }, []);
+  return <Navigate to="/pricing" replace />;
 }
