@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, EyeOff, ShieldCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { HeroCard } from "./HeroCard";
-import coupleWarm from "@/assets/couple-warm.jpg";
+import coupleWarm from "@/assets/couple-picnic.jpg";
 import heroRooftop from "@/assets/lp-hero-rooftop.jpg";
 
 
