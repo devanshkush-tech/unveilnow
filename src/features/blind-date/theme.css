@@ -11,7 +11,7 @@
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
 }
-.bd-serif { font-family: 'Fraunces', Georgia, serif; font-style: italic; }
+.bd-serif { font-family: 'Playfair Display', Georgia, serif; font-style: italic; }
 .bd-surface { background: var(--bd-surface); }
 .bd-accent { color: var(--bd-accent); }
 .bd-muted { color: var(--bd-muted); }

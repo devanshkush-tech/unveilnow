@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,9 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Logo = ({ className = "" }: { className?: string }) => (
   <Link to="/" className={`flex items-center gap-2 ${className}`}>
-    <div className="relative h-8 w-8 rounded-full bg-gradient-romance shadow-soft flex items-center justify-center">
-      <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
-    </div>
+    <BrandMark />
     <span className="font-display text-xl font-medium tracking-tight">UNVEIL NOW</span>
   </Link>
 );

@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/brand/BrandMark";
 import { Link } from "react-router-dom";
 import { Instagram } from "lucide-react";
 
@@ -8,9 +9,7 @@ export const Footer = () => {
         <div className="grid md:grid-cols-4 gap-10">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center">
-                <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
-              </div>
+              <BrandMark />
               <span className="font-display text-xl tracking-tight">UNVEIL NOW</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs italic">
