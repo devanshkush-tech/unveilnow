@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useRef, MouseEvent } from "react";
+import couplePicnic from "@/assets/couple-picnic.jpg";
 
 const MagneticWrap = ({ children, strength = 0.35 }: { children: React.ReactNode; strength?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
@@ -36,6 +37,8 @@ export const FinalCTA = () => {
           className="relative overflow-hidden rounded-[2.5rem] p-12 md:p-20 text-center shadow-elegant"
           style={{ background: "var(--gradient-romance)" }}
         >
+          <div aria-hidden className="absolute inset-0 opacity-[0.18] mix-blend-luminosity"
+            style={{ backgroundImage: `url(${couplePicnic})`, backgroundSize: "cover", backgroundPosition: "center 35%" }} />
           <div aria-hidden className="absolute inset-0" style={{ background: "var(--gradient-veil)", opacity: 0.35 }} />
           {/* Floating ambient orbs */}
           <div aria-hidden className="ambient-orb absolute -top-16 -left-10 w-64 h-64 rounded-full blur-3xl opacity-40"

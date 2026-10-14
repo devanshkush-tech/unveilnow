@@ -16,6 +16,8 @@ import { FloatingSignupCTA } from "@/components/landing/FloatingSignupCTA";
 import { SEO } from "@/components/SEO";
 import { useEffect } from "react";
 import { trackMetaEvent } from "@/lib/metaCapi";
+import { ScrollReveal } from "@/components/landing/ScrollReveal";
+import { StoryMoment } from "@/components/landing/StoryMoment";
 
 const Index = () => {
   useEffect(() => {
@@ -58,15 +60,16 @@ const Index = () => {
 
       <main>
         <Hero />
-        <RevealCards />
-        <WhyChoose />
-        <HowItWorks />
-        <WhyDifferent />
-        <VideoTestimonials />
-        <Pricing />
-        <TrustFeatures />
-        <FAQ />
-        <FinalCTA />
+        <ScrollReveal><RevealCards /></ScrollReveal>
+        <ScrollReveal><WhyChoose /></ScrollReveal>
+        <StoryMoment />
+        <ScrollReveal><HowItWorks /></ScrollReveal>
+        <ScrollReveal><WhyDifferent /></ScrollReveal>
+        <ScrollReveal><VideoTestimonials /></ScrollReveal>
+        <ScrollReveal><Pricing /></ScrollReveal>
+        <ScrollReveal><TrustFeatures /></ScrollReveal>
+        <ScrollReveal><FAQ /></ScrollReveal>
+        <ScrollReveal><FinalCTA /></ScrollReveal>
       </main>
       <Footer />
       <FloatingSignupCTA />
