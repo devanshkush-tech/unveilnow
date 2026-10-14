@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,44 +9,44 @@
 @layer base {
   :root {
     /* Warm ivory base with deep aubergine ink */
-    --background: 36 33% 97%;
-    --foreground: 320 30% 12%;
+    --background: 0 0% 100%;
+    --foreground: 340 35% 12%;
 
-    --card: 36 40% 99%;
-    --card-foreground: 320 30% 12%;
+    --card: 210 40% 98%;
+    --card-foreground: 340 35% 12%;
 
-    --popover: 36 40% 99%;
-    --popover-foreground: 320 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 35% 12%;
 
     /* Deep aubergine — primary brand */
-    --primary: 327 38% 22%;
-    --primary-foreground: 36 40% 98%;
-    --primary-glow: 340 55% 45%;
+    --primary: 340 60% 30%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 343 63% 43%;
 
     /* Soft rose secondary */
-    --secondary: 18 45% 92%;
-    --secondary-foreground: 327 38% 22%;
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 340 60% 30%;
 
-    --muted: 30 25% 94%;
-    --muted-foreground: 320 10% 42%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 340 8% 42%;
 
     /* Rose-gold accent */
-    --accent: 14 60% 70%;
-    --accent-foreground: 327 38% 18%;
+    --accent: 343 63% 43%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 52%;
     --destructive-foreground: 36 40% 98%;
 
-    --border: 30 20% 88%;
-    --input: 30 20% 90%;
-    --ring: 327 38% 32%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 343 63% 43%;
 
     --radius: 1rem;
 
     /* Brand gradients */
-    --gradient-romance: linear-gradient(135deg, hsl(327 38% 22%) 0%, hsl(340 55% 45%) 60%, hsl(14 70% 72%) 100%);
-    --gradient-soft: linear-gradient(180deg, hsl(36 40% 98%) 0%, hsl(18 45% 95%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(18 60% 88%) 0%, hsl(14 70% 80%) 100%);
+    --gradient-romance: linear-gradient(135deg, hsl(340 60% 30%) 0%, hsl(343 63% 43%) 100%);
+    --gradient-soft: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(343 60% 96%) 0%, hsl(340 50% 92%) 100%);
     --gradient-veil: radial-gradient(ellipse at top, hsl(340 50% 88% / 0.6), transparent 60%),
                      radial-gradient(ellipse at bottom, hsl(14 70% 85% / 0.5), transparent 60%);
 
@@ -60,9 +60,9 @@
     --ease-silk: cubic-bezier(0.32, 0.72, 0, 1);
     --transition-smooth: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 
-    --sidebar-background: 36 33% 97%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 320 30% 12%;
-    --sidebar-primary: 327 38% 22%;
+    --sidebar-primary: 340 60% 30%;
     --sidebar-primary-foreground: 36 40% 98%;
     --sidebar-accent: 30 25% 94%;
     --sidebar-accent-foreground: 327 38% 22%;
