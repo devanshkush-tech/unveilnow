@@ -22,14 +22,14 @@ export const Hero = () => {
       <div aria-hidden className="absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(1200px 600px at 10% 0%, hsl(327 50% 92% / 0.9), transparent 60%), radial-gradient(900px 500px at 100% 20%, hsl(14 80% 92% / 0.9), transparent 60%), linear-gradient(180deg, hsl(36 50% 98%) 0%, hsl(18 55% 96%) 100%)",
+            "radial-gradient(900px 500px at 0% 0%, hsl(343 63% 43% / 0.08), transparent 60%), radial-gradient(800px 500px at 100% 30%, hsl(340 60% 30% / 0.07), transparent 60%), hsl(var(--background))",
         }}
       />
       {/* Decorative leaves */}
       <div aria-hidden className="ambient-orb absolute -left-10 top-40 w-72 h-72 rounded-full blur-3xl opacity-40"
-        style={{ background: "radial-gradient(circle, hsl(340 60% 80%), transparent 70%)" }} />
+        style={{ background: "radial-gradient(circle, hsl(343 63% 70%), transparent 70%)" }} />
       <div aria-hidden className="ambient-orb-slow absolute -right-10 bottom-0 w-96 h-96 rounded-full blur-3xl opacity-40"
-        style={{ background: "radial-gradient(circle, hsl(14 70% 80%), transparent 70%)" }} />
+        style={{ background: "radial-gradient(circle, hsl(340 60% 60%), transparent 70%)" }} />
       {/* Candid couple photo as ambient background accent (very subtle) */}
       <div
         aria-hidden
@@ -60,7 +60,7 @@ export const Hero = () => {
             </h1>
 
             <p className="mt-6 text-base md:text-lg text-foreground/75 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-up delay-100">
-              A story-first dating platform where real connection starts before appearance. Share your personality, values, and intentions first — and reveal photos only after the chemistry meter is filled.
+              Feel the connection first, then images. A story-first dating platform where real connection starts before appearance. Share your personality, values, and intentions first — and reveal photos only after the chemistry meter is filled.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-fade-up delay-200">

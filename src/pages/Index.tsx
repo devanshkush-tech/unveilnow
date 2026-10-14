@@ -2,6 +2,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { PromoPopup } from "@/components/PromoPopup";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/landing/Hero";
+import { RevealCards } from "@/components/landing/RevealCards";
 import { WhyChoose } from "@/components/landing/WhyChoose";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { WhyDifferent } from "@/components/landing/WhyDifferent";
@@ -57,6 +58,7 @@ const Index = () => {
 
       <main>
         <Hero />
+        <RevealCards />
         <WhyChoose />
         <HowItWorks />
         <WhyDifferent />
