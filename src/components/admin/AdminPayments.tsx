@@ -173,7 +173,7 @@ const AdminPayments = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl bg-secondary/40 p-3">
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Plan</div>
-                  <div className="font-display capitalize">{active.plan}</div>
+                  <div className="font-display capitalize">{active.feature === "spotlight" ? `Spotlight · ${active.plan.slice("spotlight_".length)}` : active.plan}</div>
                 </div>
                 <div className="rounded-xl bg-secondary/40 p-3">
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Amount</div>

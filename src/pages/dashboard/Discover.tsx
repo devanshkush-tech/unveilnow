@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Briefcase, BookOpen, EyeOff, Compass, X, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { genderPreferenceAllows } from "@/lib/matchingPreferences";
+import { SpotlightPanel } from "@/components/dashboard/SpotlightPanel";
 
 type Candidate = {
   id: string;
@@ -52,6 +53,7 @@ const Discover = () => {
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
   const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set());
   const [cursor, setCursor] = useState(0);
+  const cardRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -140,8 +142,24 @@ const Discover = () => {
   const current = visible[safeCursor] ?? null;
 
   useEffect(() => {
-    if (!current?.id) return;
-    void supabase.rpc("record_spotlight_view", { _profile_id: current.id });
+    const card = cardRef.current;
+    if (!current?.id || !card) return;
+    let dwellTimer: number | undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+        dwellTimer = window.setTimeout(() => {
+          void supabase.rpc("record_spotlight_view", { _profile_id: current.id });
+        }, 700);
+      } else if (dwellTimer !== undefined) {
+        window.clearTimeout(dwellTimer);
+        dwellTimer = undefined;
+      }
+    }, { threshold: [0.5] });
+    observer.observe(card);
+    return () => {
+      observer.disconnect();
+      if (dwellTimer !== undefined) window.clearTimeout(dwellTimer);
+    };
   }, [current?.id]);
   const next = () => setCursor((i) => Math.min(i + 1, Math.max(0, visible.length - 1)));
   const skipCurrent = () => {
@@ -168,6 +186,7 @@ const Discover = () => {
   if (visible.length === 0 || !current) {
     return (
       <div className="container max-w-2xl py-16">
+        <SpotlightPanel />
         <BlindDateEntryCard />
         <EmptyState
           image={coupleCafe}
@@ -185,6 +204,7 @@ const Discover = () => {
 
   return (
     <div className="container max-w-2xl py-6 md:py-10">
+      <SpotlightPanel />
       <div className="mb-5 animate-fade-up flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
@@ -197,6 +217,7 @@ const Discover = () => {
       <div className="mb-6"><MatchUsageBanner /></div>
 
       <article
+        ref={cardRef}
         key={c.id}
         className="bg-card border border-border/60 rounded-3xl shadow-card overflow-hidden animate-fade-up flex flex-col"
       >
