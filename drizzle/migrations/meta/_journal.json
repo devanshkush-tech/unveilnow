@@ -8,6 +8,13 @@
       "when": 1792134017672,
       "tag": "0000_spotlight_campaigns_and_unique_views",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792134293156,
+      "tag": "0001_spotlight_activation_and_view_tracking",
+      "breakpoints": true
     }
   ]
 }

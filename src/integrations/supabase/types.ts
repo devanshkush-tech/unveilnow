@@ -1541,6 +1541,12 @@ export type Database = {
         Args: { _lead_id: string; _source: string; _user_id: string }
         Returns: undefined
       }
+      get_active_spotlight_profiles: {
+        Args: never
+        Returns: {
+          profile_id: string
+        }[]
+      }
       get_my_bd_profile: {
         Args: never
         Returns: {
