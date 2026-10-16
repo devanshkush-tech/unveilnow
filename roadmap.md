@@ -1,4 +1,5 @@
 - [x] Confirm existing gender preference filtering and patch any uncovered discovery paths.
 - [x] Add Spotlight packages, same UPI/WhatsApp review flow, and manual admin activation.
 - [x] Show an active Spotlight countdown and an honest unique-member view result in the dashboard; add offer prompts to Matches and Notifications.
-- [ ] Verify prices, approval activation, countdown, result popup, and build status.
+- [x] Verify offer prices, signed-in offer screens, core tests, and current build status.
+- [ ] Verify approved-campaign countdown and result popup when an approved Spotlight campaign is available; no campaign was created just for preview testing.
