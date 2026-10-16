@@ -1241,6 +1241,82 @@ export type Database = {
         }
         Relationships: []
       }
+      spotlight_campaigns: {
+        Row: {
+          created_at: string
+          duration_days: number
+          ends_at: string
+          id: string
+          payment_submission_id: string
+          plan: string
+          price_inr: number
+          starts_at: string
+          user_id: string
+          views_count: number
+        }
+        Insert: {
+          created_at?: string
+          duration_days: number
+          ends_at: string
+          id?: string
+          payment_submission_id: string
+          plan: string
+          price_inr: number
+          starts_at?: string
+          user_id: string
+          views_count?: number
+        }
+        Update: {
+          created_at?: string
+          duration_days?: number
+          ends_at?: string
+          id?: string
+          payment_submission_id?: string
+          plan?: string
+          price_inr?: number
+          starts_at?: string
+          user_id?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_campaigns_payment_submission_id_fkey"
+            columns: ["payment_submission_id"]
+            isOneToOne: true
+            referencedRelation: "payment_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spotlight_view_events: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          viewer_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          viewer_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spotlight_view_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "spotlight_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -1571,6 +1647,10 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      record_spotlight_view: {
+        Args: { _profile_id: string }
+        Returns: undefined
       }
       refresh_match_period: { Args: { _user_id: string }; Returns: undefined }
       save_my_bd_answers: {
