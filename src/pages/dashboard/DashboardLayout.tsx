@@ -2,6 +2,7 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import { Compass, Heart, MessageCircle, User, Settings } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { BlindDateToggle } from "@/components/BlindDateToggle";
+import { SpotlightPanel } from "@/components/dashboard/SpotlightPanel";
 
 const tabs = [
   { to: "/dashboard", end: true, label: "Discover", icon: Compass },
@@ -81,6 +82,7 @@ const DashboardLayout = () => {
       </header>
 
       <main className="flex-1 pb-20 md:pb-0">
+        <SpotlightPanel />
         <Outlet />
       </main>
 

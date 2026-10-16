@@ -49,6 +49,7 @@ import UnlockInterest from "./pages/UnlockInterest";
 import { ScrollReveal } from "./components/ScrollReveal";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
+import Spotlight from "./pages/Spotlight.tsx";
 
 const queryClient = new QueryClient();
 
@@ -137,6 +138,7 @@ const App = () => (
             <Route path="/blind-date/premium" element={<Navigate to="/pricing" replace />} />
             <Route path="/notifications" element={<RequireAuth requireOnboarded={false} requireActive={false}><Notifications /></RequireAuth>} />
             <Route path="/unlock-interest/:fromUserId" element={<RequireAuth requireOnboarded={false} requireActive={false}><UnlockInterest /></RequireAuth>} />
+            <Route path="/spotlight" element={<RequireAuth><Spotlight /></RequireAuth>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>

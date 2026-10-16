@@ -544,6 +544,9 @@ Deno.serve(async (req) => {
       const { error: upErr } = await admin.from('payment_submissions').update(patch).eq('id', id);
       if (upErr) return json({ error: upErr.message }, 500);
 
+      // Spotlight activation is handled by its approval trigger and must never alter core access.
+      if (sub.feature === 'spotlight') return json({ ok: true });
+
       const isBd = sub.feature === 'blind_date' || (sub.plan && String(sub.plan).startsWith('bd_'));
 
       if (isBd) {

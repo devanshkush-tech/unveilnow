@@ -17,6 +17,13 @@ function cosine(a: Record<string, number>, b: Record<string, number>): number {
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
+function genderPreferenceAllows(lookingFor: string | null | undefined, candidateGender: string | null | undefined): boolean {
+  if (!lookingFor || lookingFor === "Everyone") return true;
+  if (lookingFor === "Women") return candidateGender === "Woman";
+  if (lookingFor === "Men") return candidateGender === "Man";
+  return candidateGender === lookingFor;
+}
+
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
@@ -48,6 +55,14 @@ Deno.serve(async (req) => {
     if (!me.paid) return json({ error: "not_paid" }, 402);
     if ((me.chats_remaining ?? 0) <= 0) return json({ error: "no_credits" }, 402);
 
+    const { data: myProfile } = await supa.from("profiles")
+      .select("gender, looking_for")
+      .eq("id", user.id)
+      .eq("onboarded", true)
+      .eq("account_status", "active")
+      .maybeSingle();
+    if (!myProfile) return json({ error: "profile_unavailable" }, 403);
+
     // Candidate pool: only paid, completed, real users (NOT the current user).
     const { data: pool } = await supa
       .from("blind_date_profiles")
@@ -60,9 +75,24 @@ Deno.serve(async (req) => {
 
     if (!pool || !pool.length) return json({ error: "no_candidates", session_id: null });
 
+    const candidateIds = pool.map((candidate) => candidate.user_id);
+    const { data: candidateProfiles } = await supa.from("profiles")
+      .select("id, gender, looking_for, onboarded, account_status, suspended, banned")
+      .in("id", candidateIds)
+      .eq("onboarded", true)
+      .eq("account_status", "active")
+      .eq("suspended", false)
+      .eq("banned", false);
+    const compatibleIds = new Set((candidateProfiles ?? [])
+      .filter((candidate) => genderPreferenceAllows(myProfile.looking_for, candidate.gender)
+        && genderPreferenceAllows(candidate.looking_for, myProfile.gender))
+      .map((candidate) => candidate.id));
+    const compatiblePool = pool.filter((candidate) => compatibleIds.has(candidate.user_id));
+    if (!compatiblePool.length) return json({ error: "no_candidates", session_id: null });
+
     let bestId: string | null = null;
     let bestScore = -1;
-    for (const p of pool) {
+    for (const p of compatiblePool) {
       const score = cosine(
         (me.compat_vector ?? {}) as Record<string, number>,
         (p.compat_vector ?? {}) as Record<string, number>,

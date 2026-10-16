@@ -60,7 +60,8 @@ const AdminPayments = () => {
   const update = async (id: string, status: "approved" | "rejected", admin_notes?: string) => {
     try {
       await adminAuth.call("update_payment_status", { id, status, admin_notes });
-      toast.success(status === "approved" ? "Payment approved — user unlocked." : "Payment rejected.");
+      const isSpotlight = rows.find((row) => row.id === id)?.plan.startsWith("spotlight_") ?? false;
+      toast.success(status === "approved" ? (isSpotlight ? "Spotlight approved and activated." : "Payment approved — user unlocked.") : "Payment rejected.");
       setActive(null);
       load();
     } catch (e: any) { toast.error(e.message); }
@@ -120,7 +121,7 @@ const AdminPayments = () => {
                     </button>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{r.phone || "—"}</td>
-                  <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs capitalize ${planBadge[r.plan] ?? "bg-secondary"}`}>{r.plan}</span></td>
+                  <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs capitalize ${planBadge[r.plan] ?? "bg-secondary"}`}>{r.plan.startsWith("spotlight_") ? `Spotlight · ${r.plan.slice("spotlight_".length)}` : r.plan}</span></td>
                   <td className="px-4 py-3">{r.amount_label || "—"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{r.utm_source || "direct"}</td>
                   <td className="px-4 py-3 text-muted-foreground">{r.utm_campaign || "—"}</td>
@@ -201,7 +202,7 @@ const AdminPayments = () => {
                   </Button>
                 )}
                 <Button variant="hero" className="rounded-full" onClick={() => update(active.id, "approved", notes)}>
-                  <Check className="h-4 w-4" /> Approve & unlock account
+                          <Check className="h-4 w-4" /> {active.feature === "spotlight" ? "Approve Spotlight" : "Approve & unlock account"}
                 </Button>
                 <Button variant="outline" className="rounded-full" onClick={() => update(active.id, "rejected", notes)}>
                   <X className="h-4 w-4" /> Reject payment

@@ -17,6 +17,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { genderPreferenceAllows } from "@/lib/matchingPreferences";
 
 type Candidate = {
   id: string;
@@ -25,6 +26,8 @@ type Candidate = {
   city: string | null;
   profession: string | null;
   intent: string | null;
+  gender: string | null;
+  looking_for: string | null;
   story: string | null;
   voice_intro_path: string | null;
   prompts: { question: string; answer: string }[];
@@ -55,7 +58,7 @@ const Discover = () => {
     (async () => {
       setLoading(true);
       // Load my own preference so we only show profiles matching gender preference
-      const { data: me } = await supabase.from("profiles").select("looking_for").eq("id", user.id).maybeSingle();
+      const { data: me } = await supabase.from("profiles").select("looking_for, gender").eq("id", user.id).maybeSingle();
       const lookingFor = me?.looking_for ?? "Everyone";
       const wantedGender =
         lookingFor === "Women" ? "Woman" :
@@ -63,21 +66,29 @@ const Discover = () => {
 
       let profilesQuery = supabase
         .from("profiles")
-        .select("id, first_name, age, city, profession, intent, story, voice_intro_path, gender")
+        .select("id, first_name, age, city, profession, intent, story, voice_intro_path, gender, looking_for")
         .eq("onboarded", true)
         .neq("id", user.id)
         .limit(50);
       if (wantedGender) profilesQuery = profilesQuery.eq("gender", wantedGender);
 
-      const [{ data: sentRows }, { data: blockedRows }, { data: profiles }] = await Promise.all([
+      const [{ data: sentRows }, { data: blockedRows }, { data: profiles }, { data: promotedRows }] = await Promise.all([
         supabase.from("interest_requests").select("receiver_id").eq("sender_id", user.id),
         supabase.from("blocked_users").select("blocked_id").eq("blocker_id", user.id),
         profilesQuery,
+        (supabase as any).rpc("get_active_spotlight_profiles"),
       ]);
       const sent = new Set((sentRows ?? []).map((r) => r.receiver_id));
       const blocked = new Set((blockedRows ?? []).map((r) => r.blocked_id));
       setSentIds(sent);
-      const filtered = (profiles ?? []).filter((p) => !blocked.has(p.id) && !sent.has(p.id));
+      const filtered = (profiles ?? []).filter((p) =>
+        !blocked.has(p.id)
+        && !sent.has(p.id)
+        && genderPreferenceAllows(lookingFor, p.gender)
+        && genderPreferenceAllows(p.looking_for, me?.gender),
+      );
+      const promoted = new Set<string>((promotedRows?.data ?? []).map((row: { profile_id: string }) => row.profile_id));
+      filtered.sort((first, second) => Number(promoted.has(second.id)) - Number(promoted.has(first.id)));
       if (filtered.length === 0) {
         setCandidates([]);
         setLoading(false);
@@ -117,6 +128,11 @@ const Discover = () => {
   );
   const safeCursor = Math.min(cursor, Math.max(0, visible.length - 1));
   const current = visible[safeCursor] ?? null;
+
+  useEffect(() => {
+    if (!current?.id) return;
+    void supabase.rpc("record_spotlight_view", { _profile_id: current.id });
+  }, [current?.id]);
   const next = () => setCursor((i) => Math.min(i + 1, Math.max(0, visible.length - 1)));
   const skipCurrent = () => {
     if (!current) return;
