@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { genderPreferenceAllows } from "@/lib/matchingPreferences";
+import { SpotlightPanel } from "@/components/dashboard/SpotlightPanel";
 
 type Candidate = {
   id: string;
@@ -168,6 +169,7 @@ const Discover = () => {
   if (visible.length === 0 || !current) {
     return (
       <div className="container max-w-2xl py-16">
+        <SpotlightPanel />
         <BlindDateEntryCard />
         <EmptyState
           image={coupleCafe}
@@ -185,6 +187,7 @@ const Discover = () => {
 
   return (
     <div className="container max-w-2xl py-6 md:py-10">
+      <SpotlightPanel />
       <div className="mb-5 animate-fade-up flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-3xl md:text-4xl">Discover</h1>
