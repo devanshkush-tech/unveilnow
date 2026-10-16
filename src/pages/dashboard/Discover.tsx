@@ -78,16 +78,26 @@ const Discover = () => {
         profilesQuery,
         (supabase as any).rpc("get_active_spotlight_profiles"),
       ]);
+      const promotedIds = (promotedRows?.data ?? []).map((row: { profile_id: string }) => row.profile_id as string);
+      const alreadyFetched = new Set((profiles ?? []).map((profile) => profile.id));
+      const missingPromotedIds = promotedIds.filter((id) => !alreadyFetched.has(id));
+      const { data: extraPromotedProfiles } = missingPromotedIds.length
+        ? await supabase.from("profiles")
+          .select("id, first_name, age, city, profession, intent, story, voice_intro_path, gender, looking_for")
+          .in("id", missingPromotedIds)
+          .eq("onboarded", true)
+        : { data: [] as typeof profiles };
+      const allProfiles = [...(profiles ?? []), ...(extraPromotedProfiles ?? [])];
       const sent = new Set((sentRows ?? []).map((r) => r.receiver_id));
       const blocked = new Set((blockedRows ?? []).map((r) => r.blocked_id));
       setSentIds(sent);
-      const filtered = (profiles ?? []).filter((p) =>
+      const filtered = allProfiles.filter((p) =>
         !blocked.has(p.id)
         && !sent.has(p.id)
         && genderPreferenceAllows(lookingFor, p.gender)
         && genderPreferenceAllows(p.looking_for, me?.gender),
       );
-      const promoted = new Set<string>((promotedRows?.data ?? []).map((row: { profile_id: string }) => row.profile_id));
+      const promoted = new Set<string>(promotedIds);
       filtered.sort((first, second) => Number(promoted.has(second.id)) - Number(promoted.has(first.id)));
       if (filtered.length === 0) {
         setCandidates([]);
