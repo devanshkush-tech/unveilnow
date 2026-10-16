@@ -15,6 +15,7 @@ type PaymentRow = {
   email: string;
   phone: string | null;
   plan: string;
+  feature: string;
   amount_label: string | null;
   status: "pending" | "approved" | "rejected";
   admin_notes: string | null;

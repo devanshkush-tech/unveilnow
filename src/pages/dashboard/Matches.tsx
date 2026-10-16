@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/dating/EmptyState";
 import { MatchUsageBanner } from "@/components/dating/MatchUsageBanner";
+import { SpotlightPanel } from "@/components/dashboard/SpotlightPanel";
 
 type MatchRow = {
   id: string;
@@ -129,6 +130,7 @@ const Matches = () => {
       </div>
 
       <div className="mb-6"><MatchUsageBanner /></div>
+      <SpotlightPanel showOffer />
 
       <Tabs defaultValue="incoming" className="space-y-6">
         <TabsList className="rounded-full p-1 h-12 bg-secondary">

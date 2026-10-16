@@ -32,7 +32,7 @@ const formatRemaining = (milliseconds: number) => {
     : `${hours}h ${minutes}m ${remainder}s`;
 };
 
-export function SpotlightPanel() {
+export function SpotlightPanel({ showOffer = false }: { showOffer?: boolean }) {
   const { user } = useAuth();
   const [gender, setGender] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -97,6 +97,7 @@ export function SpotlightPanel() {
   };
 
   if (loading || !user || gender === "Woman") return null;
+  if (!active && !pending && !showOffer) return null;
 
   return (
     <>
