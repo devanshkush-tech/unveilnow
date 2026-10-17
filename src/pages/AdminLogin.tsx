@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ShieldCheck, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { adminAuth } from "@/lib/adminAuth";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
@@ -49,9 +50,7 @@ const AdminLogin = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-soft p-6">
       <div className="w-full max-w-md rounded-3xl bg-card border border-border/60 shadow-card p-8 animate-fade-up">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-romance flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <BrandMark className="h-12 w-12" />
           <div>
             <h1 className="font-display text-2xl leading-tight">Admin Console</h1>
             <p className="text-xs uppercase tracking-widest text-muted-foreground">Unveil · Restricted</p>

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { WHATSAPP_URL, planLabel, planPrice } from "@/lib/payment";
 import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 const PaymentReview = () => {
   const { user, loading, signOut } = useAuth();
@@ -81,9 +82,7 @@ const PaymentReview = () => {
       <header className="border-b border-border/50 bg-background/70 backdrop-blur">
         <div className="container max-w-3xl flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-7 w-7" />
             <span className="font-display text-lg">Unveil</span>
           </div>
           <Button variant="ghost" size="sm" className="rounded-full" onClick={async () => { await signOut(); navigate("/"); }}>

@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBdProfile } from "../hooks/useBdProfile";
 import { WHATSAPP_URL } from "@/lib/payment";
 import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 type Sub = { plan: string; amount_label: string | null; status: string; created_at: string };
 
@@ -88,9 +89,7 @@ export default function BlindDatePaymentReview() {
       <header className="border-b border-border/50 bg-background/70 backdrop-blur sticky top-0 z-10">
         <div className="container max-w-3xl flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-7 w-7" />
             <span className="font-display text-lg">Unveil · Blind Date</span>
           </div>
           <Button variant="ghost" size="sm" className="rounded-full" onClick={async () => { await signOut(); navigate("/"); }}>

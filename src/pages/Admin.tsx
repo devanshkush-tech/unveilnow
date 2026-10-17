@@ -33,6 +33,7 @@ import AdminChemistry from "@/components/admin/AdminChemistry";
 import AdminPayments from "@/components/admin/AdminPayments";
 import AdminPaymentHistory from "@/components/admin/AdminPaymentHistory";
 import AdminCreateProfile from "@/components/admin/AdminCreateProfile";
+import { BrandMark } from "@/components/brand/BrandMark";
 import AdminImpersonate from "@/components/admin/AdminImpersonate";
 import AdminNotifications from "@/components/admin/AdminNotifications";
 import BlindDateAdminConsole from "@/components/admin/blind-date/BlindDateAdminConsole";
@@ -230,9 +231,7 @@ const Admin = () => {
             </Link>
             <span className="text-border">|</span>
             <div className="flex items-center gap-2 min-w-0">
-              <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center shrink-0">
-                <ShieldCheck className="h-4 w-4 text-primary-foreground" />
-              </div>
+              <BrandMark className="h-8 w-8 shrink-0" />
               <div className="min-w-0">
                 <div className="font-display text-lg leading-tight truncate">Unveil Admin</div>
                 <div className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">Restricted console</div>
