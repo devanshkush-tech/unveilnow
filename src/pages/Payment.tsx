@@ -12,6 +12,7 @@ import { PAYMENT_PLANS, PaymentPlanId, UPI_ID, WHATSAPP_URL } from "@/lib/paymen
 import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import upiQr from "@/assets/upi-qr.jpeg";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 type Profile = {
   id: string;
@@ -198,9 +199,7 @@ const Payment = () => {
       <header className="border-b border-border/50 bg-background/70 backdrop-blur sticky top-0 z-10">
         <div className="container max-w-4xl flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-7 w-7" />
             <span className="font-display text-lg">Unveil</span>
           </div>
           <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Secure manual review</span>

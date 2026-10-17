@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ReactNode } from "react";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 export const AuthShell = ({
   title,
@@ -17,9 +18,7 @@ export const AuthShell = ({
       {/* Form side */}
       <div className="flex flex-col p-6 md:p-10 lg:p-14">
         <Link to="/" className="flex items-center gap-2 w-fit">
-          <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center">
-            <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
-          </div>
+          <BrandMark className="h-8 w-8" />
           <span className="font-display text-xl">Unveil</span>
         </Link>
 

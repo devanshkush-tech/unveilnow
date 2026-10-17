@@ -9,6 +9,7 @@ import { Check, ArrowLeft, ArrowRight, Camera, EyeOff, Loader2, X, Sparkles } fr
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { VoiceRecorder } from "@/components/dating/VoiceRecorder";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 const stepLabels = ["Basics", "Preferences", "Prompts", "Story", "Voice", "Photos"];
 const TOTAL_STEPS = stepLabels.length;
@@ -469,9 +470,7 @@ const Onboarding = () => {
       <header className="border-b border-border/50 bg-background/70 backdrop-blur sticky top-0 z-10">
         <div className="container max-w-3xl flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-7 w-7" />
             <span className="font-display text-lg">Unveil</span>
           </Link>
           <div className="text-xs text-muted-foreground">

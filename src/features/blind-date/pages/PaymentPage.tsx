@@ -14,6 +14,7 @@ import { useBdProfile } from "../hooks/useBdProfile";
 import upiQr from "@/assets/upi-qr.jpeg";
 import { trackMetaEvent } from "@/lib/metaCapi";
 import { useIsFreeAccess } from "@/hooks/useIsFreeAccess";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 export default function BlindDatePayment() {
   const { isFree, loading: freeLoading } = useIsFreeAccess();
@@ -123,9 +124,7 @@ export default function BlindDatePayment() {
       <header className="border-b border-border/50 bg-background/70 backdrop-blur sticky top-0 z-10">
         <div className="container max-w-4xl flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-7 w-7" />
             <span className="font-display text-lg">Unveil · Blind Date</span>
           </div>
           <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> Secure manual review</span>

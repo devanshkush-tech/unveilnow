@@ -2,6 +2,7 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import { Compass, Heart, MessageCircle, User, Settings } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { BlindDateToggle } from "@/components/BlindDateToggle";
+import { BrandMark } from "@/components/brand/BrandMark";
 
 const tabs = [
   { to: "/dashboard", end: true, label: "Discover", icon: Compass },
@@ -18,9 +19,7 @@ const DashboardLayout = () => {
       <aside className="hidden md:flex md:w-64 flex-col border-r border-border/60 bg-gradient-soft p-6">
         <div className="flex items-center justify-between mb-10">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-gradient-romance flex items-center justify-center">
-              <span className="font-display text-primary-foreground text-lg leading-none pb-0.5">U</span>
-            </div>
+            <BrandMark className="h-8 w-8" />
             <span className="font-display text-xl">Unveil</span>
           </Link>
           <div className="flex items-center gap-2">
@@ -69,9 +68,7 @@ const DashboardLayout = () => {
       {/* Mobile top bar */}
       <header className="md:hidden flex items-center justify-between px-5 h-14 border-b border-border/60 bg-background sticky top-0 z-20">
         <Link to="/" className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-gradient-romance flex items-center justify-center">
-            <span className="font-display text-primary-foreground text-sm leading-none pb-0.5">U</span>
-          </div>
+          <BrandMark className="h-7 w-7" />
           <span className="font-display text-lg">Unveil</span>
         </Link>
         <div className="flex items-center gap-2">
